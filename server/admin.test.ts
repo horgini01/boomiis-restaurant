@@ -84,9 +84,10 @@ describe("Admin Dashboard", () => {
     const { ctx } = createAdminContext();
     const caller = appRouter.createCaller(ctx);
 
+    const uniqueSlug = `test-category-${Date.now()}`;
     const result = await caller.admin.createCategory({
       name: "Test Category",
-      slug: "test-category",
+      slug: uniqueSlug,
       description: "Test description",
       displayOrder: 10,
       isActive: true,
@@ -99,10 +100,11 @@ describe("Admin Dashboard", () => {
     const { ctx } = createNonAdminContext();
     const caller = appRouter.createCaller(ctx);
 
+    const uniqueSlug = `test-category-${Date.now()}`;
     await expect(
       caller.admin.createCategory({
         name: "Test Category",
-        slug: "test-category",
+        slug: uniqueSlug,
         description: "Test description",
         displayOrder: 10,
         isActive: true,
@@ -116,10 +118,11 @@ describe("Menu Management", () => {
     const { ctx } = createAdminContext();
     const caller = appRouter.createCaller(ctx);
 
+    const uniqueSlug = `test-dish-${Date.now()}`;
     const result = await caller.admin.createMenuItem({
       categoryId: 1,
       name: "Test Dish",
-      slug: "test-dish",
+      slug: uniqueSlug,
       description: "A delicious test dish",
       price: 12.99,
       imageUrl: "https://example.com/image.jpg",
@@ -139,11 +142,12 @@ describe("Menu Management", () => {
     const { ctx } = createNonAdminContext();
     const caller = appRouter.createCaller(ctx);
 
+    const uniqueSlug = `test-dish-${Date.now()}`;
     await expect(
       caller.admin.createMenuItem({
         categoryId: 1,
         name: "Test Dish",
-        slug: "test-dish",
+        slug: uniqueSlug,
         description: "A delicious test dish",
         price: 12.99,
         imageUrl: "https://example.com/image.jpg",

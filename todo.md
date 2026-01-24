@@ -90,3 +90,6 @@
 - [x] Orders management with status updates
 - [x] Reservations management
 - [x] Admin authorization middleware
+
+## Bug Fixes
+- [x] Fix JSON parsing error on menu page ("None" is not valid JSON)

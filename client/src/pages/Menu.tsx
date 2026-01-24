@@ -164,11 +164,28 @@ export default function Menu() {
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold mb-2">{item.name}</h3>
                       <p className="text-muted-foreground mb-4 text-sm">{item.description}</p>
-                      {item.allergens && JSON.parse(item.allergens).length > 0 && (
-                        <p className="text-xs text-muted-foreground mb-4">
-                          <span className="font-semibold">Allergens:</span> {JSON.parse(item.allergens).join(', ')}
-                        </p>
-                      )}
+                      {(() => {
+                        try {
+                          const allergensList = item.allergens ? JSON.parse(item.allergens) : [];
+                          if (Array.isArray(allergensList) && allergensList.length > 0) {
+                            return (
+                              <p className="text-xs text-muted-foreground mb-4">
+                                <span className="font-semibold">Allergens:</span> {allergensList.join(', ')}
+                              </p>
+                            );
+                          }
+                        } catch (e) {
+                          // If not JSON, treat as plain string
+                          if (item.allergens && item.allergens !== 'None' && item.allergens.trim() !== '') {
+                            return (
+                              <p className="text-xs text-muted-foreground mb-4">
+                                <span className="font-semibold">Allergens:</span> {item.allergens}
+                              </p>
+                            );
+                          }
+                        }
+                        return null;
+                      })()}
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold text-primary">£{item.price}</span>
                         <Button
