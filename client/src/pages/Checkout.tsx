@@ -27,15 +27,30 @@ export default function Checkout() {
   });
 
   const createOrderMutation = trpc.orders.create.useMutation({
-    onSuccess: (data: any) => {
-      clearCart();
-      toast.success('Order placed successfully!');
-      setLocation(`/order-success/${data.orderNumber}`);
+    onSuccess: async (data: any) => {
+      // Create Stripe checkout session
+      try {
+        const checkoutSession = await createCheckoutMutation.mutateAsync({
+          orderId: data.orderId,
+          customerEmail: formData.customerEmail,
+          customerName: formData.customerName,
+        });
+
+        if (checkoutSession.url) {
+          // Redirect to Stripe checkout
+          toast.success('Redirecting to payment...');
+          window.location.href = checkoutSession.url;
+        }
+      } catch (error: any) {
+        toast.error('Failed to create payment session');
+      }
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to place order');
     },
   });
+
+  const createCheckoutMutation = trpc.payment.createCheckoutSession.useMutation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,10 +229,10 @@ export default function Checkout() {
                       {createOrderMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Placing Order...
+                          Processing...
                         </>
                       ) : (
-                        'Place Order'
+                        'Proceed to Payment'
                       )}
                     </Button>
                     

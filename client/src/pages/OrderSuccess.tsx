@@ -1,13 +1,74 @@
-import { Link, useParams } from 'wouter';
+import { Link, useParams, useLocation, useSearch } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { useCart } from '@/contexts/CartContext';
 
 export default function OrderSuccess() {
   const params = useParams();
   const orderNumber = params.orderNumber;
+  const searchString = useSearch();
+  const [, setLocation] = useLocation();
+  const { clearCart } = useCart();
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [paymentVerified, setPaymentVerified] = useState(false);
+
+  // Extract session_id from URL query params
+  const sessionId = new URLSearchParams(searchString).get('session_id');
+
+  const verifyPaymentQuery = trpc.payment.verifyPayment.useQuery(
+    { sessionId: sessionId || '' },
+    { 
+      enabled: !!sessionId,
+      retry: false,
+    }
+  );
+
+  useEffect(() => {
+    if (sessionId && verifyPaymentQuery.data) {
+      if (verifyPaymentQuery.data.paymentStatus === 'paid') {
+        setPaymentVerified(true);
+        clearCart();
+      }
+      setIsVerifying(false);
+    } else if (!sessionId) {
+      // No session ID means direct access, redirect to home
+      setLocation('/');
+    }
+  }, [sessionId, verifyPaymentQuery.data, clearCart, setLocation]);
+
+  if (isVerifying || verifyPaymentQuery.isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center py-12">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-xl text-muted-foreground">Verifying your payment...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!paymentVerified) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center py-12">
+          <div className="text-center">
+            <p className="text-xl text-muted-foreground">Payment verification failed. Please contact support.</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -21,11 +82,19 @@ export default function OrderSuccess() {
                 <CheckCircle className="h-12 w-12 text-primary" />
               </div>
               
-              <h1 className="text-4xl font-bold mb-4">Order Placed Successfully!</h1>
+              <h1 className="text-4xl font-bold mb-4">Payment Successful!</h1>
               
               <p className="text-xl text-muted-foreground mb-6">
-                Thank you for your order. We've received it and will start preparing your food shortly.
+                Thank you for your order. Your payment has been processed and we'll start preparing your food shortly.
               </p>
+              
+              <div className="flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground">
+                <span>Secured by</span>
+                <svg className="h-5" viewBox="0 0 60 25" fill="currentColor">
+                  <path d="M0 12.5C0 5.596 5.596 0 12.5 0h35C54.404 0 60 5.596 60 12.5S54.404 25 47.5 25h-35C5.596 25 0 19.404 0 12.5z" fill="#635BFF"/>
+                  <text x="30" y="17" fontSize="12" fill="white" textAnchor="middle" fontWeight="bold">stripe</text>
+                </svg>
+              </div>
               
               {orderNumber && (
                 <div className="bg-secondary/20 border border-border rounded-lg p-6 mb-8">

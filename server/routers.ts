@@ -8,6 +8,7 @@ import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
 import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories } from "../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
+import { stripe } from "./stripe";
 
 export const appRouter = router({
   system: systemRouter,
@@ -544,6 +545,120 @@ export const appRouter = router({
 
         await db.update(reservations).set({ status: input.status as any }).where(eq(reservations.id, input.reservationId));
         return { success: true };
+      }),
+  }),
+
+  payment: router({
+    createCheckoutSession: publicProcedure
+      .input(z.object({
+        orderId: z.number(),
+        customerEmail: z.string().email(),
+        customerName: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get order details
+        const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
+        if (!order) {
+          throw new Error('Order not found');
+        }
+
+        // Get order items
+        const items = await db.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, input.orderId));
+
+        // Create Stripe checkout session
+        const origin = ctx.req.headers.origin || 'http://localhost:3000';
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: items.map(item => ({
+            price_data: {
+              currency: 'gbp',
+              product_data: {
+                name: item.menuItemName,
+              },
+              unit_amount: Math.round(parseFloat(item.price) * 100), // Convert to pence
+            },
+            quantity: item.quantity,
+          })),
+          // Add delivery fee if applicable
+          ...(parseFloat(order.deliveryFee) > 0 ? {
+            line_items: [
+              ...items.map(item => ({
+                price_data: {
+                  currency: 'gbp',
+                  product_data: {
+                    name: item.menuItemName,
+                  },
+                  unit_amount: Math.round(parseFloat(item.price) * 100),
+                },
+                quantity: item.quantity,
+              })),
+              {
+                price_data: {
+                  currency: 'gbp',
+                  product_data: {
+                    name: 'Delivery Fee',
+                  },
+                  unit_amount: Math.round(parseFloat(order.deliveryFee) * 100),
+                },
+                quantity: 1,
+              },
+            ],
+          } : {}),
+          mode: 'payment',
+          success_url: `${origin}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/checkout?cancelled=true`,
+          customer_email: input.customerEmail,
+          client_reference_id: input.orderId.toString(),
+          metadata: {
+            orderId: input.orderId.toString(),
+            customerEmail: input.customerEmail,
+            customerName: input.customerName,
+          },
+          allow_promotion_codes: true,
+          payment_intent_data: {
+            metadata: {
+              orderId: input.orderId.toString(),
+            },
+          },
+        });
+
+        // Update order with payment intent ID
+        await db.update(orders)
+          .set({ paymentIntentId: session.payment_intent as string })
+          .where(eq(orders.id, input.orderId));
+
+        return {
+          sessionId: session.id,
+          url: session.url,
+        };
+      }),
+
+    verifyPayment: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+        
+        if (session.payment_status === 'paid') {
+          const db = await getDb();
+          if (!db) throw new Error('Database not available');
+
+          const orderId = parseInt(session.client_reference_id || '0');
+          if (orderId) {
+            await db.update(orders)
+              .set({ paymentStatus: 'paid', status: 'confirmed' })
+              .where(eq(orders.id, orderId));
+          }
+        }
+
+        return {
+          paymentStatus: session.payment_status,
+          customerEmail: session.customer_email,
+        };
       }),
   }),
 });

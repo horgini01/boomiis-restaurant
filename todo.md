@@ -129,3 +129,12 @@
 
 ## Content Enhancement
 - [x] Generate and upload images for 10 menu items (Fried Plantain, Chin Chin, Moi Moi, Coconut Candy, Zobo, Waakye, Coleslaw, Palm Wine, Pepper Soup, Vegetable Jollof)
+
+## Payment Integration
+- [x] Add Stripe feature to project
+- [x] Configure Stripe API keys and webhooks
+- [x] Create payment API endpoints (create checkout session, verify payment)
+- [x] Build checkout UI with Stripe Checkout
+- [x] Add support for card payments, Apple Pay, and Google Pay
+- [x] Update order flow to include payment processing
+- [x] Test payment flow end-to-end
