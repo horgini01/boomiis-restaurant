@@ -316,32 +316,54 @@ export default function MenuItemsManagement() {
                             if (!file) return;
                             
                             setUploadingImage(true);
+                            
                             try {
                               const reader = new FileReader();
                               reader.onload = async (event) => {
-                                const base64 = event.target?.result as string;
-                                const response = await fetch('/api/trpc/admin.uploadImage', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    json: {
-                                      image: base64,
-                                      filename: file.name,
-                                    },
-                                  }),
-                                });
-                                const data = await response.json();
-                                if (data.result?.data?.json?.url) {
-                                  setFormData({ ...formData, imageUrl: data.result.data.json.url });
-                                  toast.success('Image uploaded successfully');
-                                } else {
-                                  throw new Error('Upload failed');
+                                try {
+                                  const base64 = event.target?.result as string;
+                                  const response = await fetch('/api/trpc/admin.uploadImage', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      json: {
+                                        file: base64,
+                                        fileName: file.name,
+                                        mimeType: file.type || 'image/jpeg',
+                                      },
+                                    }),
+                                  });
+                                  
+                                  if (!response.ok) {
+                                    throw new Error(`Upload failed: ${response.statusText}`);
+                                  }
+                                  
+                                  const data = await response.json();
+                                  console.log('Upload response:', data);
+                                  
+                                  if (data.result?.data?.json?.url) {
+                                    setFormData((prev) => ({ ...prev, imageUrl: data.result.data.json.url }));
+                                    toast.success('Image uploaded successfully');
+                                  } else {
+                                    throw new Error('Invalid response format');
+                                  }
+                                } catch (error: any) {
+                                  console.error('Upload error:', error);
+                                  toast.error(error.message || 'Failed to upload image');
+                                } finally {
+                                  setUploadingImage(false);
                                 }
                               };
+                              
+                              reader.onerror = () => {
+                                toast.error('Failed to read file');
+                                setUploadingImage(false);
+                              };
+                              
                               reader.readAsDataURL(file);
-                            } catch (error) {
-                              toast.error('Failed to upload image');
-                            } finally {
+                            } catch (error: any) {
+                              console.error('File read error:', error);
+                              toast.error('Failed to process image');
                               setUploadingImage(false);
                             }
                           }}

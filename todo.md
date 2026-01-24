@@ -119,3 +119,6 @@
 
 ## UI Enhancements (Current)
 - [x] Add loading animation for image uploads in admin panel
+
+## Bug Fixes (Urgent)
+- [x] Fix image upload not working when selecting images from local drive
