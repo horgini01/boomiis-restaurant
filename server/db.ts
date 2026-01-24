@@ -1,11 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, menuCategories, menuItems, orders, orderItems, reservations } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -89,4 +88,43 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Menu queries
+export async function getAllMenuCategories() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(menuCategories).where(eq(menuCategories.isActive, true)).orderBy(menuCategories.displayOrder);
+}
+
+export async function getMenuItemsByCategory(categoryId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  if (categoryId) {
+    return await db.select().from(menuItems)
+      .where(and(eq(menuItems.categoryId, categoryId), eq(menuItems.isAvailable, true)))
+      .orderBy(menuItems.displayOrder);
+  }
+  
+  return await db.select().from(menuItems)
+    .where(eq(menuItems.isAvailable, true))
+    .orderBy(menuItems.displayOrder);
+}
+
+export async function getFeaturedMenuItems() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(menuItems)
+    .where(and(eq(menuItems.isFeatured, true), eq(menuItems.isAvailable, true)))
+    .orderBy(menuItems.displayOrder)
+    .limit(6);
+}
+
+export async function getMenuItemById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(menuItems).where(eq(menuItems.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
