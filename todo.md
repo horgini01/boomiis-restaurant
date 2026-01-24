@@ -98,3 +98,10 @@
 - [x] Add admin login link to footer
 
 - [x] Fix React setState error in AdminLogin component (navigation during render)
+
+## Authentication System Update
+- [x] Replace Manus OAuth with email/password login
+- [x] Create login API endpoint with bcrypt password verification
+- [x] Update AdminLogin component with email/password form
+- [x] Update authentication context to use custom login
+- [x] Test login with default admin credentials

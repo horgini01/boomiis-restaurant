@@ -1,7 +1,9 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { verifyCredentials } from "./customAuth";
+import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
 import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories } from "../drizzle/schema";
@@ -11,6 +13,42 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const user = await verifyCredentials(input.email, input.password);
+        
+        if (!user) {
+          throw new Error('Invalid email or password');
+        }
+
+        if (user.role !== 'admin') {
+          throw new Error('Access denied. Admin privileges required.');
+        }
+
+        // Create session token
+        const token = await sdk.createSessionToken(user.openId, {
+          name: user.name || '',
+          expiresInMs: 365 * 24 * 60 * 60 * 1000, // 1 year
+        });
+
+        // Set session cookie
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, cookieOptions);
+
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+        };
+      }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

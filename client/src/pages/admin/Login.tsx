@@ -1,18 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { Loader2, Lock } from 'lucide-react';
-import { getLoginUrl } from '@/const';
 
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { user, loading } = useAuth();
-  const [loggingIn, setLoggingIn] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  const loginMutation = trpc.auth.login.useMutation({
+    onSuccess: () => {
+      toast.success('Login successful!');
+      // Reload to update auth state
+      window.location.href = '/admin/dashboard';
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Login failed');
+    },
+  });
 
   // If already logged in as admin, redirect to dashboard
   useEffect(() => {
@@ -21,9 +33,15 @@ export default function AdminLogin() {
     }
   }, [loading, user, setLocation]);
 
-  const handleLogin = () => {
-    setLoggingIn(true);
-    window.location.href = getLoginUrl();
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
+
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -39,23 +57,63 @@ export default function AdminLogin() {
           </p>
         </CardHeader>
         <CardContent>
-          <Button
-            onClick={handleLogin}
-            size="lg"
-            className="w-full"
-            disabled={loggingIn}
-          >
-            {loggingIn ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Redirecting...
-              </>
-            ) : (
-              'Sign in with Manus'
-            )}
-          </Button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@boomiis.uk"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loginMutation.isPending}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loginMutation.isPending}
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
           
-          <p className="text-xs text-muted-foreground text-center mt-6">
+          <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+            <p className="text-xs text-muted-foreground text-center font-medium mb-2">
+              Default Admin Credentials
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              Email: <span className="font-mono">admin@boomiis.uk</span>
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              Password: <span className="font-mono">admin123</span>
+            </p>
+          </div>
+          
+          <p className="text-xs text-muted-foreground text-center mt-4">
             Only authorized administrators can access this area
           </p>
         </CardContent>
