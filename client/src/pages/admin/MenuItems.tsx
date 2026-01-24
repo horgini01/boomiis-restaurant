@@ -285,17 +285,25 @@ export default function MenuItemsManagement() {
                           placeholder="Image URL or upload below"
                           value={formData.imageUrl}
                           onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                          disabled={uploadingImage}
                         />
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => document.getElementById('image-upload')?.click()}
                           disabled={uploadingImage}
+                          className="min-w-[100px]"
                         >
                           {uploadingImage ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Uploading...
+                            </>
                           ) : (
-                            <Upload className="h-4 w-4" />
+                            <>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload
+                            </>
                           )}
                         </Button>
                         <input
@@ -339,12 +347,24 @@ export default function MenuItemsManagement() {
                           }}
                         />
                       </div>
-                      {formData.imageUrl && (
-                        <img
-                          src={formData.imageUrl}
-                          alt="Preview"
-                          className="mt-2 h-32 w-32 object-cover rounded-lg"
-                        />
+                      {uploadingImage && (
+                        <div className="mt-2 p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-3">
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                          <div>
+                            <p className="text-sm font-medium">Uploading image...</p>
+                            <p className="text-xs text-muted-foreground">Please wait while we upload your image to storage</p>
+                          </div>
+                        </div>
+                      )}
+                      {formData.imageUrl && !uploadingImage && (
+                        <div className="mt-2">
+                          <img
+                            src={formData.imageUrl}
+                            alt="Preview"
+                            className="h-32 w-32 object-cover rounded-lg border-2 border-primary/20"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Image preview</p>
+                        </div>
                       )}
                     </div>
 

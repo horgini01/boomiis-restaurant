@@ -116,3 +116,6 @@
 - [x] Add image upload button to menu item edit form
 - [x] Fix image loading issue (images not displaying on menu page)
 - [x] Ensure uploaded images are properly served from S3
+
+## UI Enhancements (Current)
+- [x] Add loading animation for image uploads in admin panel
