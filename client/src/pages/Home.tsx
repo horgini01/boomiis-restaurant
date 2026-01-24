@@ -11,6 +11,8 @@ import { useState } from 'react';
 
 export default function Home() {
   const [email, setEmail] = useState('');
+  const { data: featuredItems = [], isLoading: isFeaturedLoading } = trpc.menu.featured.useQuery();
+  
   const subscribeMutation = trpc.newsletter.subscribe.useMutation({
     onSuccess: () => {
       toast.success('Thank you for subscribing!');
@@ -115,41 +117,51 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  name: 'Jollof Rice',
-                  description: 'Our signature one-pot rice dish cooked in a rich tomato sauce with spices',
-                  price: '£12.99',
-                },
-                {
-                  name: 'Suya Platter',
-                  description: 'Spicy grilled meat skewers served with fresh vegetables and peanut sauce',
-                  price: '£15.99',
-                },
-                {
-                  name: 'Egusi Soup',
-                  description: 'Traditional melon seed soup with assorted meat and fish, served with fufu',
-                  price: '£14.99',
-                },
-              ].map((dish, index) => (
-                <Card key={index} className="overflow-hidden border-border/50">
-                  <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                    <UtensilsCrossed className="h-16 w-16 text-primary/40" />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-2">{dish.name}</h3>
-                    <p className="text-muted-foreground mb-4">{dish.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-primary">{dish.price}</span>
-                      <Link href="/menu">
-                        <Button variant="outline" size="sm">
-                          Order Now
-                        </Button>
-                      </Link>
+              {isFeaturedLoading ? (
+                // Loading skeleton
+                Array.from({ length: 3 }).map((_, index) => (
+                  <Card key={index} className="overflow-hidden border-border/50">
+                    <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 animate-pulse" />
+                    <CardContent className="p-6">
+                      <div className="h-6 bg-muted rounded mb-2 animate-pulse" />
+                      <div className="h-4 bg-muted rounded mb-4 animate-pulse" />
+                      <div className="flex items-center justify-between">
+                        <div className="h-8 w-20 bg-muted rounded animate-pulse" />
+                        <div className="h-10 w-24 bg-muted rounded animate-pulse" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : featuredItems.length > 0 ? (
+                featuredItems.slice(0, 3).map((item) => (
+                  <Card key={item.id} className="overflow-hidden border-border/50">
+                    <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <UtensilsCrossed className="h-16 w-16 text-primary/40" />
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold mb-2">{item.name}</h3>
+                      <p className="text-muted-foreground mb-4">{item.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-primary">£{item.price}</span>
+                        <Link href="/menu">
+                          <Button variant="outline" size="sm">
+                            Order Now
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                // Fallback if no featured items
+                <div className="col-span-3 text-center py-12">
+                  <p className="text-muted-foreground">No featured dishes available at the moment.</p>
+                </div>
+              )}
             </div>
 
             <div className="text-center mt-8">

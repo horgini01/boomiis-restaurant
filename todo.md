@@ -122,3 +122,7 @@
 
 ## Bug Fixes (Urgent)
 - [x] Fix image upload not working when selecting images from local drive
+
+## Bug Fixes (Critical - User Reported)
+- [x] Fix featured dishes not updating on homepage when marked in admin panel
+- [x] Fix menu item name alignment issues on menu page

@@ -180,7 +180,7 @@ export default function Menu() {
             ) : filteredItems && filteredItems.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredItems.map(item => (
-                  <Card key={item.id} className="overflow-hidden border-border/50 hover:border-primary/50 transition-colors">
+                  <Card key={item.id} className="overflow-hidden border-border/50 hover:border-primary/50 transition-colors flex flex-col">
                     <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center relative">
                       {item.imageUrl ? (
                         <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
@@ -208,9 +208,9 @@ export default function Menu() {
                         )}
                       </div>
                     </div>
-                    <CardContent className="p-6">
+                    <CardContent className="p-6 flex flex-col flex-1">
                       <h3 className="text-xl font-bold mb-2">{item.name}</h3>
-                      <p className="text-muted-foreground mb-4 text-sm">{item.description}</p>
+                      <p className="text-muted-foreground mb-4 text-sm flex-1">{item.description}</p>
                       {(() => {
                         try {
                           const allergensList = item.allergens ? JSON.parse(item.allergens) : [];
@@ -233,7 +233,7 @@ export default function Menu() {
                         }
                         return null;
                       })()}
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mt-auto">
                         <span className="text-2xl font-bold text-primary">£{item.price}</span>
                         <Button
                           onClick={() => handleAddToCart(item)}
