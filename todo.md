@@ -111,3 +111,8 @@
 - [x] Upload real food images for all menu items (5 items completed, admin can add more via upload feature)
 - [x] Bulk menu operations (update prices, toggle availability, duplicate items)
 - [x] Search functionality on menu page (search by name or ingredients)
+
+## Bug Fixes (Current)
+- [x] Add image upload button to menu item edit form
+- [x] Fix image loading issue (images not displaying on menu page)
+- [x] Ensure uploaded images are properly served from S3

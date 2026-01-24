@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/table';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, Star } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, Star, Upload } from 'lucide-react';
 
 export default function MenuItemsManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -51,6 +51,7 @@ export default function MenuItemsManagement() {
     isFeatured: false,
     displayOrder: 0,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const utils = trpc.useUtils();
   const { data: categories } = trpc.menu.categories.useQuery();
@@ -276,13 +277,75 @@ export default function MenuItemsManagement() {
                     </div>
 
                     <div className="col-span-2">
-                      <Label htmlFor="imageUrl">Image URL</Label>
-                      <Input
-                        id="imageUrl"
-                        type="url"
-                        value={formData.imageUrl}
-                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                      />
+                      <Label htmlFor="imageUrl">Image</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="imageUrl"
+                          type="url"
+                          placeholder="Image URL or upload below"
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => document.getElementById('image-upload')?.click()}
+                          disabled={uploadingImage}
+                        >
+                          {uploadingImage ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Upload className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            
+                            setUploadingImage(true);
+                            try {
+                              const reader = new FileReader();
+                              reader.onload = async (event) => {
+                                const base64 = event.target?.result as string;
+                                const response = await fetch('/api/trpc/admin.uploadImage', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    json: {
+                                      image: base64,
+                                      filename: file.name,
+                                    },
+                                  }),
+                                });
+                                const data = await response.json();
+                                if (data.result?.data?.json?.url) {
+                                  setFormData({ ...formData, imageUrl: data.result.data.json.url });
+                                  toast.success('Image uploaded successfully');
+                                } else {
+                                  throw new Error('Upload failed');
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            } catch (error) {
+                              toast.error('Failed to upload image');
+                            } finally {
+                              setUploadingImage(false);
+                            }
+                          }}
+                        />
+                      </div>
+                      {formData.imageUrl && (
+                        <img
+                          src={formData.imageUrl}
+                          alt="Preview"
+                          className="mt-2 h-32 w-32 object-cover rounded-lg"
+                        />
+                      )}
                     </div>
 
                     <div className="col-span-2">
