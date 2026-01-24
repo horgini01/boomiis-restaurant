@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { stripe } from '../stripe';
 import { getDb } from '../db';
-import { orders } from '../../drizzle/schema';
+import { orders, orderItems, menuItems } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
+import { sendOrderConfirmationEmail, sendAdminOrderNotification } from '../email';
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -53,6 +54,51 @@ export async function handleStripeWebhook(req: Request, res: Response) {
               .where(eq(orders.id, orderId));
 
             console.log(`[Webhook] Order ${orderId} marked as paid`);
+
+            // Send email notifications
+            try {
+              // Fetch order details
+              const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
+
+              if (order) {
+                // Fetch order items with menu item details
+                const items = await db
+                  .select({
+                    quantity: orderItems.quantity,
+                    price: orderItems.price,
+                    name: menuItems.name,
+                  })
+                  .from(orderItems)
+                  .leftJoin(menuItems, eq(orderItems.menuItemId, menuItems.id))
+                  .where(eq(orderItems.orderId, orderId));
+
+                const emailData = {
+                  orderNumber: order.orderNumber,
+                  customerName: order.customerName,
+                  customerEmail: order.customerEmail,
+                  orderType: order.orderType as 'delivery' | 'pickup',
+                  items: items.map((item: any) => ({
+                    name: item.name || 'Unknown Item',
+                    quantity: item.quantity,
+                    price: parseFloat(item.price),
+                  })),
+                  subtotal: parseFloat(order.subtotal),
+                  deliveryFee: parseFloat(order.deliveryFee),
+                  total: parseFloat(order.total),
+                  deliveryAddress: order.deliveryAddress || undefined,
+                  paymentIntentId: session.payment_intent as string,
+                };
+
+                // Send customer confirmation email
+                await sendOrderConfirmationEmail(emailData);
+
+                // Send admin notification email
+                await sendAdminOrderNotification(emailData);
+              }
+            } catch (emailError: any) {
+              console.error('[Webhook] Failed to send email notifications:', emailError.message);
+              // Don't fail the webhook if email fails
+            }
           }
         }
         break;

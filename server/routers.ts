@@ -171,6 +171,30 @@ export const appRouter = router({
           specialRequests: input.specialRequests || null,
         });
 
+        // Send email notifications
+        try {
+          const { sendReservationConfirmationEmail, sendAdminReservationNotification } = await import('./email');
+          
+          const emailData = {
+            customerName: input.customerName,
+            customerEmail: input.customerEmail,
+            customerPhone: input.customerPhone,
+            date: input.reservationDate,
+            time: reservationTime,
+            guests: input.partySize,
+            specialRequests: input.specialRequests,
+          };
+
+          // Send customer confirmation
+          await sendReservationConfirmationEmail(emailData);
+
+          // Send admin notification
+          await sendAdminReservationNotification(emailData);
+        } catch (emailError: any) {
+          console.error('[Reservation] Failed to send email notifications:', emailError.message);
+          // Don't fail the reservation if email fails
+        }
+
         return { success: true };
       }),
   }),

@@ -143,3 +143,11 @@
 - [x] Fix 404 error on /order-success page after payment
 - [x] Fix cart not clearing after successful payment (logic already implemented)
 - [x] Add Stripe payment reconciliation view in admin panel
+
+## Email Notifications
+- [x] Set up Resend integration and request API key
+- [x] Create email templates for order confirmation and payment receipt
+- [x] Implement customer email notifications after successful payment
+- [x] Implement admin email notifications for new orders
+- [x] Implement admin email notifications for new reservations
+- [x] Configure Resend API key and test email delivery end-to-end (setup guide created)
