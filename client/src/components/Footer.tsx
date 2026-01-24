@@ -115,6 +115,11 @@ export default function Footer() {
                   Accessibility
                 </span>
               </Link>
+              <Link href="/admin/login">
+                <span className="text-sm text-muted-foreground/60 hover:text-primary transition-colors cursor-pointer">
+                  Admin
+                </span>
+              </Link>
             </div>
           </div>
         </div>

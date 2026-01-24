@@ -93,3 +93,6 @@
 
 ## Bug Fixes
 - [x] Fix JSON parsing error on menu page ("None" is not valid JSON)
+
+## UI Improvements
+- [x] Add admin login link to footer
