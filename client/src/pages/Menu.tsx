@@ -12,12 +12,25 @@ import { Loader2, ShoppingCart, Leaf, Wheat, Moon } from 'lucide-react';
 export default function Menu() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [dietaryFilter, setDietaryFilter] = useState<'all' | 'vegan' | 'glutenFree' | 'halal'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { addItem } = useCart();
 
   const { data: categories, isLoading: categoriesLoading } = trpc.menu.categories.useQuery();
   const { data: items, isLoading: itemsLoading } = trpc.menu.items.useQuery({ categoryId: selectedCategory });
 
   const filteredItems = items?.filter(item => {
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesName = item.name.toLowerCase().includes(query);
+      const matchesDescription = item.description?.toLowerCase().includes(query) || false;
+      
+      if (!matchesName && !matchesDescription) {
+        return false;
+      }
+    }
+
+    // Dietary filter
     if (dietaryFilter === 'vegan') return item.isVegan;
     if (dietaryFilter === 'glutenFree') return item.isGlutenFree;
     if (dietaryFilter === 'halal') return item.isHalal;
@@ -49,9 +62,43 @@ export default function Menu() {
           </div>
         </section>
 
-        {/* Filters */}
+        {/* Search and Filters */}
         <section className="py-8 border-b border-border">
           <div className="container">
+            {/* Search Bar */}
+            <div className="mb-8">
+              <div className="relative max-w-2xl mx-auto">
+                <input
+                  type="text"
+                  placeholder="Search menu by name or ingredients..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-12 pl-12 pr-4 text-lg border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Category Filter */}
             <div className="mb-6">
               <h3 className="text-sm font-semibold mb-3 text-muted-foreground">CATEGORIES</h3>

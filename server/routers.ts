@@ -7,7 +7,7 @@ import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
 import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories } from "../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export const appRouter = router({
   system: systemRouter,
@@ -175,6 +175,33 @@ export const appRouter = router({
   }),
 
   admin: router({
+    uploadImage: protectedProcedure
+      .input(z.object({
+        file: z.string(), // base64 encoded image
+        fileName: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Admin access required');
+        }
+
+        const { storagePut } = await import('./storage');
+        
+        // Convert base64 to buffer
+        const base64Data = input.file.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        // Generate unique file key
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(7);
+        const fileKey = `menu-items/${timestamp}-${randomSuffix}-${input.fileName}`;
+        
+        // Upload to S3
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+        
+        return { url, fileKey };
+      }),
     stats: protectedProcedure.query(async ({ ctx }) => {
       if (ctx.user.role !== 'admin') {
         throw new Error('Unauthorized');
@@ -344,6 +371,113 @@ export const appRouter = router({
 
         await db.delete(menuItems).where(eq(menuItems.id, input.id));
         return { success: true };
+      }),
+
+    bulkUpdatePrices: protectedProcedure
+      .input(z.object({
+        itemIds: z.array(z.number()),
+        priceChange: z.number(), // percentage change, e.g., 10 for 10% increase, -5 for 5% decrease
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Admin access required');
+        }
+
+        const { itemIds, priceChange } = input;
+        
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get current items
+        const items = await db.select().from(menuItems).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);        
+        // Update each item's price
+        for (const item of items) {
+          const currentPrice = parseFloat(item.price);
+          const newPrice = currentPrice * (1 + priceChange / 100);
+          await db.update(menuItems)
+            .set({ price: newPrice.toFixed(2) })
+            .where(eq(menuItems.id, item.id));
+        }
+
+        return { success: true, updatedCount: items.length };
+      }),
+
+    bulkToggleAvailability: protectedProcedure
+      .input(z.object({
+        itemIds: z.array(z.number()),
+        isAvailable: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Admin access required');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { itemIds, isAvailable } = input;
+        
+        for (const id of itemIds) {
+          await db.update(menuItems)
+            .set({ isAvailable })
+            .where(eq(menuItems.id, id));
+        }
+
+        return { success: true, updatedCount: itemIds.length };
+      }),
+
+    duplicateMenuItem: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Admin access required');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const [item] = await db.select().from(menuItems).where(eq(menuItems.id, input.id)).limit(1);
+        
+        if (!item) {
+          throw new Error('Menu item not found');
+        }
+
+        // Create a copy with a new slug
+        const timestamp = Date.now();
+        const newSlug = `${item.slug}-copy-${timestamp}`;
+        const newName = `${item.name} (Copy)`;
+
+        await db.insert(menuItems).values({
+          categoryId: item.categoryId,
+          name: newName,
+          slug: newSlug,
+          description: item.description,
+          price: item.price,
+          imageUrl: item.imageUrl,
+          isVegan: item.isVegan,
+          isGlutenFree: item.isGlutenFree,
+          isHalal: item.isHalal,
+          allergens: item.allergens,
+          isAvailable: false, // Start as unavailable
+          isFeatured: false,
+          displayOrder: item.displayOrder,
+        });
+
+        return { success: true };
+      }),
+
+    getMenuItems: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Admin access required');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        return await db.select().from(menuItems).orderBy(menuItems.displayOrder);
       }),
 
     toggleMenuItemAvailable: protectedProcedure

@@ -105,3 +105,9 @@
 - [x] Update AdminLogin component with email/password form
 - [x] Update authentication context to use custom login
 - [x] Test login with default admin credentials
+
+## New Features (Current Request)
+- [x] Image upload functionality with S3 storage integration
+- [x] Upload real food images for all menu items (5 items completed, admin can add more via upload feature)
+- [x] Bulk menu operations (update prices, toggle availability, duplicate items)
+- [x] Search functionality on menu page (search by name or ingredients)

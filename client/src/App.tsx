@@ -14,7 +14,8 @@ import Reservations from "./pages/Reservations";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CategoriesManagement from "./pages/admin/Categories";
-import MenuItemsManagement from "./pages/admin/MenuItems";
+import MenuItemsManagement from './pages/admin/MenuItems';
+import BulkOperations from './pages/admin/BulkOperations';
 import OrdersManagement from "./pages/admin/Orders";
 import ReservationsManagement from "./pages/admin/ReservationsManagement";
 
@@ -30,9 +31,8 @@ function Router() {
       <Route path={"/reservations"} component={Reservations} />
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
-      <Route path={"/admin/categories"} component={CategoriesManagement} />
-      <Route path={"/admin/menu-items"} component={MenuItemsManagement} />
-      <Route path={"/admin/orders"} component={OrdersManagement} />
+      <Route path={"/admin/categories"} component={CategoriesManagement} />          <Route path="/admin/menu-items" component={MenuItemsManagement} />
+          <Route path="/admin/bulk-operations" component={BulkOperations} />      <Route path={"/admin/orders"} component={OrdersManagement} />
       <Route path={"/admin/reservations"} component={ReservationsManagement} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
