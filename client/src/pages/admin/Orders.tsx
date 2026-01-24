@@ -82,6 +82,7 @@ export default function OrdersManagement() {
                       <TableHead>Total</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Payment</TableHead>
+                      <TableHead>Stripe ID</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -113,6 +114,21 @@ export default function OrdersManagement() {
                           }`}>
                             {order.paymentStatus}
                           </span>
+                        </TableCell>
+                        <TableCell>
+                          {order.paymentIntentId ? (
+                            <a
+                              href={`https://dashboard.stripe.com/test/payments/${order.paymentIntentId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline font-mono"
+                              title="View in Stripe Dashboard"
+                            >
+                              {order.paymentIntentId.substring(0, 20)}...
+                            </a>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}

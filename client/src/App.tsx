@@ -27,7 +27,7 @@ function Router() {
       <Route path={"/menu"} component={Menu} />
       <Route path={"/cart"} component={Cart} />
       <Route path={"/checkout"} component={Checkout} />
-      <Route path={"/order-success/:orderNumber"} component={OrderSuccess} />
+      <Route path={"/order-success"} component={OrderSuccess} />
       <Route path={"/reservations"} component={Reservations} />
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />

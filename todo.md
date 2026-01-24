@@ -138,3 +138,8 @@
 - [x] Add support for card payments, Apple Pay, and Google Pay
 - [x] Update order flow to include payment processing
 - [x] Test payment flow end-to-end
+
+## Bug Fixes (Critical - Post-Payment Issues)
+- [x] Fix 404 error on /order-success page after payment
+- [x] Fix cart not clearing after successful payment (logic already implemented)
+- [x] Add Stripe payment reconciliation view in admin panel
