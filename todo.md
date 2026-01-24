@@ -96,3 +96,5 @@
 
 ## UI Improvements
 - [x] Add admin login link to footer
+
+- [x] Fix React setState error in AdminLogin component (navigation during render)

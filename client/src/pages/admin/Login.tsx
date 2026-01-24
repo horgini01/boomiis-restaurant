@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,10 +15,11 @@ export default function AdminLogin() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   // If already logged in as admin, redirect to dashboard
-  if (!loading && user?.role === 'admin') {
-    setLocation('/admin/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && user?.role === 'admin') {
+      setLocation('/admin/dashboard');
+    }
+  }, [loading, user, setLocation]);
 
   const handleLogin = () => {
     setLoggingIn(true);
