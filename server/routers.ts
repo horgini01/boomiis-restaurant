@@ -1,10 +1,10 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
-import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations } from "../drizzle/schema";
+import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export const appRouter = router({
@@ -132,6 +132,245 @@ export const appRouter = router({
           specialRequests: input.specialRequests || null,
         });
 
+        return { success: true };
+      }),
+  }),
+
+  admin: router({
+    stats: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const menuItemsResult = await db.select().from(menuItems);
+      const ordersResult = await db.select().from(orders).where(eq(orders.status, 'pending'));
+      const reservationsResult = await db.select().from(reservations).where(eq(reservations.status, 'pending'));
+      const completedOrders = await db.select().from(orders).where(eq(orders.status, 'completed'));
+
+      const totalRevenue = completedOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+
+      return {
+        menuItemsCount: menuItemsResult.length,
+        pendingOrdersCount: ordersResult.length,
+        pendingReservationsCount: reservationsResult.length,
+        totalRevenue: totalRevenue.toFixed(2),
+      };
+    }),
+
+    createCategory: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        slug: z.string(),
+        description: z.string().optional(),
+        displayOrder: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(menuCategories).values(input);
+        return { success: true };
+      }),
+
+    updateCategory: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string(),
+        slug: z.string(),
+        description: z.string().optional(),
+        displayOrder: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { id, ...data } = input;
+        await db.update(menuCategories).set(data).where(eq(menuCategories.id, id));
+        return { success: true };
+      }),
+
+    deleteCategory: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(menuCategories).where(eq(menuCategories.id, input.id));
+        return { success: true };
+      }),
+
+    toggleCategoryActive: protectedProcedure
+      .input(z.object({ id: z.number(), isActive: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(menuCategories).set({ isActive: input.isActive }).where(eq(menuCategories.id, input.id));
+        return { success: true };
+      }),
+
+    createMenuItem: protectedProcedure
+      .input(z.object({
+        categoryId: z.number(),
+        name: z.string(),
+        slug: z.string(),
+        description: z.string().optional(),
+        price: z.number(),
+        imageUrl: z.string().optional(),
+        isVegan: z.boolean(),
+        isGlutenFree: z.boolean(),
+        isHalal: z.boolean(),
+        allergens: z.string().optional(),
+        isAvailable: z.boolean(),
+        isFeatured: z.boolean(),
+        displayOrder: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(menuItems).values({
+          ...input,
+          price: input.price.toString(),
+        });
+        return { success: true };
+      }),
+
+    updateMenuItem: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        categoryId: z.number(),
+        name: z.string(),
+        slug: z.string(),
+        description: z.string().optional(),
+        price: z.number(),
+        imageUrl: z.string().optional(),
+        isVegan: z.boolean(),
+        isGlutenFree: z.boolean(),
+        isHalal: z.boolean(),
+        allergens: z.string().optional(),
+        isAvailable: z.boolean(),
+        isFeatured: z.boolean(),
+        displayOrder: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { id, ...data } = input;
+        await db.update(menuItems).set({
+          ...data,
+          price: data.price.toString(),
+        }).where(eq(menuItems.id, id));
+        return { success: true };
+      }),
+
+    deleteMenuItem: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(menuItems).where(eq(menuItems.id, input.id));
+        return { success: true };
+      }),
+
+    toggleMenuItemAvailable: protectedProcedure
+      .input(z.object({ id: z.number(), isAvailable: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(menuItems).set({ isAvailable: input.isAvailable }).where(eq(menuItems.id, input.id));
+        return { success: true };
+      }),
+
+    getOrders: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const ordersResult = await db.select().from(orders);
+      return ordersResult;
+    }),
+
+    updateOrderStatus: protectedProcedure
+      .input(z.object({ orderId: z.number(), status: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(orders).set({ status: input.status as any }).where(eq(orders.id, input.orderId));
+        return { success: true };
+      }),
+
+    getReservations: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const reservationsResult = await db.select().from(reservations);
+      return reservationsResult;
+    }),
+
+    updateReservationStatus: protectedProcedure
+      .input(z.object({ reservationId: z.number(), status: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(reservations).set({ status: input.status as any }).where(eq(reservations.id, input.reservationId));
         return { success: true };
       }),
   }),

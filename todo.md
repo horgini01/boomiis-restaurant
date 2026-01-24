@@ -80,3 +80,13 @@
 - [ ] Test admin dashboard operations
 - [ ] Create deployment checkpoint
 - [ ] Deploy to production
+
+## Admin Dashboard (New Request)
+- [x] Admin login page with authentication
+- [x] Admin dashboard layout with navigation
+- [x] Menu categories management (CRUD)
+- [x] Menu items management (CRUD)
+- [x] Real-time updates from admin to menu page
+- [x] Orders management with status updates
+- [x] Reservations management
+- [x] Admin authorization middleware
