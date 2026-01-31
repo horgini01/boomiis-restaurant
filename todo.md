@@ -151,3 +151,10 @@
 - [x] Implement admin email notifications for new orders
 - [x] Implement admin email notifications for new reservations
 - [x] Configure Resend API key and test email delivery end-to-end (setup guide created)
+
+## Resend Email Configuration
+- [x] Configure RESEND_API_KEY environment variable
+- [x] Configure FROM_EMAIL with verified domain
+- [x] Configure ADMIN_EMAIL for notifications
+- [x] Test order confirmation email (API validated)
+- [x] Test reservation confirmation email (API validated)
