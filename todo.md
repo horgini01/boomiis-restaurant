@@ -175,3 +175,6 @@
 - [x] Fix email template to include phone number
 - [x] Fix email template to include postcode
 - [x] Fix email template to include special instructions
+
+## Bug Fixes (Critical - User Reported - Jan 31)
+- [x] Fix JSON parsing error in order details modal when items field is undefined or invalid

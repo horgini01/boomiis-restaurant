@@ -78,6 +78,17 @@ export default function OrdersManagement() {
     setIsDetailsOpen(true);
   };
 
+  const parseOrderItems = (itemsJson: string | null | undefined): any[] => {
+    if (!itemsJson) return [];
+    try {
+      const parsed = JSON.parse(itemsJson);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error('Failed to parse order items:', error);
+      return [];
+    }
+  };
+
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
@@ -354,7 +365,7 @@ export default function OrdersManagement() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {JSON.parse(selectedOrder.items).map((item: any, index: number) => (
+                        {parseOrderItems(selectedOrder.items).map((item: any, index: number) => (
                           <TableRow key={index}>
                             <TableCell className="font-medium">{item.name}</TableCell>
                             <TableCell className="text-center">{item.quantity}</TableCell>
@@ -373,7 +384,7 @@ export default function OrdersManagement() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="font-medium">
-                        £{JSON.parse(selectedOrder.items).reduce((sum: number, item: any) => 
+                        £{parseOrderItems(selectedOrder.items).reduce((sum: number, item: any) => 
                           sum + (item.quantity * parseFloat(item.price)), 0
                         ).toFixed(2)}
                       </span>
