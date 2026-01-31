@@ -254,3 +254,6 @@
 - [x] Add quick toggle switches to admin menu items list (already implemented)
 - [x] Display "Currently Unavailable" badges on customer menu
 - [x] Prevent unavailable items from being added to cart
+
+## Bug Fixes (User Reported - Jan 31 - Menu Availability Toggle)
+- [x] Fix handleToggleAvailable function - items were disappearing from admin list when toggled (changed from trpc.menu.items to trpc.admin.getMenuItems)

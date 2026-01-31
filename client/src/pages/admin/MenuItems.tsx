@@ -56,12 +56,12 @@ export default function MenuItemsManagement() {
 
   const utils = trpc.useUtils();
   const { data: categories } = trpc.menu.categories.useQuery();
-  const { data: menuItems, isLoading } = trpc.menu.items.useQuery();
+  const { data: menuItems, isLoading } = trpc.admin.getMenuItems.useQuery();
 
   const createMutation = trpc.admin.createMenuItem.useMutation({
     onSuccess: () => {
       toast.success('Menu item created successfully');
-      utils.menu.items.invalidate();
+      utils.admin.getMenuItems.invalidate();
       utils.menu.featured.invalidate();
       setIsDialogOpen(false);
       resetForm();
@@ -74,7 +74,7 @@ export default function MenuItemsManagement() {
   const updateMutation = trpc.admin.updateMenuItem.useMutation({
     onSuccess: () => {
       toast.success('Menu item updated successfully');
-      utils.menu.items.invalidate();
+      utils.admin.getMenuItems.invalidate();
       utils.menu.featured.invalidate();
       setIsDialogOpen(false);
       resetForm();
@@ -87,7 +87,7 @@ export default function MenuItemsManagement() {
   const deleteMutation = trpc.admin.deleteMenuItem.useMutation({
     onSuccess: () => {
       toast.success('Menu item deleted successfully');
-      utils.menu.items.invalidate();
+      utils.admin.getMenuItems.invalidate();
       utils.menu.featured.invalidate();
     },
     onError: (error: any) => {
@@ -98,7 +98,7 @@ export default function MenuItemsManagement() {
   const toggleAvailableMutation = trpc.admin.toggleMenuItemAvailable.useMutation({
     onSuccess: () => {
       toast.success('Menu item status updated');
-      utils.menu.items.invalidate();
+      utils.admin.getMenuItems.invalidate();
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to update menu item');
