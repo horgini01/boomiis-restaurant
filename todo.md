@@ -225,3 +225,7 @@
 - [x] Optimize kitchen view for mobile/tablet (large touch targets)
 - [x] Add tap-to-update-status interface for kitchen staff
 - [x] Make kitchen view accessible without login (public route)
+
+## New Features (User Request - Jan 31 - Kitchen Display Access)
+- [x] Add Kitchen Display quick action card to admin dashboard
+- [x] Make kitchen display link open in new tab

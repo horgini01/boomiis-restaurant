@@ -2,7 +2,7 @@ import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { trpc } from '@/lib/trpc';
-import { Loader2, UtensilsCrossed, ShoppingBag, CalendarCheck, TrendingUp } from 'lucide-react';
+import { Loader2, UtensilsCrossed, ShoppingBag, CalendarCheck, TrendingUp, ChefHat } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = trpc.admin.stats.useQuery();
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <a
                       href="/admin/menu-items"
                       className="p-4 rounded-lg border border-border hover:border-primary transition-colors"
@@ -100,6 +100,16 @@ export default function AdminDashboard() {
                       <CalendarCheck className="h-6 w-6 text-primary mb-2" />
                       <h3 className="font-semibold mb-1">Reservations</h3>
                       <p className="text-sm text-muted-foreground">Manage table bookings</p>
+                    </a>
+                    <a
+                      href="/kitchen"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-4 rounded-lg border border-orange-500/50 bg-orange-500/10 hover:border-orange-500 transition-colors"
+                    >
+                      <ChefHat className="h-6 w-6 text-orange-500 mb-2" />
+                      <h3 className="font-semibold mb-1">Kitchen Display</h3>
+                      <p className="text-sm text-muted-foreground">Open kitchen view (new tab)</p>
                     </a>
                   </div>
                 </CardContent>
