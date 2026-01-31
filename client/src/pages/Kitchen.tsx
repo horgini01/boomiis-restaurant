@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Clock, CheckCircle2, AlertCircle, ChefHat } from 'lucide-react';
+import { Clock, CheckCircle2, AlertCircle, ChefHat, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function KitchenDisplay() {
@@ -154,7 +154,7 @@ export default function KitchenDisplay() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4 md:p-6">
+    <div className="kitchen-display-container min-h-screen bg-gray-900 p-4 md:p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
@@ -169,14 +169,25 @@ export default function KitchenDisplay() {
             <div className="text-5xl font-bold text-white">{activeOrders.length}</div>
             <div className="text-gray-400 text-lg">Active Orders</div>
           </div>
-          <Button
-            size="lg"
-            variant={soundEnabled ? "default" : "outline"}
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="h-14 px-6"
-          >
-            {soundEnabled ? '🔔 Sound On' : '🔕 Sound Off'}
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => window.print()}
+              className="h-14 px-6 bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
+            >
+              <Printer className="h-5 w-5 mr-2" />
+              Print All
+            </Button>
+            <Button
+              size="lg"
+              variant={soundEnabled ? "default" : "outline"}
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="h-14 px-6"
+            >
+              {soundEnabled ? '🔔 Sound On' : '🔕 Sound Off'}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -349,4 +360,51 @@ export default function KitchenDisplay() {
       )}
     </div>
   );
+}
+
+// Add print styles
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = `
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .kitchen-display-container,
+      .kitchen-display-container * {
+        visibility: visible;
+      }
+      .kitchen-display-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      /* Hide buttons and interactive elements */
+      button {
+        display: none !important;
+      }
+      /* Optimize for print */
+      .bg-gray-900 {
+        background: white !important;
+      }
+      .bg-gray-800 {
+        background: white !important;
+        border: 2px solid black !important;
+      }
+      .text-white {
+        color: black !important;
+      }
+      .text-gray-300,
+      .text-gray-400 {
+        color: #333 !important;
+      }
+      /* Ensure cards print side by side */
+      @page {
+        size: landscape;
+        margin: 1cm;
+      }
+    }
+  `;
+  document.head.appendChild(style);
 }

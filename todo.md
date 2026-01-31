@@ -233,3 +233,10 @@
 ## Bug Fixes (User Reported - Jan 31 - Kitchen Workflow)
 - [x] Implement strict step-by-step workflow in kitchen display
 - [x] Show only one appropriate button per order status (no skipping steps)
+
+## New Features (User Request - Jan 31 - Kitchen Efficiency)
+- [x] Add preparation timer tracking to order timeline (already implemented)
+- [x] Calculate time spent in "preparing" status for each order
+- [x] Display average prep times in analytics dashboard
+- [x] Add "Print All Active Orders" button to kitchen display
+- [x] Generate PDF with all pending/confirmed orders for printing
