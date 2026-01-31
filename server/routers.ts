@@ -527,8 +527,34 @@ export const appRouter = router({
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
+      // Get all orders
       const ordersResult = await db.select().from(orders);
-      return ordersResult;
+      
+      // For each order, fetch its items from order_items table
+      const ordersWithItems = await Promise.all(
+        ordersResult.map(async (order) => {
+          const items = await db
+            .select()
+            .from(orderItemsTable)
+            .where(eq(orderItemsTable.orderId, order.id));
+          
+          // Format items as JSON string to match expected format
+          const itemsJson = JSON.stringify(
+            items.map(item => ({
+              name: item.menuItemName,
+              quantity: item.quantity,
+              price: item.price,
+            }))
+          );
+          
+          return {
+            ...order,
+            items: itemsJson,
+          };
+        })
+      );
+      
+      return ordersWithItems;
     }),
 
     updateOrderStatus: protectedProcedure

@@ -1,0 +1,20 @@
+{
+  "query": "SELECT oi.* FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.order_number = 'BO-MKSAD7KT-MV36';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT oi.* FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.order_number = 'BO-MKSAD7KT-MV36';",
+  "rows": [
+    {
+      "id": "60002",
+      "order_id": "60002",
+      "menu_item_id": "60006",
+      "menu_item_name": "Test Dish for Payment",
+      "quantity": "1",
+      "price": "10.00",
+      "subtotal": "10.00",
+      "created_at": "2026-01-24 12:28:42"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torder_id\tmenu_item_id\tmenu_item_name\tquantity\tprice\tsubtotal\tcreated_at\n60002\t60002\t60006\tTest Dish for Payment\t1\t10.00\t10.00\t2026-01-24 12:28:42\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

@@ -178,3 +178,7 @@
 
 ## Bug Fixes (Critical - User Reported - Jan 31)
 - [x] Fix JSON parsing error in order details modal when items field is undefined or invalid
+
+## Bug Fixes (Critical - User Reported - Jan 31)
+- [x] Investigate why order items are not being saved to database (items stored in separate order_items table)
+- [x] Fix getOrders API to join with order_items table and return items data
