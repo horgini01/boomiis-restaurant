@@ -33,6 +33,7 @@ export default function OrderSuccess() {
       if (verifyPaymentQuery.data.paymentStatus === 'paid') {
         setPaymentVerified(true);
         clearCart();
+        console.log('[OrderSuccess] Cart cleared after successful payment');
       }
       setIsVerifying(false);
     } else if (!sessionId) {

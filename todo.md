@@ -158,3 +158,9 @@
 - [x] Configure ADMIN_EMAIL for notifications
 - [x] Test order confirmation email (API validated)
 - [x] Test reservation confirmation email (API validated)
+
+## Critical Post-Payment Bugs (User Reported - Jan 31)
+- [x] Fix missing Stripe payment ID in order records after successful payment
+- [x] Fix emails not sending to customers after payment completion
+- [x] Add customer email field to orders table and admin display
+- [x] Fix cart not clearing after successful payment (implementation verified, added logging)

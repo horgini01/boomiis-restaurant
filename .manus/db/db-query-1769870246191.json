@@ -1,0 +1,23 @@
+{
+  "query": "SELECT id, order_number, customer_name, customer_email, customer_phone, total, order_type, status, payment_status, payment_intent_id, created_at FROM orders ORDER BY created_at DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, order_number, customer_name, customer_email, customer_phone, total, order_type, status, payment_status, payment_intent_id, created_at FROM orders ORDER BY created_at DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "120003",
+      "order_number": "BO-ML2ESJZU-ESUH",
+      "customer_name": "Olayinka Oginni",
+      "customer_email": "bravehatconsulting@gmail.com",
+      "customer_phone": "07456183646",
+      "total": "28.96",
+      "order_type": "delivery",
+      "status": "confirmed",
+      "payment_status": "paid",
+      "payment_intent_id": "NULL",
+      "created_at": "2026-01-31 14:30:18"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torder_number\tcustomer_name\tcustomer_email\tcustomer_phone\ttotal\torder_type\tstatus\tpayment_status\tpayment_intent_id\tcreated_at\n120003\tBO-ML2ESJZU-ESUH\tOlayinka Oginni\tbravehatconsulting@gmail.com\t07456183646\t28.96\tdelivery\tconfirmed\tpaid\tNULL\t2026-01-31 14:30:18\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

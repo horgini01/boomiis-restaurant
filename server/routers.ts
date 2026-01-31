@@ -665,7 +665,9 @@ export const appRouter = router({
         sessionId: z.string(),
       }))
       .query(async ({ input }) => {
-        const session = await stripe.checkout.sessions.retrieve(input.sessionId);
+        const session = await stripe.checkout.sessions.retrieve(input.sessionId, {
+          expand: ['payment_intent'],
+        });
         
         if (session.payment_status === 'paid') {
           const db = await getDb();
@@ -673,9 +675,76 @@ export const appRouter = router({
 
           const orderId = parseInt(session.client_reference_id || '0');
           if (orderId) {
+            // Get payment intent ID
+            const paymentIntentId = typeof session.payment_intent === 'string' 
+              ? session.payment_intent 
+              : session.payment_intent?.id;
+
+            // Update order with payment info
             await db.update(orders)
-              .set({ paymentStatus: 'paid', status: 'confirmed' })
+              .set({ 
+                paymentStatus: 'paid', 
+                status: 'confirmed',
+                paymentIntentId: paymentIntentId || null,
+              })
               .where(eq(orders.id, orderId));
+
+            // Fetch complete order details for email
+            const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
+            const items = await db.select({
+              name: orderItemsTable.menuItemName,
+              quantity: orderItemsTable.quantity,
+              price: orderItemsTable.price,
+              subtotal: orderItemsTable.subtotal,
+            }).from(orderItemsTable).where(eq(orderItemsTable.orderId, orderId));
+
+            if (order) {
+              // Send confirmation emails
+              const { sendOrderConfirmationEmail, sendAdminOrderNotification } = await import('./email');
+              
+              try {
+                await sendOrderConfirmationEmail({
+                  customerEmail: order.customerEmail,
+                  customerName: order.customerName,
+                  orderNumber: order.orderNumber,
+                  orderType: order.orderType,
+                  items: items.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: parseFloat(item.price),
+                    subtotal: parseFloat(item.subtotal),
+                  })),
+                  subtotal: parseFloat(order.subtotal),
+                  deliveryFee: parseFloat(order.deliveryFee),
+                  total: parseFloat(order.total),
+                  deliveryAddress: order.deliveryAddress || undefined,
+                });
+                console.log('[Payment] Order confirmation email sent');
+              } catch (error) {
+                console.error('[Payment] Failed to send order confirmation:', error);
+              }
+
+              try {
+                await sendAdminOrderNotification({
+                  orderNumber: order.orderNumber,
+                  customerName: order.customerName,
+                  customerEmail: order.customerEmail,
+                  orderType: order.orderType,
+                  subtotal: parseFloat(order.subtotal),
+                  deliveryFee: parseFloat(order.deliveryFee),
+                  total: parseFloat(order.total),
+                  items: items.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: parseFloat(item.price),
+                  })),
+                  deliveryAddress: order.deliveryAddress || undefined,
+                });
+                console.log('[Payment] Admin notification email sent');
+              } catch (error) {
+                console.error('[Payment] Failed to send admin notification:', error);
+              }
+            }
           }
         }
 

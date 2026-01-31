@@ -94,6 +94,7 @@ export default function OrdersManagement() {
                         <TableCell>
                           <div>
                             <p className="font-medium">{order.customerName}</p>
+                            <p className="text-sm text-muted-foreground">{order.customerEmail}</p>
                             <p className="text-sm text-muted-foreground">{order.customerPhone}</p>
                           </div>
                         </TableCell>
