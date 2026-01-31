@@ -208,3 +208,7 @@
 - [x] Add visual urgency indicators for orders scheduled within 1 hour
 - [x] Highlight urgent orders in orange/red color
 - [x] Add urgency badge or icon to scheduled time display
+
+## Bug Fixes (User Reported - Jan 31 - Time Format)
+- [x] Change time format from 24-hour (HH:mm) to 12-hour with AM/PM
+- [x] Update all time displays in orders list to show AM/PM

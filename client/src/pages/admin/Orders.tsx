@@ -136,12 +136,12 @@ export default function OrdersManagement() {
 
     const csvRows = filteredAndSortedOrders.map(order => [
       order.orderNumber,
-      format(new Date(order.createdAt), 'yyyy-MM-dd HH:mm'),
+      format(new Date(order.createdAt), 'yyyy-MM-dd hh:mm a'),
       order.customerName,
       order.customerEmail,
       order.customerPhone,
       order.orderType,
-      order.scheduledFor ? format(new Date(order.scheduledFor), 'yyyy-MM-dd HH:mm') : '',
+      order.scheduledFor ? format(new Date(order.scheduledFor), 'yyyy-MM-dd hh:mm a') : '',
       order.status,
       order.paymentStatus,
       `£${parseFloat(order.total).toFixed(2)}`,
@@ -478,7 +478,7 @@ export default function OrdersManagement() {
                                 <div className={`flex items-center gap-2 ${isOrderUrgent(order.scheduledFor) ? 'text-orange-500 font-semibold' : ''}`}>
                                   <div className="flex flex-col">
                                     <span>{format(new Date(order.scheduledFor), 'MMM dd, yyyy')}</span>
-                                    <span className={isOrderUrgent(order.scheduledFor) ? 'text-orange-400 text-xs' : 'text-muted-foreground text-xs'}>{format(new Date(order.scheduledFor), 'HH:mm')}</span>
+                                    <span className={isOrderUrgent(order.scheduledFor) ? 'text-orange-400 text-xs' : 'text-muted-foreground text-xs'}>{format(new Date(order.scheduledFor), 'h:mm a')}</span>
                                   </div>
                                   {isOrderUrgent(order.scheduledFor) && (
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-500">
@@ -524,7 +524,7 @@ export default function OrdersManagement() {
                               )}
                             </TableCell>
                             <TableCell className="text-muted-foreground">
-                              {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}
+                              {format(new Date(order.createdAt), 'MMM dd, yyyy h:mm a')}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-2">
@@ -682,7 +682,7 @@ export default function OrdersManagement() {
                               </div>
                               <div class="info-item">
                                 <div class="info-label">Date</div>
-                                <div class="info-value">${format(new Date(selectedOrder.createdAt), 'MMM dd, yyyy HH:mm')}</div>
+                                <div class="info-value">${format(new Date(selectedOrder.createdAt), 'MMM dd, yyyy h:mm a')}</div>
                               </div>
                               <div class="info-item">
                                 <div class="info-label">Order Type</div>
@@ -921,7 +921,7 @@ export default function OrdersManagement() {
                     <div>
                       <p className="text-muted-foreground">Order Date</p>
                       <p className="font-medium">
-                        {format(new Date(selectedOrder.createdAt), 'MMM dd, yyyy HH:mm')}
+                        {format(new Date(selectedOrder.createdAt), 'MMM dd, yyyy h:mm a')}
                       </p>
                     </div>
                     {selectedOrder.paymentIntentId && (
