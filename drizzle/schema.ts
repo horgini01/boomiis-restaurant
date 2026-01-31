@@ -52,6 +52,7 @@ export const menuItems = mysqlTable("menu_items", {
   allergens: text("allergens"), // JSON array of allergen strings
   isAvailable: boolean("is_available").default(true).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(),
+  prepTimeMinutes: int("prep_time_minutes").default(15).notNull(), // Estimated preparation time in minutes
   displayOrder: int("display_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
@@ -80,6 +81,7 @@ export const orders = mysqlTable("orders", {
   paymentStatus: mysqlEnum("payment_status", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
   paymentIntentId: varchar("payment_intent_id", { length: 255 }).unique(),
   specialInstructions: text("special_instructions"),
+  timeline: text("timeline"), // JSON array of {status, timestamp} objects tracking status changes
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

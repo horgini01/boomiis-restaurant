@@ -585,8 +585,24 @@ export const appRouter = router({
           throw new Error('Order not found');
         }
 
-        // Update order status
-        await db.update(orders).set({ status: input.status as any }).where(eq(orders.id, input.orderId));
+        // Update timeline with new status change
+        let timeline: Array<{status: string, timestamp: string}> = [];
+        try {
+          timeline = order.timeline ? JSON.parse(order.timeline) : [];
+        } catch (e) {
+          console.error('Failed to parse timeline:', e);
+          timeline = [];
+        }
+        timeline.push({
+          status: input.status,
+          timestamp: new Date().toISOString(),
+        });
+
+        // Update order status and timeline
+        await db.update(orders).set({ 
+          status: input.status as any,
+          timeline: JSON.stringify(timeline),
+        }).where(eq(orders.id, input.orderId));
 
         // Send status update email to customer
         await sendOrderStatusUpdateEmail({

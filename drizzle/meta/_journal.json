@@ -15,6 +15,20 @@
       "when": 1769214129103,
       "tag": "0001_clear_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1769885239198,
+      "tag": "0002_black_smiling_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1769885426084,
+      "tag": "0003_giant_colleen_wing",
+      "breakpoints": true
     }
   ]
 }

@@ -19,6 +19,7 @@ import BulkOperations from './pages/admin/BulkOperations';
 import OrdersManagement from "./pages/admin/Orders";
 import ReservationsManagement from "./pages/admin/ReservationsManagement";
 import Analytics from "./pages/admin/Analytics";
+import Kitchen from "./pages/Kitchen";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -35,7 +36,9 @@ function Router() {
       <Route path={"/admin/categories"} component={CategoriesManagement} />          <Route path="/admin/menu-items" component={MenuItemsManagement} />
           <Route path="/admin/bulk-operations" component={BulkOperations} />      <Route path={"/admin/orders"} component={OrdersManagement} />
       <Route path={"/ admin/reservations"} component={ReservationsManagement} />
-      <Route path={"/admin/analytics"} component={Analytics} />      <Route path={"/404"} component={NotFound} />
+      <Route path={"/admin/analytics"} component={Analytics} />
+      <Route path={"/kitchen"} component={Kitchen} />
+      <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>

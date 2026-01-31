@@ -49,6 +49,7 @@ export default function MenuItemsManagement() {
     allergens: '',
     isAvailable: true,
     isFeatured: false,
+    prepTimeMinutes: 15,
     displayOrder: 0,
   });
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -118,6 +119,7 @@ export default function MenuItemsManagement() {
       allergens: '',
       isAvailable: true,
       isFeatured: false,
+      prepTimeMinutes: 15,
       displayOrder: 0,
     });
     setEditingItem(null);
@@ -138,6 +140,7 @@ export default function MenuItemsManagement() {
       allergens: item.allergens || '',
       isAvailable: item.isAvailable,
       isFeatured: item.isFeatured,
+      prepTimeMinutes: item.prepTimeMinutes || 15,
       displayOrder: item.displayOrder,
     });
     setIsDialogOpen(true);
@@ -264,6 +267,19 @@ export default function MenuItemsManagement() {
                         value={formData.price}
                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="prepTimeMinutes">Prep Time (minutes) *</Label>
+                      <Input
+                        id="prepTimeMinutes"
+                        type="number"
+                        min="1"
+                        required
+                        value={formData.prepTimeMinutes}
+                        onChange={(e) => setFormData({ ...formData, prepTimeMinutes: parseInt(e.target.value) || 15 })}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Estimated kitchen preparation time</p>
                     </div>
 
                     <div>

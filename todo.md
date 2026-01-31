@@ -212,3 +212,16 @@
 ## Bug Fixes (User Reported - Jan 31 - Time Format)
 - [x] Change time format from 24-hour (HH:mm) to 12-hour with AM/PM
 - [x] Update all time displays in orders list to show AM/PM
+
+## New Features (User Request - Jan 31 - Kitchen Display System)
+- [x] Add preparation time field to menu items schema
+- [x] Add prep time input to menu items admin interface
+- [x] Create kitchen display page showing only active orders
+- [x] Design large text, card-based layout for kitchen view
+- [x] Add order timeline tracking with status change timestamps
+- [ ] Calculate kitchen start time based on prep time and scheduled time
+- [x] Implement sound alerts for new urgent orders
+- [x] Add sound notification when order enters urgent window
+- [x] Optimize kitchen view for mobile/tablet (large touch targets)
+- [x] Add tap-to-update-status interface for kitchen staff
+- [x] Make kitchen view accessible without login (public route)
