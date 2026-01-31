@@ -164,3 +164,14 @@
 - [x] Fix emails not sending to customers after payment completion
 - [x] Add customer email field to orders table and admin display
 - [x] Fix cart not clearing after successful payment (implementation verified, added logging)
+
+## Order Management Enhancements (User Requested - Jan 31)
+- [x] Add postcode field to orders table schema (already exists)
+- [x] Add special instructions field to orders table schema (already exists)
+- [x] Update checkout form to capture postcode and special instructions (already implemented)
+- [x] Create order details modal showing item breakdown for admin
+- [x] Add search functionality to orders list
+- [x] Add sort functionality to orders list (by date, status, total)
+- [x] Fix email template to include phone number
+- [x] Fix email template to include postcode
+- [x] Fix email template to include special instructions

@@ -25,6 +25,7 @@ interface OrderEmailData {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
+  customerPhone: string;
   orderType: 'delivery' | 'pickup';
   items: Array<{
     name: string;
@@ -35,6 +36,8 @@ interface OrderEmailData {
   deliveryFee: number;
   total: number;
   deliveryAddress?: string;
+  deliveryPostcode?: string;
+  specialInstructions?: string;
   paymentIntentId?: string;
 }
 
@@ -88,7 +91,9 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
               <div class="order-details">
                 <h2>Order #${data.orderNumber}</h2>
                 <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
-                ${data.deliveryAddress ? `<p><strong>Delivery Address:</strong> ${data.deliveryAddress}</p>` : ''}
+                <p><strong>Contact Phone:</strong> ${data.customerPhone}</p>
+                ${data.deliveryAddress ? `<p><strong>Delivery Address:</strong> ${data.deliveryAddress}${data.deliveryPostcode ? `, ${data.deliveryPostcode}` : ''}</p>` : ''}
+                ${data.specialInstructions ? `<p><strong>Special Instructions:</strong> ${data.specialInstructions}</p>` : ''}
                 
                 <h3>Items:</h3>
                 <ul>

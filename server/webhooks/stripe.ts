@@ -76,7 +76,8 @@ export async function handleStripeWebhook(req: Request, res: Response) {
                   orderNumber: order.orderNumber,
                   customerName: order.customerName,
                   customerEmail: order.customerEmail,
-                  orderType: order.orderType as 'delivery' | 'pickup',
+                  customerPhone: order.customerPhone,
+                  orderType: order.orderType,
                   items: items.map((item: any) => ({
                     name: item.name || 'Unknown Item',
                     quantity: item.quantity,
@@ -86,6 +87,8 @@ export async function handleStripeWebhook(req: Request, res: Response) {
                   deliveryFee: parseFloat(order.deliveryFee),
                   total: parseFloat(order.total),
                   deliveryAddress: order.deliveryAddress || undefined,
+                  deliveryPostcode: order.deliveryPostcode || undefined,
+                  specialInstructions: order.specialInstructions || undefined,
                   paymentIntentId: session.payment_intent as string,
                 };
 

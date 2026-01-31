@@ -706,18 +706,20 @@ export const appRouter = router({
                 await sendOrderConfirmationEmail({
                   customerEmail: order.customerEmail,
                   customerName: order.customerName,
+                  customerPhone: order.customerPhone,
                   orderNumber: order.orderNumber,
                   orderType: order.orderType,
                   items: items.map(item => ({
                     name: item.name,
                     quantity: item.quantity,
                     price: parseFloat(item.price),
-                    subtotal: parseFloat(item.subtotal),
                   })),
                   subtotal: parseFloat(order.subtotal),
                   deliveryFee: parseFloat(order.deliveryFee),
                   total: parseFloat(order.total),
                   deliveryAddress: order.deliveryAddress || undefined,
+                  deliveryPostcode: order.deliveryPostcode || undefined,
+                  specialInstructions: order.specialInstructions || undefined,
                 });
                 console.log('[Payment] Order confirmation email sent');
               } catch (error) {
@@ -729,6 +731,7 @@ export const appRouter = router({
                   orderNumber: order.orderNumber,
                   customerName: order.customerName,
                   customerEmail: order.customerEmail,
+                  customerPhone: order.customerPhone,
                   orderType: order.orderType,
                   subtotal: parseFloat(order.subtotal),
                   deliveryFee: parseFloat(order.deliveryFee),
@@ -739,6 +742,8 @@ export const appRouter = router({
                     price: parseFloat(item.price),
                   })),
                   deliveryAddress: order.deliveryAddress || undefined,
+                  deliveryPostcode: order.deliveryPostcode || undefined,
+                  specialInstructions: order.specialInstructions || undefined,
                 });
                 console.log('[Payment] Admin notification email sent');
               } catch (error) {
