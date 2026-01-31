@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/table';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, Star, Upload } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, Star, Upload, Package, PackageX } from 'lucide-react';
 
 export default function MenuItemsManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -105,6 +105,16 @@ export default function MenuItemsManagement() {
     },
   });
 
+  const toggleStockMutation = trpc.admin.toggleMenuItemStock.useMutation({
+    onSuccess: () => {
+      toast.success('Stock status updated');
+      utils.admin.getMenuItems.invalidate();
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update stock status');
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       categoryId: '',
@@ -173,6 +183,10 @@ export default function MenuItemsManagement() {
 
   const handleToggleAvailable = (id: number, currentStatus: boolean) => {
     toggleAvailableMutation.mutate({ id, isAvailable: !currentStatus });
+  };
+
+  const handleToggleStock = (id: number, currentStatus: boolean) => {
+    toggleStockMutation.mutate({ id, outOfStock: !currentStatus });
   };
 
   const getCategoryName = (categoryId: number) => {
@@ -545,11 +559,25 @@ export default function MenuItemsManagement() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleToggleAvailable(item.id, item.isAvailable)}
+                              title={item.isAvailable ? 'Hide from menu' : 'Show on menu'}
                             >
                               {item.isAvailable ? (
                                 <EyeOff className="h-4 w-4" />
                               ) : (
                                 <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleToggleStock(item.id, item.outOfStock)}
+                              title={item.outOfStock ? 'Mark in stock' : 'Mark out of stock'}
+                              className={item.outOfStock ? 'text-orange-500' : ''}
+                            >
+                              {item.outOfStock ? (
+                                <PackageX className="h-4 w-4" />
+                              ) : (
+                                <Package className="h-4 w-4" />
                               )}
                             </Button>
                             <Button

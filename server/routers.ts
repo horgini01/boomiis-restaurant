@@ -531,6 +531,20 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    toggleMenuItemStock: protectedProcedure
+      .input(z.object({ id: z.number(), outOfStock: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(menuItems).set({ outOfStock: input.outOfStock }).where(eq(menuItems.id, input.id));
+        return { success: true };
+      }),
+
     getOrders: protectedProcedure.query(async ({ ctx }) => {
       if (ctx.user.role !== 'admin') {
         throw new Error('Unauthorized');

@@ -51,6 +51,7 @@ export const menuItems = mysqlTable("menu_items", {
   isHalal: boolean("is_halal").default(false).notNull(),
   allergens: text("allergens"), // JSON array of allergen strings
   isAvailable: boolean("is_available").default(true).notNull(),
+  outOfStock: boolean("out_of_stock").default(false).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(),
   prepTimeMinutes: int("prep_time_minutes").default(15).notNull(), // Estimated preparation time in minutes
   displayOrder: int("display_order").default(0).notNull(),

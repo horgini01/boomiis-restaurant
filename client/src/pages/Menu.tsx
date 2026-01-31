@@ -42,6 +42,10 @@ export default function Menu() {
       toast.error(`${item.name} is currently unavailable`);
       return;
     }
+    if (item.outOfStock) {
+      toast.error(`${item.name} is temporarily out of stock`);
+      return;
+    }
     addItem({
       id: item.id,
       name: item.name,
@@ -184,8 +188,15 @@ export default function Menu() {
             ) : filteredItems && filteredItems.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredItems.map(item => (
-                  <Card key={item.id} className="overflow-hidden border-border/50 hover:border-primary/50 transition-colors flex flex-col">
+                  <Card key={item.id} className={`overflow-hidden border-border/50 hover:border-primary/50 transition-colors flex flex-col ${item.outOfStock ? 'opacity-75' : ''}`}>
                     <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center relative">
+                      {item.outOfStock && (
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                          <Badge variant="destructive" className="text-base px-4 py-2 font-bold">
+                            Temporarily Out of Stock
+                          </Badge>
+                        </div>
+                      )}
                       {item.imageUrl ? (
                         <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
@@ -246,11 +257,11 @@ export default function Menu() {
                         <span className="text-2xl font-bold text-primary">£{item.price}</span>
                         <Button
                           onClick={() => handleAddToCart(item)}
-                          disabled={!item.isAvailable}
+                          disabled={!item.isAvailable || item.outOfStock}
                           className="gap-2"
                         >
                           <ShoppingCart className="h-4 w-4" />
-                          Add to Cart
+                          {item.outOfStock ? 'Out of Stock' : 'Add to Cart'}
                         </Button>
                       </div>
                     </CardContent>

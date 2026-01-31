@@ -257,3 +257,12 @@
 
 ## Bug Fixes (User Reported - Jan 31 - Menu Availability Toggle)
 - [x] Fix handleToggleAvailable function - items were disappearing from admin list when toggled (changed from trpc.menu.items to trpc.admin.getMenuItems)
+
+## New Features (User Request - Jan 31 - Out of Stock Management)
+- [x] Add outOfStock boolean field to menu items schema
+- [x] Add "Out of Stock" toggle to admin menu items interface (separate from availability)
+- [x] Display out-of-stock items on customer menu with "Temporarily Out of Stock" badge
+- [x] Disable "Add to Cart" button for out-of-stock items
+- [x] Apply semi-transparent overlay to out-of-stock item cards
+- [x] Keep out-of-stock items visible in search and category filters
+- [x] Test that out-of-stock items remain visible but non-orderable

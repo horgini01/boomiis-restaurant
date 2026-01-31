@@ -1,0 +1,1 @@
+ALTER TABLE `menu_items` ADD `out_of_stock` boolean DEFAULT false NOT NULL;

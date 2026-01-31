@@ -29,6 +29,13 @@
       "when": 1769885426084,
       "tag": "0003_giant_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1769900371939,
+      "tag": "0004_condemned_eddie_brock",
+      "breakpoints": true
     }
   ]
 }
