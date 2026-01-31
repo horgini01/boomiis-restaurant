@@ -38,6 +38,10 @@ export default function Menu() {
   });
 
   const handleAddToCart = (item: any) => {
+    if (!item.isAvailable) {
+      toast.error(`${item.name} is currently unavailable`);
+      return;
+    }
     addItem({
       id: item.id,
       name: item.name,
@@ -188,6 +192,11 @@ export default function Menu() {
                         <div className="text-primary/40 text-6xl">🍽️</div>
                       )}
                       <div className="absolute top-2 right-2 flex flex-col gap-1">
+                        {!item.isAvailable && (
+                          <Badge variant="destructive" className="gap-1 font-semibold">
+                            Currently Unavailable
+                          </Badge>
+                        )}
                         {item.isVegan && (
                           <Badge variant="secondary" className="gap-1">
                             <Leaf className="h-3 w-3" />
@@ -237,6 +246,7 @@ export default function Menu() {
                         <span className="text-2xl font-bold text-primary">£{item.price}</span>
                         <Button
                           onClick={() => handleAddToCart(item)}
+                          disabled={!item.isAvailable}
                           className="gap-2"
                         >
                           <ShoppingCart className="h-4 w-4" />

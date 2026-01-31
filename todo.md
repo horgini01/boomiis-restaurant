@@ -247,3 +247,10 @@
 - [x] Implement automated daily email sending system
 - [x] Add admin settings page for email notification preferences
 - [x] Add checkbox/toggle to enable/disable daily sales emails
+
+## New Features (User Request - Jan 31 - Menu Availability Toggle)
+- [x] Add availability/isAvailable field to menu items schema (already exists)
+- [x] Push database schema changes for availability field (already exists)
+- [x] Add quick toggle switches to admin menu items list (already implemented)
+- [x] Display "Currently Unavailable" badges on customer menu
+- [x] Prevent unavailable items from being added to cart
