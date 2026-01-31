@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/table';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Eye, Search, ArrowUpDown, Download, Calendar, CheckSquare, Square, Printer } from 'lucide-react';
+import { Loader2, Eye, Search, ArrowUpDown, Download, Calendar, CheckSquare, Square, Printer, Clock } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -60,6 +60,16 @@ export default function OrdersManagement() {
 
   const handleStatusChange = (orderId: number, status: string) => {
     updateStatusMutation.mutate({ orderId, status });
+  };
+
+  // Check if order is urgent (scheduled within 1 hour)
+  const isOrderUrgent = (scheduledFor: string | null) => {
+    if (!scheduledFor) return false;
+    const scheduledTime = new Date(scheduledFor).getTime();
+    const now = new Date().getTime();
+    const oneHour = 60 * 60 * 1000;
+    const timeDiff = scheduledTime - now;
+    return timeDiff > 0 && timeDiff <= oneHour;
   };
 
   const getStatusColor = (status: string) => {
@@ -465,9 +475,17 @@ export default function OrdersManagement() {
                             <TableCell className="capitalize">{order.orderType}</TableCell>
                             <TableCell className="text-sm">
                               {order.scheduledFor ? (
-                                <div className="flex flex-col">
-                                  <span>{format(new Date(order.scheduledFor), 'MMM dd, yyyy')}</span>
-                                  <span className="text-muted-foreground text-xs">{format(new Date(order.scheduledFor), 'HH:mm')}</span>
+                                <div className={`flex items-center gap-2 ${isOrderUrgent(order.scheduledFor) ? 'text-orange-500 font-semibold' : ''}`}>
+                                  <div className="flex flex-col">
+                                    <span>{format(new Date(order.scheduledFor), 'MMM dd, yyyy')}</span>
+                                    <span className={isOrderUrgent(order.scheduledFor) ? 'text-orange-400 text-xs' : 'text-muted-foreground text-xs'}>{format(new Date(order.scheduledFor), 'HH:mm')}</span>
+                                  </div>
+                                  {isOrderUrgent(order.scheduledFor) && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-500">
+                                      <Clock className="h-3 w-3 mr-1" />
+                                      Urgent
+                                    </span>
+                                  )}
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">-</span>

@@ -203,3 +203,8 @@
 - [x] Add "Scheduled For" column to orders list showing pickup/delivery time
 - [x] Format scheduled time in user-friendly format
 - [x] Include scheduled time in CSV export
+
+## New Features (User Request - Jan 31 - Order Urgency Indicators)
+- [x] Add visual urgency indicators for orders scheduled within 1 hour
+- [x] Highlight urgent orders in orange/red color
+- [x] Add urgency badge or icon to scheduled time display
