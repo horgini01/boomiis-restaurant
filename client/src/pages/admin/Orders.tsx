@@ -115,6 +115,7 @@ export default function OrdersManagement() {
       'Email',
       'Phone',
       'Order Type',
+      'Scheduled For',
       'Status',
       'Payment Status',
       'Total',
@@ -130,6 +131,7 @@ export default function OrdersManagement() {
       order.customerEmail,
       order.customerPhone,
       order.orderType,
+      order.scheduledFor ? format(new Date(order.scheduledFor), 'yyyy-MM-dd HH:mm') : '',
       order.status,
       order.paymentStatus,
       `£${parseFloat(order.total).toFixed(2)}`,
@@ -420,6 +422,7 @@ export default function OrdersManagement() {
                           <TableHead>Order #</TableHead>
                           <TableHead>Customer</TableHead>
                           <TableHead>Type</TableHead>
+                          <TableHead>Scheduled For</TableHead>
                           <TableHead>Total</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Payment</TableHead>
@@ -460,6 +463,16 @@ export default function OrdersManagement() {
                               </div>
                             </TableCell>
                             <TableCell className="capitalize">{order.orderType}</TableCell>
+                            <TableCell className="text-sm">
+                              {order.scheduledFor ? (
+                                <div className="flex flex-col">
+                                  <span>{format(new Date(order.scheduledFor), 'MMM dd, yyyy')}</span>
+                                  <span className="text-muted-foreground text-xs">{format(new Date(order.scheduledFor), 'HH:mm')}</span>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
                             <TableCell className="font-medium">£{parseFloat(order.total).toFixed(2)}</TableCell>
                             <TableCell>
                               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>

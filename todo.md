@@ -198,3 +198,8 @@
 - [x] Add peak ordering times chart
 - [x] Add print receipt functionality
 - [x] Generate PDF receipts for orders
+
+## New Features (User Request - Jan 31 - Scheduled Time Display)
+- [x] Add "Scheduled For" column to orders list showing pickup/delivery time
+- [x] Format scheduled time in user-friendly format
+- [x] Include scheduled time in CSV export
