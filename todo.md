@@ -229,3 +229,7 @@
 ## New Features (User Request - Jan 31 - Kitchen Display Access)
 - [x] Add Kitchen Display quick action card to admin dashboard
 - [x] Make kitchen display link open in new tab
+
+## Bug Fixes (User Reported - Jan 31 - Kitchen Workflow)
+- [x] Implement strict step-by-step workflow in kitchen display
+- [x] Show only one appropriate button per order status (no skipping steps)

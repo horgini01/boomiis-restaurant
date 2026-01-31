@@ -305,22 +305,13 @@ export default function KitchenDisplay() {
                   {/* Action Buttons */}
                   <div className="grid grid-cols-2 gap-2 pt-2">
                     {order.status === 'pending' && (
-                      <>
-                        <Button
-                          size="lg"
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-lg h-14"
-                          onClick={() => handleStatusChange(order.id, 'confirmed')}
-                        >
-                          Confirm
-                        </Button>
-                        <Button
-                          size="lg"
-                          className="bg-purple-600 hover:bg-purple-700 text-white text-lg h-14"
-                          onClick={() => handleStatusChange(order.id, 'preparing')}
-                        >
-                          Start Prep
-                        </Button>
-                      </>
+                      <Button
+                        size="lg"
+                        className="col-span-2 bg-blue-600 hover:bg-blue-700 text-white text-lg h-14"
+                        onClick={() => handleStatusChange(order.id, 'confirmed')}
+                      >
+                        Confirm Order
+                      </Button>
                     )}
                     {order.status === 'confirmed' && (
                       <Button
