@@ -6,7 +6,7 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
-import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories } from "../drizzle/schema";
+import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories, siteSettings } from "../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail } from "./email";
@@ -640,6 +640,48 @@ export const appRouter = router({
         if (!db) throw new Error('Database not available');
 
         await db.update(reservations).set({ status: input.status as any }).where(eq(reservations.id, input.reservationId));
+        return { success: true };
+      }),
+
+    getSettings: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const settings = await db.select().from(siteSettings);
+        return settings;
+      }),
+
+    updateSetting: protectedProcedure
+      .input(z.object({ settingKey: z.string(), settingValue: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Check if setting exists
+        const [existing] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, input.settingKey)).limit(1);
+
+        if (existing) {
+          // Update existing setting
+          await db.update(siteSettings)
+            .set({ settingValue: input.settingValue })
+            .where(eq(siteSettings.settingKey, input.settingKey));
+        } else {
+          // Insert new setting
+          await db.insert(siteSettings).values({
+            settingKey: input.settingKey,
+            settingValue: input.settingValue,
+          });
+        }
+
         return { success: true };
       }),
   }),

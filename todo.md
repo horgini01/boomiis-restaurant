@@ -240,3 +240,10 @@
 - [x] Display average prep times in analytics dashboard
 - [x] Add "Print All Active Orders" button to kitchen display
 - [x] Generate PDF with all pending/confirmed orders for printing
+
+## New Features (User Request - Jan 31 - Email Reports & Kitchen Filters)
+- [x] Add order type filter toggle to kitchen display (Delivery/Pickup/Both)
+- [x] Create daily sales summary email template
+- [x] Implement automated daily email sending system
+- [x] Add admin settings page for email notification preferences
+- [x] Add checkbox/toggle to enable/disable daily sales emails

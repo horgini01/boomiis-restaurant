@@ -11,6 +11,7 @@ export default function KitchenDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [previousUrgentOrders, setPreviousUrgentOrders] = useState<Set<number>>(new Set());
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [orderTypeFilter, setOrderTypeFilter] = useState<'all' | 'delivery' | 'pickup'>('all');
   
   // Update current time every second for timers
   useEffect(() => {
@@ -77,9 +78,14 @@ export default function KitchenDisplay() {
   });
 
   // Filter to show only active orders (not completed or cancelled)
-  const activeOrders = orders?.filter(
+  let activeOrders = orders?.filter(
     (order) => !['completed', 'cancelled'].includes(order.status)
   ) || [];
+  
+  // Apply order type filter
+  if (orderTypeFilter !== 'all') {
+    activeOrders = activeOrders.filter(order => order.orderType === orderTypeFilter);
+  }
 
   // Sort by urgency (scheduled time) and status
   const sortedOrders = [...activeOrders].sort((a, b) => {
@@ -189,6 +195,34 @@ export default function KitchenDisplay() {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Order Type Filter */}
+      <div className="mb-6 flex justify-center gap-3">
+        <Button
+          size="lg"
+          variant={orderTypeFilter === 'all' ? 'default' : 'outline'}
+          onClick={() => setOrderTypeFilter('all')}
+          className="h-12 px-8 text-lg"
+        >
+          All Orders
+        </Button>
+        <Button
+          size="lg"
+          variant={orderTypeFilter === 'delivery' ? 'default' : 'outline'}
+          onClick={() => setOrderTypeFilter('delivery')}
+          className="h-12 px-8 text-lg"
+        >
+          Delivery Only
+        </Button>
+        <Button
+          size="lg"
+          variant={orderTypeFilter === 'pickup' ? 'default' : 'outline'}
+          onClick={() => setOrderTypeFilter('pickup')}
+          className="h-12 px-8 text-lg"
+        >
+          Pickup Only
+        </Button>
       </div>
 
       {/* Orders Grid */}

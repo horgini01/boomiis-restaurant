@@ -527,3 +527,117 @@ export async function sendOrderStatusUpdateEmail(data: {
     return { success: false, error };
   }
 }
+
+interface DailySalesSummaryData {
+  date: string;
+  totalRevenue: number;
+  totalOrders: number;
+  deliveryOrders: number;
+  pickupOrders: number;
+  popularItems: Array<{ name: string; count: number }>;
+  averagePrepTime: number;
+  pendingOrders: number;
+}
+
+export async function sendDailySalesSummaryEmail(data: DailySalesSummaryData): Promise<boolean> {
+  const resend = getResendClient();
+  if (!resend) {
+    console.log('[Email] Skipping daily sales summary email - Resend not configured');
+    return false;
+  }
+
+  const popularItemsList = data.popularItems
+    .slice(0, 5)
+    .map((item, index) => `${index + 1}. ${item.name} (${item.count} orders)`)
+    .join('<br>');
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #d4a574; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .stat-box { background: white; padding: 15px; border-radius: 6px; text-align: center; border: 1px solid #e0e0e0; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #d4a574; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+        .section { margin: 25px 0; }
+        .section-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px; border-bottom: 2px solid #d4a574; padding-bottom: 5px; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1 style="margin: 0;">📊 Daily Sales Summary</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px;">${data.date}</p>
+        </div>
+        <div class="content">
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="stat-value">£${data.totalRevenue.toFixed(2)}</div>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${data.totalOrders}</div>
+              <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${data.deliveryOrders}</div>
+              <div class="stat-label">Delivery Orders</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${data.pickupOrders}</div>
+              <div class="stat-label">Pickup Orders</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">🔥 Top 5 Popular Items</div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+              ${popularItemsList || '<p style="color: #999;">No items sold today</p>'}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">⏱️ Performance Metrics</div>
+            <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e0e0e0;">
+              <p><strong>Average Prep Time:</strong> ${data.averagePrepTime > 0 ? `${Math.round(data.averagePrepTime)} minutes` : 'N/A'}</p>
+              <p><strong>Pending Orders:</strong> ${data.pendingOrders}</p>
+              <p><strong>Average Order Value:</strong> £${data.totalOrders > 0 ? (data.totalRevenue / data.totalOrders).toFixed(2) : '0.00'}</p>
+            </div>
+          </div>
+
+          ${data.pendingOrders > 0 ? `
+          <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 6px; margin-top: 20px;">
+            <p style="margin: 0; color: #856404;"><strong>⚠️ Reminder:</strong> You have ${data.pendingOrders} pending order${data.pendingOrders > 1 ? 's' : ''} that need attention.</p>
+          </div>
+          ` : ''}
+
+          <div class="footer">
+            <p>This is an automated daily sales summary from Boomiis Restaurant.</p>
+            <p>You can disable these emails in your admin settings.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `Daily Sales Summary - ${data.date}`,
+      html: htmlContent,
+    });
+    console.log(`[Email] Daily sales summary sent to ${ADMIN_EMAIL}`);
+    return true;
+  } catch (error) {
+    console.error('[Email] Failed to send daily sales summary:', error);
+    return false;
+  }
+}

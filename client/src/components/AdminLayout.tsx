@@ -13,6 +13,7 @@ import {
   Menu as MenuIcon,
   X,
   BarChart3,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -40,6 +41,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
     { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
   ];
 
   const NavLinks = () => (
