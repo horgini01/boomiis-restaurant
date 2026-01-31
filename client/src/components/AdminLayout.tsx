@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu as MenuIcon,
   X,
+  BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -38,6 +39,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/bulk-operations', label: 'Bulk Operations', icon: FolderTree },
     { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
+    { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
   const NavLinks = () => (

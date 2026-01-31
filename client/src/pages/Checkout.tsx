@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/contexts/CartContext';
 import { trpc } from '@/lib/trpc';
@@ -24,7 +25,30 @@ export default function Checkout() {
     deliveryAddress: '',
     deliveryPostcode: '',
     specialInstructions: '',
+    preferredTime: '',
   });
+
+  // Generate time slots (30-minute intervals from 11:00 AM to 9:00 PM)
+  const generateTimeSlots = () => {
+    const slots = [];
+    const startHour = 11;
+    const endHour = 21;
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minute of [0, 30]) {
+        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const displayTime = new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        });
+        slots.push({ value: time, label: displayTime });
+      }
+    }
+    return slots;
+  };
+
+  const timeSlots = generateTimeSlots();
 
   const createOrderMutation = trpc.orders.create.useMutation({
     onSuccess: async (data: any) => {
@@ -57,6 +81,12 @@ export default function Checkout() {
     
     if (items.length === 0) {
       toast.error('Your cart is empty');
+      return;
+    }
+
+    // Validate time slot selection
+    if (!formData.preferredTime) {
+      toast.error('Please select a preferred delivery/pickup time');
       return;
     }
 
@@ -171,6 +201,35 @@ export default function Checkout() {
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Preferred Time Slot */}
+                <Card className="border-border/50">
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-bold mb-4">Preferred {orderType === 'delivery' ? 'Delivery' : 'Pickup'} Time</h2>
+                    <div>
+                      <Label htmlFor="preferredTime">Select Time Slot *</Label>
+                      <Select
+                        value={formData.preferredTime}
+                        onValueChange={(value) => setFormData({ ...formData, preferredTime: value })}
+                        required
+                      >
+                        <SelectTrigger id="preferredTime">
+                          <SelectValue placeholder="Choose a time slot" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeSlots.map((slot) => (
+                            <SelectItem key={slot.value} value={slot.value}>
+                              {slot.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        We'll do our best to {orderType === 'delivery' ? 'deliver' : 'have your order ready'} at your preferred time.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Special Instructions */}
                 <Card className="border-border/50">

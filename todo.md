@@ -182,3 +182,19 @@
 ## Bug Fixes (Critical - User Reported - Jan 31)
 - [x] Investigate why order items are not being saved to database (items stored in separate order_items table)
 - [x] Fix getOrders API to join with order_items table and return items data
+
+## New Features (User Requested - Jan 31)
+- [x] Add delivery time slot selection to checkout flow
+- [x] Update database schema to store preferred delivery/pickup time (using existing scheduledFor field)
+- [x] Implement automated order status notification emails
+- [x] Create email templates for each status transition
+- [x] Add date range filtering to orders list
+- [x] Add export to CSV functionality for orders
+- [x] Implement bulk order selection with checkboxes
+- [x] Add bulk status update functionality
+- [x] Create order analytics dashboard page
+- [x] Add daily/weekly sales trend charts
+- [x] Add popular items chart
+- [x] Add peak ordering times chart
+- [x] Add print receipt functionality
+- [x] Generate PDF receipts for orders

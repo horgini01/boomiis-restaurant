@@ -9,6 +9,7 @@ import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuIte
 import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories } from "../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
+import { sendOrderStatusUpdateEmail } from "./email";
 
 export const appRouter = router({
   system: systemRouter,
@@ -99,6 +100,7 @@ export const appRouter = router({
         deliveryAddress: z.string().optional(),
         deliveryPostcode: z.string().optional(),
         specialInstructions: z.string().optional(),
+        preferredTime: z.string().optional(),
         items: z.array(z.object({
           menuItemId: z.number(),
           quantity: z.number(),
@@ -109,15 +111,25 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        const { items: orderItems, ...orderData } = input;
+        const { items: orderItems, preferredTime, ...orderData } = input;
         const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const deliveryFee = input.orderType === 'delivery' ? 3.99 : 0;
         const total = subtotal + deliveryFee;
         const orderNumber = `BO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
+        // Convert preferred time (HH:MM) to timestamp for today
+        let scheduledFor = null;
+        if (preferredTime) {
+          const [hours, minutes] = preferredTime.split(':').map(Number);
+          const scheduledDate = new Date();
+          scheduledDate.setHours(hours, minutes, 0, 0);
+          scheduledFor = scheduledDate;
+        }
+
         const [result] = await db.insert(orders).values({
           orderNumber,
           ...orderData,
+          scheduledFor,
           subtotal: subtotal.toString(),
           deliveryFee: deliveryFee.toString(),
           total: total.toString(),
@@ -567,7 +579,25 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
+        // Get order details before updating
+        const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+        if (!order) {
+          throw new Error('Order not found');
+        }
+
+        // Update order status
         await db.update(orders).set({ status: input.status as any }).where(eq(orders.id, input.orderId));
+
+        // Send status update email to customer
+        await sendOrderStatusUpdateEmail({
+          orderNumber: order.orderNumber,
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          status: input.status,
+          orderType: order.orderType,
+          scheduledFor: order.scheduledFor,
+        });
+
         return { success: true };
       }),
 

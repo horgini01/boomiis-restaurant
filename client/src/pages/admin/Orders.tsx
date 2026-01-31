@@ -26,7 +26,11 @@ import {
 } from '@/components/ui/table';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Eye, Search, ArrowUpDown } from 'lucide-react';
+import { Loader2, Eye, Search, ArrowUpDown, Download, Calendar, CheckSquare, Square, Printer } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useState, useMemo } from 'react';
 
@@ -38,6 +42,10 @@ export default function OrdersManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'total'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
+  const [bulkStatus, setBulkStatus] = useState<string>('');
 
   const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation({
     onSuccess: () => {
@@ -93,6 +101,60 @@ export default function OrdersManagement() {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
+  // Export to CSV function
+  const exportToCSV = () => {
+    if (!filteredAndSortedOrders || filteredAndSortedOrders.length === 0) {
+      toast.error('No orders to export');
+      return;
+    }
+
+    const csvHeaders = [
+      'Order Number',
+      'Date',
+      'Customer Name',
+      'Email',
+      'Phone',
+      'Order Type',
+      'Status',
+      'Payment Status',
+      'Total',
+      'Delivery Address',
+      'Postcode',
+      'Special Instructions',
+    ];
+
+    const csvRows = filteredAndSortedOrders.map(order => [
+      order.orderNumber,
+      format(new Date(order.createdAt), 'yyyy-MM-dd HH:mm'),
+      order.customerName,
+      order.customerEmail,
+      order.customerPhone,
+      order.orderType,
+      order.status,
+      order.paymentStatus,
+      `£${parseFloat(order.total).toFixed(2)}`,
+      order.deliveryAddress || '',
+      order.deliveryPostcode || '',
+      order.specialInstructions || '',
+    ]);
+
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvRows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `orders_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Orders exported to CSV');
+  };
+
   // Filter and sort orders
   const filteredAndSortedOrders = useMemo(() => {
     if (!orders) return [];
@@ -107,6 +169,23 @@ export default function OrdersManagement() {
         order.customerPhone.toLowerCase().includes(query)
       );
     });
+
+    // Filter by date range
+    if (dateFrom) {
+      filtered = filtered.filter((order: any) => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate >= dateFrom;
+      });
+    }
+    if (dateTo) {
+      filtered = filtered.filter((order: any) => {
+        const orderDate = new Date(order.createdAt);
+        // Set time to end of day for dateTo
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+        return orderDate <= endOfDay;
+      });
+    }
 
     // Sort by selected field
     filtered.sort((a: any, b: any) => {
@@ -128,7 +207,7 @@ export default function OrdersManagement() {
     });
 
     return filtered;
-  }, [orders, searchQuery, sortBy, sortOrder]);
+  }, [orders, searchQuery, sortBy, sortOrder, dateFrom, dateTo]);
 
   return (
     <AdminGuard>
@@ -136,38 +215,175 @@ export default function OrdersManagement() {
         <div>
           <h1 className="text-4xl font-bold mb-8">Orders Management</h1>
 
-          {/* Search and Sort Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by order number, customer name, email, or phone..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          {/* Search, Filter, and Sort Controls */}
+          <div className="space-y-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by order number, customer name, email, or phone..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Sort by..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="status">Status</SelectItem>
+                    <SelectItem value="total">Total</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleSortOrder}
+                  title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Sort by..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="status">Status</SelectItem>
-                  <SelectItem value="total">Total</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={toggleSortOrder}
-                title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
-              >
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
+            
+            {/* Date Range and Export */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div className="flex gap-2 items-center">
+                <span className="text-sm text-muted-foreground">From:</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[200px] justify-start text-left font-normal",
+                        !dateFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateFrom ? format(dateFrom, 'PPP') : 'Pick a date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={dateFrom}
+                      onSelect={setDateFrom}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                
+                <span className="text-sm text-muted-foreground">To:</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[200px] justify-start text-left font-normal",
+                        !dateTo && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {dateTo ? format(dateTo, 'PPP') : 'Pick a date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={dateTo}
+                      onSelect={setDateTo}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                
+                {(dateFrom || dateTo) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setDateFrom(undefined);
+                      setDateTo(undefined);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+              
+              <div className="ml-auto">
+                <Button
+                  variant="outline"
+                  onClick={exportToCSV}
+                  disabled={!filteredAndSortedOrders || filteredAndSortedOrders.length === 0}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export to CSV
+                </Button>
+              </div>
             </div>
           </div>
+
+          {/* Bulk Actions Bar */}
+          {selectedOrderIds.length > 0 && (
+            <Card className="border-border/50 mb-4 bg-primary/5">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium">
+                      {selectedOrderIds.length} order{selectedOrderIds.length > 1 ? 's' : ''} selected
+                    </span>
+                    <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Change status to..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="preparing">Preparing</SelectItem>
+                        <SelectItem value="ready">Ready</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      onClick={async () => {
+                        if (!bulkStatus) {
+                          toast.error('Please select a status');
+                          return;
+                        }
+                        try {
+                          await Promise.all(
+                            selectedOrderIds.map(orderId =>
+                              updateStatusMutation.mutateAsync({ orderId, status: bulkStatus })
+                            )
+                          );
+                          toast.success(`${selectedOrderIds.length} order(s) updated`);
+                          setSelectedOrderIds([]);
+                          setBulkStatus('');
+                        } catch (error) {
+                          toast.error('Failed to update some orders');
+                        }
+                      }}
+                      disabled={!bulkStatus || updateStatusMutation.isPending}
+                    >
+                      {updateStatusMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Apply to Selected
+                    </Button>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedOrderIds([])}
+                  >
+                    Clear Selection
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -189,6 +405,18 @@ export default function OrdersManagement() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead className="w-[50px]">
+                            <Checkbox
+                              checked={selectedOrderIds.length === filteredAndSortedOrders.length && filteredAndSortedOrders.length > 0}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedOrderIds(filteredAndSortedOrders.map((o: any) => o.id));
+                                } else {
+                                  setSelectedOrderIds([]);
+                                }
+                              }}
+                            />
+                          </TableHead>
                           <TableHead>Order #</TableHead>
                           <TableHead>Customer</TableHead>
                           <TableHead>Type</TableHead>
@@ -203,6 +431,18 @@ export default function OrdersManagement() {
                       <TableBody>
                         {filteredAndSortedOrders.map((order: any) => (
                           <TableRow key={order.id}>
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedOrderIds.includes(order.id)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedOrderIds([...selectedOrderIds, order.id]);
+                                  } else {
+                                    setSelectedOrderIds(selectedOrderIds.filter(id => id !== order.id));
+                                  }
+                                }}
+                              />
+                            </TableCell>
                             <TableCell className="font-medium">{order.orderNumber}</TableCell>
                             <TableCell>
                               <div>
@@ -298,7 +538,230 @@ export default function OrdersManagement() {
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Order Details - #{selectedOrder?.orderNumber}</DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle>Order Details - #{selectedOrder?.orderNumber}</DialogTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const printWindow = window.open('', '_blank');
+                    if (!printWindow) return;
+                    
+                    const items = parseOrderItems(selectedOrder.items);
+                    const subtotal = items.reduce((sum: number, item: any) => 
+                      sum + (item.quantity * parseFloat(item.price)), 0
+                    );
+                    const deliveryFee = selectedOrder.orderType === 'delivery' ? 5.00 : 0;
+                    
+                    printWindow.document.write(`
+                      <!DOCTYPE html>
+                      <html>
+                        <head>
+                          <title>Order Receipt - ${selectedOrder.orderNumber}</title>
+                          <style>
+                            body {
+                              font-family: Arial, sans-serif;
+                              max-width: 800px;
+                              margin: 0 auto;
+                              padding: 20px;
+                            }
+                            .header {
+                              text-align: center;
+                              border-bottom: 2px solid #d4a574;
+                              padding-bottom: 20px;
+                              margin-bottom: 20px;
+                            }
+                            .header h1 {
+                              color: #d4a574;
+                              margin: 0;
+                            }
+                            .section {
+                              margin-bottom: 20px;
+                            }
+                            .section h2 {
+                              color: #333;
+                              border-bottom: 1px solid #ddd;
+                              padding-bottom: 5px;
+                            }
+                            .info-grid {
+                              display: grid;
+                              grid-template-columns: 1fr 1fr;
+                              gap: 10px;
+                            }
+                            .info-item {
+                              margin-bottom: 10px;
+                            }
+                            .info-label {
+                              color: #666;
+                              font-size: 12px;
+                            }
+                            .info-value {
+                              font-weight: bold;
+                            }
+                            table {
+                              width: 100%;
+                              border-collapse: collapse;
+                              margin-top: 10px;
+                            }
+                            th, td {
+                              padding: 8px;
+                              text-align: left;
+                              border-bottom: 1px solid #ddd;
+                            }
+                            th {
+                              background-color: #f5f5f5;
+                            }
+                            .text-right {
+                              text-align: right;
+                            }
+                            .text-center {
+                              text-align: center;
+                            }
+                            .total-row {
+                              font-size: 18px;
+                              font-weight: bold;
+                              border-top: 2px solid #333;
+                            }
+                            .footer {
+                              text-align: center;
+                              margin-top: 40px;
+                              padding-top: 20px;
+                              border-top: 1px solid #ddd;
+                              color: #666;
+                              font-size: 12px;
+                            }
+                            @media print {
+                              body { padding: 0; }
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="header">
+                            <h1>Boomiis Restaurant</h1>
+                            <p>Authentic West African Cuisine</p>
+                            <p>123 High Street, London, UK SW1A 1AA | +44 20 1234 5678</p>
+                          </div>
+                          
+                          <div class="section">
+                            <h2>Order Receipt</h2>
+                            <div class="info-grid">
+                              <div class="info-item">
+                                <div class="info-label">Order Number</div>
+                                <div class="info-value">${selectedOrder.orderNumber}</div>
+                              </div>
+                              <div class="info-item">
+                                <div class="info-label">Date</div>
+                                <div class="info-value">${format(new Date(selectedOrder.createdAt), 'MMM dd, yyyy HH:mm')}</div>
+                              </div>
+                              <div class="info-item">
+                                <div class="info-label">Order Type</div>
+                                <div class="info-value" style="text-transform: capitalize;">${selectedOrder.orderType}</div>
+                              </div>
+                              <div class="info-item">
+                                <div class="info-label">Status</div>
+                                <div class="info-value" style="text-transform: capitalize;">${selectedOrder.status}</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="section">
+                            <h2>Customer Information</h2>
+                            <div class="info-grid">
+                              <div class="info-item">
+                                <div class="info-label">Name</div>
+                                <div class="info-value">${selectedOrder.customerName}</div>
+                              </div>
+                              <div class="info-item">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">${selectedOrder.customerEmail}</div>
+                              </div>
+                              <div class="info-item">
+                                <div class="info-label">Phone</div>
+                                <div class="info-value">${selectedOrder.customerPhone}</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          ${selectedOrder.orderType === 'delivery' ? `
+                            <div class="section">
+                              <h2>Delivery Information</h2>
+                              <div class="info-item">
+                                <div class="info-label">Address</div>
+                                <div class="info-value">${selectedOrder.deliveryAddress}</div>
+                              </div>
+                              ${selectedOrder.deliveryPostcode ? `
+                                <div class="info-item">
+                                  <div class="info-label">Postcode</div>
+                                  <div class="info-value">${selectedOrder.deliveryPostcode}</div>
+                                </div>
+                              ` : ''}
+                              ${selectedOrder.specialInstructions ? `
+                                <div class="info-item">
+                                  <div class="info-label">Special Instructions</div>
+                                  <div class="info-value">${selectedOrder.specialInstructions}</div>
+                                </div>
+                              ` : ''}
+                            </div>
+                          ` : ''}
+                          
+                          <div class="section">
+                            <h2>Order Items</h2>
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>Item</th>
+                                  <th class="text-center">Quantity</th>
+                                  <th class="text-right">Price</th>
+                                  <th class="text-right">Subtotal</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                ${items.map((item: any) => `
+                                  <tr>
+                                    <td>${item.name}</td>
+                                    <td class="text-center">${item.quantity}</td>
+                                    <td class="text-right">£${parseFloat(item.price).toFixed(2)}</td>
+                                    <td class="text-right">£${(item.quantity * parseFloat(item.price)).toFixed(2)}</td>
+                                  </tr>
+                                `).join('')}
+                                <tr>
+                                  <td colspan="3" class="text-right"><strong>Subtotal</strong></td>
+                                  <td class="text-right"><strong>£${subtotal.toFixed(2)}</strong></td>
+                                </tr>
+                                ${deliveryFee > 0 ? `
+                                  <tr>
+                                    <td colspan="3" class="text-right"><strong>Delivery Fee</strong></td>
+                                    <td class="text-right"><strong>£${deliveryFee.toFixed(2)}</strong></td>
+                                  </tr>
+                                ` : ''}
+                                <tr class="total-row">
+                                  <td colspan="3" class="text-right">Total</td>
+                                  <td class="text-right">£${parseFloat(selectedOrder.total).toFixed(2)}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          
+                          <div class="footer">
+                            <p>Thank you for your order!</p>
+                            <p>For any questions, please contact us at +44 20 1234 5678</p>
+                          </div>
+                          
+                          <script>
+                            window.onload = function() {
+                              window.print();
+                            };
+                          </script>
+                        </body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                  }}
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print Receipt
+                </Button>
+              </div>
             </DialogHeader>
             
             {selectedOrder && (

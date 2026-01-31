@@ -392,3 +392,138 @@ export async function sendAdminReservationNotification(data: ReservationEmailDat
     return { success: false, error };
   }
 }
+
+/**
+ * Send order status update email to customer
+ */
+export async function sendOrderStatusUpdateEmail(data: {
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  status: string;
+  orderType: 'delivery' | 'pickup';
+  scheduledFor?: Date | null;
+}) {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+  
+  try {
+    // Status-specific messages
+    const statusMessages: Record<string, { title: string; message: string; color: string }> = {
+      confirmed: {
+        title: 'Order Confirmed',
+        message: 'Great news! Your order has been confirmed and we\'re getting started on it.',
+        color: '#10b981',
+      },
+      preparing: {
+        title: 'Order Being Prepared',
+        message: 'Our chefs are now preparing your delicious West African dishes with care.',
+        color: '#f59e0b',
+      },
+      ready: {
+        title: `Order Ready for ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}`,
+        message: data.orderType === 'delivery' 
+          ? 'Your order is ready and will be on its way to you shortly!' 
+          : 'Your order is ready for pickup! Please come collect it at your convenience.',
+        color: '#3b82f6',
+      },
+      completed: {
+        title: 'Order Completed',
+        message: 'Thank you for dining with us! We hope you enjoyed your meal.',
+        color: '#8b5cf6',
+      },
+      cancelled: {
+        title: 'Order Cancelled',
+        message: 'Your order has been cancelled. If you have any questions, please contact us.',
+        color: '#ef4444',
+      },
+    };
+
+    const statusInfo = statusMessages[data.status] || {
+      title: 'Order Status Updated',
+      message: `Your order status has been updated to: ${data.status}`,
+      color: '#6b7280',
+    };
+
+    const scheduledTimeText = data.scheduledFor 
+      ? `<p><strong>Scheduled Time:</strong> ${new Date(data.scheduledFor).toLocaleString('en-GB', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}</p>`
+      : '';
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: ${statusInfo.color}; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+            .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; }
+            .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+            .status-badge { display: inline-block; padding: 8px 16px; background: ${statusInfo.color}; color: white; border-radius: 20px; font-weight: bold; text-transform: capitalize; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${statusInfo.title}</h1>
+            </div>
+            <div class="content">
+              <p>Dear ${data.customerName},</p>
+              <p>${statusInfo.message}</p>
+              
+              <div class="order-details">
+                <h2>Order #${data.orderNumber}</h2>
+                <p><strong>Status:</strong> <span class="status-badge">${data.status}</span></p>
+                <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
+                ${scheduledTimeText}
+              </div>
+              
+              ${data.status === 'ready' && data.orderType === 'pickup' ? `
+                <p style="background: #fef3c7; padding: 15px; border-radius: 5px; border-left: 4px solid #f59e0b;">
+                  <strong>📍 Pickup Location:</strong><br>
+                  Boomiis Restaurant<br>
+                  123 High Street, London, UK SW1A 1AA
+                </p>
+              ` : ''}
+              
+              <p>If you have any questions about your order, please don't hesitate to contact us.</p>
+            </div>
+            <div class="footer">
+              <p>Boomiis Restaurant - Authentic West African Cuisine</p>
+              <p>123 High Street, London, UK SW1A 1AA</p>
+              <p>+44 20 1234 5678</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: data.customerEmail,
+      subject: `${statusInfo.title} - Order #${data.orderNumber}`,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Failed to send status update:', error);
+      return { success: false, error };
+    }
+
+    console.log('[Email] Status update sent:', result?.id);
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Error sending status update:', error);
+    return { success: false, error };
+  }
+}
