@@ -347,3 +347,22 @@
 - [x] Email preview displays in iframe with sample data
 - [x] Test all three email template previews working correctly
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Admin Email Management & Real-time Updates)
+- [x] Add admin_emails and cc_admin_on_status_updates settings (key-value in siteSettings)
+- [x] Create AdminEmailSettings component for managing admin notification emails
+- [x] Add Notifications tab to Restaurant Settings page
+- [x] Add email input field with validation and add button
+- [x] Display list of configured admin emails with remove buttons
+- [x] Add toggle switch for "Copy admins on order status updates"
+- [x] Add Save Email Settings button
+- [x] Create getAdminEmails() helper function to fetch emails from settings
+- [x] Update sendAdminOrderNotification to send to multiple recipients
+- [x] Add auto-refresh (5 second interval) to Admin Orders page
+- [x] Add sound alert system with playAlertSound() function
+- [x] Add previousOrderIds tracking to detect new orders
+- [x] Add Sound On/Off toggle button to Orders Management header
+- [x] Add toast notification for new orders
+- [x] Test admin email management UI in browser
+- [x] Test Sound On/Off button in Admin Orders page
+- [x] All 20 tests passing

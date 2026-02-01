@@ -26,17 +26,19 @@ import {
 } from '@/components/ui/table';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Eye, Search, ArrowUpDown, Download, Calendar, CheckSquare, Square, Printer, Clock } from 'lucide-react';
+import { Loader2, Eye, Search, ArrowUpDown, Download, Calendar, CheckSquare, Square, Printer, Clock, Bell, BellOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 export default function OrdersManagement() {
   const utils = trpc.useUtils();
-  const { data: orders, isLoading } = trpc.admin.getOrders.useQuery();
+  const { data: orders, isLoading } = trpc.admin.getOrders.useQuery(undefined, {
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
+  });
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,6 +48,45 @@ export default function OrdersManagement() {
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedOrderIds, setSelectedOrderIds] = useState<number[]>([]);
   const [bulkStatus, setBulkStatus] = useState<string>('');
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [previousOrderIds, setPreviousOrderIds] = useState<Set<number>>(new Set());
+
+  // Play alert sound for new orders
+  const playAlertSound = () => {
+    if (!soundEnabled) return;
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+
+  // Detect new orders and play sound
+  useEffect(() => {
+    if (!orders || orders.length === 0) return;
+
+    const currentOrderIds = new Set(orders.map(o => o.id));
+    
+    if (previousOrderIds.size > 0) {
+      // Check for new orders
+      const newOrders = orders.filter(o => !previousOrderIds.has(o.id));
+      if (newOrders.length > 0) {
+        playAlertSound();
+        toast.info(`${newOrders.length} new order(s) received!`);
+      }
+    }
+    
+    setPreviousOrderIds(currentOrderIds);
+  }, [orders]);
 
   const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation({
     onSuccess: () => {
@@ -225,7 +266,18 @@ export default function OrdersManagement() {
     <AdminGuard>
       <AdminLayout>
         <div>
-          <h1 className="text-4xl font-bold mb-8">Orders Management</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-4xl font-bold">Orders Management</h1>
+            <Button
+              variant={soundEnabled ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="gap-2"
+            >
+              {soundEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+              {soundEnabled ? 'Sound On' : 'Sound Off'}
+            </Button>
+          </div>
 
           {/* Search, Filter, and Sort Controls */}
           <div className="space-y-4 mb-6">

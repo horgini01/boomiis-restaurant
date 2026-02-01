@@ -25,6 +25,23 @@ async function getRestaurantSettings() {
   }
 }
 
+// Get admin emails from settings or fallback to default
+async function getAdminEmails(): Promise<string[]> {
+  try {
+    const settings = await getRestaurantSettings();
+    if (settings && settings.admin_emails) {
+      const emails = settings.admin_emails.split(',').map(e => e.trim()).filter(Boolean);
+      if (emails.length > 0) {
+        return emails;
+      }
+    }
+  } catch (error) {
+    console.error('[Email] Failed to fetch admin emails:', error);
+  }
+  // Fallback to default admin email
+  return [ADMIN_EMAIL];
+}
+
 // Lazy initialization of Resend client
 let resendClient: Resend | null = null;
 
@@ -258,9 +275,12 @@ export async function sendAdminOrderNotification(data: OrderEmailData) {
       </html>
     `;
 
+    // Get admin emails from settings
+    const adminEmails = await getAdminEmails();
+    
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: ADMIN_EMAIL,
+      to: adminEmails, // Send to all admin emails
       subject: `🔔 New Order #${data.orderNumber} - £${data.total.toFixed(2)}`,
       html,
     });
@@ -270,7 +290,7 @@ export async function sendAdminOrderNotification(data: OrderEmailData) {
       return { success: false, error };
     }
 
-    console.log('[Email] Admin order notification sent:', result?.id);
+    console.log(`[Email] Admin order notification sent to ${adminEmails.length} recipient(s):`, result?.id);
     return { success: true, id: result?.id };
   } catch (error) {
     console.error('[Email] Error sending admin order notification:', error);
