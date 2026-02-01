@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,10 @@ const TEMPLATE_TYPES = [
   { value: 'order_confirmation', label: 'Order Confirmation (Customer)' },
   { value: 'reservation_confirmation', label: 'Reservation Confirmation (Customer)' },
   { value: 'admin_order_notification', label: 'New Order Notification (Admin)' },
+  { value: 'order_preparing', label: 'Order Preparing (Customer)' },
+  { value: 'order_ready_for_pickup', label: 'Order Ready for Pickup (Customer)' },
+  { value: 'order_out_for_delivery', label: 'Order Out for Delivery (Customer)' },
+  { value: 'order_completed', label: 'Order Completed (Customer)' },
 ];
 
 const DEFAULT_TEMPLATES = {
@@ -87,6 +91,62 @@ const DEFAULT_TEMPLATES = {
   <li>Update order status as it progresses</li>
 </ol>`,
   },
+  order_preparing: {
+    subject: '👨‍🍳 Your Order is Being Prepared - #{orderNumber}',
+    headerColor: '#d4a574',
+    footerText: 'Thank you for your patience!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Great news! Our chefs are now preparing your order.</p>
+
+<h3>Order #{orderNumber}</h3>
+<p><strong>Status:</strong> Preparing</p>
+<p><strong>Order Type:</strong> {orderType}</p>
+<p><strong>Scheduled For:</strong> {scheduledTime}</p>
+
+<p>We'll notify you as soon as your order is ready!</p>`,
+  },
+  order_ready_for_pickup: {
+    subject: '✅ Your Order is Ready for Pickup - #{orderNumber}',
+    headerColor: '#d4a574',
+    footerText: 'We look forward to seeing you!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Your order is ready for pickup!</p>
+
+<h3>Order #{orderNumber}</h3>
+<p><strong>Status:</strong> Ready for Pickup</p>
+<p><strong>Pickup Address:</strong> {restaurantAddress}</p>
+
+<p>Please collect your order at your earliest convenience. If you have any questions, feel free to contact us.</p>`,
+  },
+  order_out_for_delivery: {
+    subject: '🚗 Your Order is Out for Delivery - #{orderNumber}',
+    headerColor: '#d4a574',
+    footerText: 'Your meal is on its way!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Your order is now out for delivery and will arrive soon!</p>
+
+<h3>Order #{orderNumber}</h3>
+<p><strong>Status:</strong> Out for Delivery</p>
+<p><strong>Delivery Address:</strong> {deliveryAddress}</p>
+<p><strong>Estimated Arrival:</strong> {estimatedArrival}</p>
+
+<p>Please ensure someone is available to receive the order.</p>`,
+  },
+  order_completed: {
+    subject: '🎉 Order Delivered - #{orderNumber}',
+    headerColor: '#d4a574',
+    footerText: 'Thank you for choosing us! We hope to serve you again soon.',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Your order has been successfully delivered!</p>
+
+<h3>Order #{orderNumber}</h3>
+<p><strong>Status:</strong> Completed</p>
+<p><strong>Delivered At:</strong> {deliveredTime}</p>
+
+<p>We hope you enjoyed your meal! If you have any feedback or concerns, please don't hesitate to contact us.</p>
+
+<p>Thank you for your order!</p>`,
+  },
 };
 
 export default function EmailTemplatesEditor() {
@@ -97,6 +157,7 @@ export default function EmailTemplatesEditor() {
   const [footerText, setFooterText] = useState('');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const { data: templates, isLoading, refetch } = trpc.admin.getEmailTemplates.useQuery();
   const saveTemplateMutation = trpc.admin.saveEmailTemplate.useMutation({
@@ -109,6 +170,14 @@ export default function EmailTemplatesEditor() {
       toast.error(`Failed to save template: ${error.message}`);
     },
   });
+
+  // Pre-populate fields on initial load
+  useEffect(() => {
+    if (!isLoading && !isInitialized) {
+      handleTemplateChange(selectedTemplate);
+      setIsInitialized(true);
+    }
+  }, [isLoading, isInitialized, selectedTemplate]);
 
   // Load template when selection changes
   const handleTemplateChange = (templateType: string) => {
