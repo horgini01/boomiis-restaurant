@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2, Save, Upload, Image as ImageIcon } from "lucide-react";
+import EmailPreview from "./EmailPreview";
 
 export default function RestaurantSettings() {
   const { data: settings, isLoading, refetch } = trpc.admin.getSettings.useQuery();
@@ -197,6 +198,7 @@ export default function RestaurantSettings() {
               <TabsTrigger value="contact">Contact</TabsTrigger>
               <TabsTrigger value="hours">Opening Hours</TabsTrigger>
               <TabsTrigger value="social">Social Media</TabsTrigger>
+              <TabsTrigger value="email">Email Preview</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general">
@@ -464,6 +466,10 @@ export default function RestaurantSettings() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="email">
+              <EmailPreview />
             </TabsContent>
           </Tabs>
         </div>

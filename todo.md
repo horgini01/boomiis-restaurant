@@ -331,3 +331,19 @@
 - [x] Update reservation confirmation email to use absolute logo URL
 - [x] Test emails send successfully with absolute URLs
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Email Preview System)
+- [x] Create email preview API endpoints for all email templates
+- [x] Extract email HTML generation into separate reusable functions
+- [x] Add generateOrderConfirmationEmailHTML function
+- [x] Add generateReservationConfirmationEmailHTML function
+- [x] Add generateAdminOrderNotificationEmailHTML function
+- [x] Add generateEmailPreviews function with sample data
+- [x] Create getEmailPreviews tRPC endpoint in admin router
+- [x] Create EmailPreview component with template selector and preview modal
+- [x] Add Email Preview tab to Restaurant Settings page
+- [x] Template selector dropdown with all three templates
+- [x] Preview Email button opens modal with rendered HTML
+- [x] Email preview displays in iframe with sample data
+- [x] Test all three email template previews working correctly
+- [x] All 20 tests passing

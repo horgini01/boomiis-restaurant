@@ -773,6 +773,19 @@ export const appRouter = router({
 
         return { success: true, url: publicUrl };
       }),
+
+    getEmailPreviews: protectedProcedure
+      .input(z.object({ templateType: z.enum(['orderConfirmation', 'reservationConfirmation', 'adminOrderNotification']) }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const { generateEmailPreviews } = await import('./email');
+        const previews = await generateEmailPreviews();
+        
+        return { html: previews[input.templateType] };
+      }),
   }),
 
   payment: router({

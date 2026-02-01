@@ -72,6 +72,92 @@ interface ReservationEmailData {
 }
 
 /**
+ * Generate order confirmation email HTML
+ */
+export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): Promise<string> {
+  // Fetch restaurant settings
+  const settings = await getRestaurantSettings();
+  const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+  let restaurantLogo = settings?.restaurant_logo || '';
+  const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
+  const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
+  const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
+  const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
+  // Convert relative logo path to absolute URL for emails
+  if (restaurantLogo && restaurantLogo.startsWith('/')) {
+    const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
+    restaurantLogo = `${baseUrl}${restaurantLogo}`;
+  }
+
+  const itemsList = data.items
+    .map(item => `<li>${item.quantity}x ${item.name} - £${item.price.toFixed(2)}</li>`)
+    .join('');
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
+          .header img { max-height: 60px; margin-bottom: 15px; }
+          .content { background: #f9f9f9; padding: 20px; }
+          .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+          .total { font-size: 1.2em; font-weight: bold; color: #d4a574; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; border-top: 1px solid #ddd; margin-top: 20px; }
+          .footer-contact { margin: 10px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
+            <h1>Order Confirmation</h1>
+          </div>
+          <div class="content">
+            <p>Dear ${data.customerName},</p>
+            <p>Thank you for your order! We've received your payment and are preparing your delicious meal.</p>
+            
+            <div class="order-details">
+              <h2>Order #${data.orderNumber}</h2>
+              <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
+              <p><strong>Contact Phone:</strong> ${data.customerPhone}</p>
+              ${data.deliveryAddress ? `<p><strong>Delivery Address:</strong> ${data.deliveryAddress}${data.deliveryPostcode ? `, ${data.deliveryPostcode}` : ''}</p>` : ''}
+              ${data.specialInstructions ? `<p><strong>Special Instructions:</strong> ${data.specialInstructions}</p>` : ''}
+              
+              <h3>Items:</h3>
+              <ul>
+                ${itemsList}
+              </ul>
+              
+              <p><strong>Subtotal:</strong> £${data.subtotal.toFixed(2)}</p>
+              ${data.deliveryFee > 0 ? `<p><strong>Delivery Fee:</strong> £${data.deliveryFee.toFixed(2)}</p>` : ''}
+              <p class="total">Total: £${data.total.toFixed(2)}</p>
+              
+              ${data.paymentIntentId ? `<p style="font-size: 0.9em; color: #666;">Payment ID: ${data.paymentIntentId}</p>` : ''}
+            </div>
+            
+            <p>We'll notify you when your order is ready ${data.orderType === 'delivery' ? 'for delivery' : 'for pickup'}.</p>
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+          </div>
+          <div class="footer">
+            <p><strong>${restaurantName}</strong></p>
+            <p style="font-style: italic; color: #888;">${restaurantTagline}</p>
+            <div class="footer-contact">
+              <p>📍 ${contactAddress}</p>
+              <p>📞 ${contactPhone}</p>
+              <p>✉️ ${contactEmail}</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+/**
  * Send order confirmation email to customer
  */
 export async function sendOrderConfirmationEmail(data: OrderEmailData) {
@@ -81,86 +167,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   }
   
   try {
-    // Fetch restaurant settings
-    const settings = await getRestaurantSettings();
-    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
-    let restaurantLogo = settings?.restaurant_logo || '';
-    const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
-    const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
-    const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
-    const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
-
-    // Convert relative logo path to absolute URL for emails
-    if (restaurantLogo && restaurantLogo.startsWith('/')) {
-      const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
-      restaurantLogo = `${baseUrl}${restaurantLogo}`;
-    }
-
-    const itemsList = data.items
-      .map(item => `<li>${item.quantity}x ${item.name} - £${item.price.toFixed(2)}</li>`)
-      .join('');
-
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
-            .header img { max-height: 60px; margin-bottom: 15px; }
-            .content { background: #f9f9f9; padding: 20px; }
-            .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
-            .total { font-size: 1.2em; font-weight: bold; color: #d4a574; }
-            .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; border-top: 1px solid #ddd; margin-top: 20px; }
-            .footer-contact { margin: 10px 0; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
-              <h1>Order Confirmation</h1>
-            </div>
-            <div class="content">
-              <p>Dear ${data.customerName},</p>
-              <p>Thank you for your order! We've received your payment and are preparing your delicious meal.</p>
-              
-              <div class="order-details">
-                <h2>Order #${data.orderNumber}</h2>
-                <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
-                <p><strong>Contact Phone:</strong> ${data.customerPhone}</p>
-                ${data.deliveryAddress ? `<p><strong>Delivery Address:</strong> ${data.deliveryAddress}${data.deliveryPostcode ? `, ${data.deliveryPostcode}` : ''}</p>` : ''}
-                ${data.specialInstructions ? `<p><strong>Special Instructions:</strong> ${data.specialInstructions}</p>` : ''}
-                
-                <h3>Items:</h3>
-                <ul>
-                  ${itemsList}
-                </ul>
-                
-                <p><strong>Subtotal:</strong> £${data.subtotal.toFixed(2)}</p>
-                ${data.deliveryFee > 0 ? `<p><strong>Delivery Fee:</strong> £${data.deliveryFee.toFixed(2)}</p>` : ''}
-                <p class="total">Total: £${data.total.toFixed(2)}</p>
-                
-                ${data.paymentIntentId ? `<p style="font-size: 0.9em; color: #666;">Payment ID: ${data.paymentIntentId}</p>` : ''}
-              </div>
-              
-              <p>We'll notify you when your order is ready ${data.orderType === 'delivery' ? 'for delivery' : 'for pickup'}.</p>
-              <p>If you have any questions, please don't hesitate to contact us.</p>
-            </div>
-            <div class="footer">
-              <p><strong>${restaurantName}</strong></p>
-              <p style="font-style: italic; color: #888;">${restaurantTagline}</p>
-              <div class="footer-contact">
-                <p>📍 ${contactAddress}</p>
-                <p>📞 ${contactPhone}</p>
-                <p>✉️ ${contactEmail}</p>
-              </div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+    const html = await generateOrderConfirmationEmailHTML(data);
 
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
@@ -704,4 +711,196 @@ export async function sendDailySalesSummaryEmail(data: DailySalesSummaryData): P
     console.error('[Email] Failed to send daily sales summary:', error);
     return false;
   }
+}
+
+/**
+ * Generate sample email previews for admin
+ */
+export async function generateEmailPreviews() {
+  // Sample order data
+  const sampleOrderData: OrderEmailData = {
+    orderNumber: 'BO-PREVIEW-001',
+    customerName: 'John Smith',
+    customerEmail: 'customer@example.com',
+    customerPhone: '+44 7700 900000',
+    orderType: 'delivery',
+    items: [
+      { name: 'Jollof Rice with Chicken', quantity: 2, price: 12.99 },
+      { name: 'Fried Plantain', quantity: 1, price: 3.99 },
+      { name: 'Suya Skewers', quantity: 1, price: 7.99 }
+    ],
+    subtotal: 37.96,
+    deliveryFee: 3.99,
+    total: 41.95,
+    deliveryAddress: '123 Sample Street, London',
+    deliveryPostcode: 'SW1A 1AA',
+    specialInstructions: 'Please ring the doorbell twice',
+    paymentIntentId: 'pi_sample_123456789'
+  };
+
+  // Sample reservation data
+  const sampleReservationData: ReservationEmailData = {
+    customerName: 'Jane Doe',
+    customerEmail: 'customer@example.com',
+    customerPhone: '+44 7700 900001',
+    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+    time: '19:00',
+    guests: 4,
+    specialRequests: 'Window seat if available'
+  };
+
+  // Generate HTML for all templates
+  const orderConfirmationHTML = await generateOrderConfirmationEmailHTML(sampleOrderData);
+  const reservationConfirmationHTML = await generateReservationConfirmationEmailHTML(sampleReservationData);
+  const adminOrderNotificationHTML = await generateAdminOrderNotificationEmailHTML(sampleOrderData);
+
+  return {
+    orderConfirmation: orderConfirmationHTML,
+    reservationConfirmation: reservationConfirmationHTML,
+    adminOrderNotification: adminOrderNotificationHTML
+  };
+}
+
+/**
+ * Generate reservation confirmation email HTML
+ */
+export async function generateReservationConfirmationEmailHTML(data: ReservationEmailData): Promise<string> {
+  // Fetch restaurant settings
+  const settings = await getRestaurantSettings();
+  const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+  let restaurantLogo = settings?.restaurant_logo || '';
+  const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
+  const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
+  const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
+  const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
+  // Convert relative logo path to absolute URL for emails
+  if (restaurantLogo && restaurantLogo.startsWith('/')) {
+    const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
+    restaurantLogo = `${baseUrl}${restaurantLogo}`;
+  }
+
+  const formattedDate = new Date(data.date).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
+          .header img { max-height: 60px; margin-bottom: 15px; }
+          .content { background: #f9f9f9; padding: 20px; }
+          .reservation-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; border-top: 1px solid #ddd; margin-top: 20px; }
+          .footer-contact { margin: 10px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
+            <h1>Reservation Confirmed</h1>
+          </div>
+          <div class="content">
+            <p>Dear ${data.customerName},</p>
+            <p>Your table reservation has been confirmed! We look forward to welcoming you to ${restaurantName}.</p>
+            
+            <div class="reservation-details">
+              <h2>Reservation Details</h2>
+              <p><strong>Date:</strong> ${formattedDate}</p>
+              <p><strong>Time:</strong> ${data.time}</p>
+              <p><strong>Number of Guests:</strong> ${data.guests}</p>
+              <p><strong>Name:</strong> ${data.customerName}</p>
+              <p><strong>Phone:</strong> ${data.customerPhone}</p>
+              ${data.specialRequests ? `<p><strong>Special Requests:</strong> ${data.specialRequests}</p>` : ''}
+            </div>
+            
+            <p>Please arrive on time. If you need to modify or cancel your reservation, please contact us at least 24 hours in advance.</p>
+          </div>
+          <div class="footer">
+            <p><strong>${restaurantName}</strong></p>
+            <p style="font-style: italic; color: #888;">${restaurantTagline}</p>
+            <div class="footer-contact">
+              <p>📍 ${contactAddress}</p>
+              <p>📞 ${contactPhone}</p>
+              <p>✉️ ${contactEmail}</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+/**
+ * Generate admin order notification email HTML
+ */
+export async function generateAdminOrderNotificationEmailHTML(data: OrderEmailData): Promise<string> {
+  const itemsList = data.items
+    .map(item => `<li>${item.quantity}x ${item.name} - £${item.price.toFixed(2)}</li>`)
+    .join('');
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #d4a574; color: white; padding: 20px; text-align: center; }
+          .content { background: #f9f9f9; padding: 20px; }
+          .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+          .alert { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; }
+          .total { font-size: 1.2em; font-weight: bold; color: #d4a574; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔔 New Order Received</h1>
+          </div>
+          <div class="content">
+            <div class="alert">
+              <strong>Action Required:</strong> A new order has been placed and payment confirmed.
+            </div>
+            
+            <div class="order-details">
+              <h2>Order #${data.orderNumber}</h2>
+              <p><strong>Customer:</strong> ${data.customerName}</p>
+              <p><strong>Email:</strong> ${data.customerEmail}</p>
+              <p><strong>Phone:</strong> ${data.customerPhone}</p>
+              <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
+              ${data.deliveryAddress ? `<p><strong>Delivery Address:</strong> ${data.deliveryAddress}${data.deliveryPostcode ? `, ${data.deliveryPostcode}` : ''}</p>` : ''}
+              ${data.specialInstructions ? `<p><strong>Special Instructions:</strong> ${data.specialInstructions}</p>` : ''}
+              
+              <h3>Items:</h3>
+              <ul>
+                ${itemsList}
+              </ul>
+              
+              <p><strong>Subtotal:</strong> £${data.subtotal.toFixed(2)}</p>
+              ${data.deliveryFee > 0 ? `<p><strong>Delivery Fee:</strong> £${data.deliveryFee.toFixed(2)}</p>` : ''}
+              <p class="total">Total: £${data.total.toFixed(2)}</p>
+              
+              ${data.paymentIntentId ? `<p style="font-size: 0.9em; color: #666;">Stripe Payment ID: ${data.paymentIntentId}</p>` : ''}
+            </div>
+            
+            <p><strong>Next Steps:</strong></p>
+            <ol>
+              <li>Confirm the order in the admin panel</li>
+              <li>Begin preparing the order</li>
+              <li>Update order status as it progresses</li>
+            </ol>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
 }
