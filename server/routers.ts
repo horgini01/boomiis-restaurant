@@ -9,7 +9,7 @@ import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuIte
 import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories, siteSettings } from "../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
-import { sendOrderStatusUpdateEmail } from "./email";
+import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL } from "./email";
 import { storagePut, storageGet } from "./storage";
 
 export const appRouter = router({
@@ -906,6 +906,60 @@ export const appRouter = router({
           opened: allLogs.filter(log => log.openedAt).length,
           bounced: allLogs.filter(log => log.status === 'bounced').length,
         };
+      }),
+
+    sendTestEmail: protectedProcedure
+      .input(z.object({
+        templateType: z.string(),
+        recipientEmail: z.string().email(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const { generateEmailPreviews } = await import('./email');
+        const previews = await generateEmailPreviews();
+        
+        let html = '';
+        let subject = '';
+        
+        switch (input.templateType) {
+          case 'order_confirmation':
+            html = previews.orderConfirmation;
+            subject = '[TEST] Order Confirmation - #BO-PREVIEW-001';
+            break;
+          case 'reservation_confirmation':
+            html = previews.reservationConfirmation;
+            subject = '[TEST] Reservation Confirmed - Preview';
+            break;
+          case 'admin_order_notification':
+            html = previews.adminOrderNotification;
+            subject = '[TEST] New Order Notification - #BO-PREVIEW-001';
+            break;
+          default:
+            throw new Error('Invalid template type');
+        }
+
+        const resend = getResendClient();
+        if (!resend) {
+          throw new Error('Email service not configured');
+        }
+
+        const { data: result, error } = await resend.emails.send({
+          from: FROM_EMAIL,
+          to: input.recipientEmail,
+          subject,
+          html,
+        });
+
+        if (error) {
+          console.error('[Email] Failed to send test email:', error);
+          throw new Error('Failed to send test email');
+        }
+
+        console.log('[Email] Test email sent:', result?.id);
+        return { success: true, emailId: result?.id };
       }),
   }),
 

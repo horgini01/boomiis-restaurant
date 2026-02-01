@@ -158,6 +158,8 @@ export default function EmailTemplatesEditor() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   const { data: templates, isLoading, refetch } = trpc.admin.getEmailTemplates.useQuery();
   const saveTemplateMutation = trpc.admin.saveEmailTemplate.useMutation({
@@ -170,6 +172,30 @@ export default function EmailTemplatesEditor() {
       toast.error(`Failed to save template: ${error.message}`);
     },
   });
+
+  const sendTestEmailMutation = trpc.admin.sendTestEmail.useMutation({
+    onSuccess: () => {
+      toast.success(`Test email sent to ${testEmail}`);
+      setTestEmail('');
+      setIsSendingTest(false);
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to send test email: ${error.message}`);
+      setIsSendingTest(false);
+    },
+  });
+
+  const handleSendTest = () => {
+    if (!testEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    setIsSendingTest(true);
+    sendTestEmailMutation.mutate({
+      templateType: selectedTemplate,
+      recipientEmail: testEmail,
+    });
+  };
 
   // Pre-populate fields on initial load
   useEffect(() => {
@@ -383,6 +409,36 @@ export default function EmailTemplatesEditor() {
             placeholder="Enter footer text"
             rows={3}
           />
+        </div>
+
+        {/* Send Test Email */}
+        <div className="border-t pt-6">
+          <Label htmlFor="test-email" className="text-base font-semibold">📨 Send Test Email</Label>
+          <p className="text-sm text-muted-foreground mb-3">
+            Send a test email to your inbox to see how it looks in Gmail, Outlook, and mobile clients
+          </p>
+          <div className="flex gap-2">
+            <Input
+              id="test-email"
+              type="email"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              placeholder="your-email@example.com"
+              className="flex-1"
+            />
+            <Button
+              onClick={handleSendTest}
+              disabled={isSendingTest || !testEmail}
+              className="gap-2"
+            >
+              {isSendingTest ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                '📧'
+              )}
+              Send Test
+            </Button>
+          </div>
         </div>
 
         {/* Action Buttons */}

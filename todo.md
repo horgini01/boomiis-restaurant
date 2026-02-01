@@ -419,3 +419,16 @@
 - [x] Test saving custom template in Email Templates editor
 - [x] Test custom template preview shows correctly
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Send Test Email Feature)
+- [x] Add sendTestEmail tRPC endpoint in admin router
+- [x] Export getResendClient and FROM_EMAIL from email.ts
+- [x] Use generateEmailPreviews to create test email HTML
+- [x] Send test email with [TEST] prefix in subject line
+- [x] Add sendTestEmailMutation to EmailTemplatesEditor component
+- [x] Add testEmail state and isSendingTest loading state
+- [x] Add handleSendTest function with email validation
+- [x] Add Send Test Email section with email input and button
+- [x] Add success/error toast notifications
+- [x] Test Send Test Email UI in browser (working perfectly)
+- [x] All 20 tests passing

@@ -4,7 +4,7 @@ import { getDb } from './db';
 import { siteSettings } from '../drizzle/schema';
 
 // Email configuration
-const FROM_EMAIL = ENV.fromEmail || 'Boomiis Restaurant <orders@boomiis.com>';
+export const FROM_EMAIL = ENV.fromEmail || 'Boomiis Restaurant <orders@boomiis.com>';
 const ADMIN_EMAIL = ENV.adminEmail || (ENV.ownerName ? `${ENV.ownerName} <admin@boomiis.com>` : 'admin@boomiis.com');
 
 // Fetch restaurant settings for email templates
@@ -45,7 +45,7 @@ async function getAdminEmails(): Promise<string[]> {
 // Lazy initialization of Resend client
 let resendClient: Resend | null = null;
 
-function getResendClient(): Resend | null {
+export function getResendClient(): Resend | null {
   if (!ENV.resendApiKey) {
     console.warn('[Email] Resend API key not configured. Email notifications are disabled.');
     return null;
