@@ -165,7 +165,7 @@ export default function KitchenDisplay() {
     <div className="kitchen-display-container min-h-screen bg-gray-900 p-4 md:p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {restaurantLogo ? (
             <img 
               src={restaurantLogo} 
@@ -177,7 +177,7 @@ export default function KitchenDisplay() {
           )}
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-white">Kitchen Display</h1>
-            <p className="text-gray-400 text-sm">{restaurantName}</p>
+            <p className="text-orange-500 text-xl font-semibold">{restaurantName}</p>
             <p className="text-gray-400 text-lg">{format(currentTime, 'EEEE, MMMM d, yyyy • h:mm:ss a')}</p>
           </div>
         </div>

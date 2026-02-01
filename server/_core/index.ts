@@ -35,6 +35,75 @@ async function startServer() {
   // Stripe webhook MUST come before express.json() for signature verification
   app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
   
+  // Generic image proxy endpoint - serves any Manus storage file with authentication
+  app.get('/api/images/*', async (req, res) => {
+    const { handleImageProxy } = await import('./imageProxy');
+    return handleImageProxy(req, res);
+  });
+  
+  // Logo proxy endpoint - serves S3 files with authentication
+  app.get('/api/logo', async (req, res) => {
+    try {
+      const { storageGet } = await import('../storage');
+      const { getDb } = await import('../db');
+      const { siteSettings } = await import('../../drizzle/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      const db = await getDb();
+      if (!db) {
+        return res.status(500).send('Database not available');
+      }
+      
+      const [setting] = await db.select().from(siteSettings)
+        .where(eq(siteSettings.settingKey, 'restaurant_logo'))
+        .limit(1);
+      
+      if (!setting || !setting.settingValue) {
+        return res.status(404).send('Logo not found');
+      }
+      
+      const key = setting.settingValue; // Now storing just the key
+      
+      // Use Forge API downloadUrl endpoint to get a signed URL, then fetch and proxy
+      const { ENV } = await import('./env');
+      const downloadUrlApiEndpoint = new URL('v1/storage/downloadUrl', ENV.forgeApiUrl.endsWith('/') ? ENV.forgeApiUrl : `${ENV.forgeApiUrl}/`);
+      downloadUrlApiEndpoint.searchParams.set('path', key);
+      
+      console.log('[Logo Proxy] Getting download URL for key:', key);
+      const urlResponse = await fetch(downloadUrlApiEndpoint, {
+        headers: {
+          'Authorization': `Bearer ${ENV.forgeApiKey}`
+        }
+      });
+      
+      if (!urlResponse.ok) {
+        const errorText = await urlResponse.text();
+        console.error('[Logo Proxy] Failed to get download URL:', errorText);
+        return res.status(urlResponse.status).send('Failed to get download URL');
+      }
+      
+      const { url: signedUrl } = await urlResponse.json();
+      console.log('[Logo Proxy] Got signed URL, fetching file...');
+      
+      // Now fetch the actual file from the signed URL
+      const response = await fetch(signedUrl);
+      console.log('[Logo Proxy] File fetch status:', response.status, response.statusText);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Logo Proxy] Failed to fetch file:', errorText);
+        return res.status(response.status).send('Failed to fetch logo');
+      }
+      
+      const buffer = await response.arrayBuffer();
+      res.set('Content-Type', response.headers.get('content-type') || 'image/png');
+      res.set('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+      res.send(Buffer.from(buffer));
+    } catch (error) {
+      console.error('Logo proxy error:', error);
+      res.status(500).send('Internal server error');
+    }
+  });
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

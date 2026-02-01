@@ -1,0 +1,22 @@
+{
+  "query": "SELECT name, image_url FROM menu_items WHERE image_url IS NOT NULL LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT name, image_url FROM menu_items WHERE image_url IS NOT NULL LIMIT 3;",
+  "rows": [
+    {
+      "name": "Puff Puff",
+      "image_url": "/menu-images/puff-puff.png"
+    },
+    {
+      "name": "Plantain Chips",
+      "image_url": "/menu-images/plantain-chips.png"
+    },
+    {
+      "name": "Suya Skewers",
+      "image_url": "/menu-images/suya-skewers.png"
+    }
+  ],
+  "messages": [],
+  "stdout": "name\timage_url\nPuff Puff\t/menu-images/puff-puff.png\nPlantain Chips\t/menu-images/plantain-chips.png\nSuya Skewers\t/menu-images/suya-skewers.png\n",
+  "stderr": "",
+  "execution_time_ms": 47
+}

@@ -1,0 +1,14 @@
+{
+  "query": "SELECT setting_key, setting_value FROM site_settings WHERE setting_key = 'restaurant_logo';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT setting_key, setting_value FROM site_settings WHERE setting_key = 'restaurant_logo';",
+  "rows": [
+    {
+      "setting_key": "restaurant_logo",
+      "setting_value": "https://d2xsxph8kpxj0f.cloudfront.net/310519663223027880/6g8xxhsNMKiXF83cS8YGfP/restaurant-logos/kichen logo.png-4l3qt2wf"
+    }
+  ],
+  "messages": [],
+  "stdout": "setting_key\tsetting_value\nrestaurant_logo\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663223027880/6g8xxhsNMKiXF83cS8YGfP/restaurant-logos/kichen logo.png-4l3qt2wf\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

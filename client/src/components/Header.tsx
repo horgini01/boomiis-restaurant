@@ -26,17 +26,18 @@ export default function Header() {
       <nav className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/">
-          {restaurantLogo ? (
-            <img 
-              src={restaurantLogo} 
-              alt={restaurantName} 
-              className="h-10 w-auto object-contain cursor-pointer"
-            />
-          ) : (
-            <span className="text-2xl font-bold text-primary cursor-pointer">
+          <div className="flex items-center gap-3 cursor-pointer">
+            {restaurantLogo && (
+              <img 
+                src={restaurantLogo} 
+                alt={restaurantName} 
+                className="h-10 w-auto object-contain"
+              />
+            )}
+            <span className="text-2xl font-bold text-primary">
               {restaurantName}
             </span>
-          )}
+          </div>
         </Link>
 
         {/* Desktop Navigation */}

@@ -1,0 +1,8 @@
+{
+  "query": "SELECT name, image FROM menu_items WHERE name LIKE '%Fufu%' OR name LIKE '%FuFu%' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT name, image FROM menu_items WHERE name LIKE '%Fufu%' OR name LIKE '%FuFu%' LIMIT 1;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'image' in 'field list'"
+  ]
+}

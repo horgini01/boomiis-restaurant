@@ -289,3 +289,24 @@
 - [x] Enhance reservation confirmation email template with logo and contact details
 - [x] Add fallback for when no logo is uploaded (show restaurant name)
 - [x] Fetch restaurant settings dynamically in email templates
+
+## Bug Fixes (User Reported - Feb 1 - Logo Upload Not Persisting)
+- [x] Investigated S3 storage 403 Forbidden issue
+- [x] Discovered menu items use local file storage, not S3
+- [x] Changed logo upload to save locally in client/public/logos/
+- [x] Fixed logo display in header with restaurant name beside it
+- [x] Fixed logo display in kitchen display with formatted restaurant name
+- [x] Tested complete upload workflow - logo now displays correctly
+
+## New Features (User Request - Feb 1 - Storage Abstraction Layer for Deployment Flexibility)
+- [ ] Create storage provider interface with upload/download methods
+- [ ] Implement Manus storage provider with server-side authenticated proxy
+- [ ] Add image proxy endpoint (/api/images/:key) for serving Manus storage files
+- [ ] Update uploadLogo mutation to use storage abstraction
+- [ ] Update uploadImage mutation to use storage abstraction
+- [ ] Update Header component to use proxied image URLs
+- [ ] Update Kitchen component to use proxied image URLs
+- [ ] Update Menu component to use proxied image URLs for menu items
+- [ ] Test logo upload and display across all pages
+- [ ] Test menu item image upload and display
+- [ ] Document how to switch storage providers for external deployment

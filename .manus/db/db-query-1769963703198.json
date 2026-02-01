@@ -1,0 +1,14 @@
+{
+  "query": "SELECT name, image_url FROM menu_items WHERE name LIKE '%Fufu%' OR name LIKE '%FuFu%' OR name LIKE '%Egusi%' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT name, image_url FROM menu_items WHERE name LIKE '%Fufu%' OR name LIKE '%FuFu%' OR name LIKE '%Egusi%' LIMIT 1;",
+  "rows": [
+    {
+      "name": "Egusi Soup with Fufu",
+      "image_url": "/menu-images/egusi-soup-fufu.png"
+    }
+  ],
+  "messages": [],
+  "stdout": "name\timage_url\nEgusi Soup with Fufu\t/menu-images/egusi-soup-fufu.png\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

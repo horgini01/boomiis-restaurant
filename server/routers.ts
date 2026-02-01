@@ -10,7 +10,7 @@ import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservat
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail } from "./email";
-import { storagePut } from "./storage";
+import { storagePut, storageGet } from "./storage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -735,26 +735,43 @@ export const appRouter = router({
         const base64Data = input.fileData.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
 
-        // Upload to S3
+        // Save file locally to client/public/logos/ (same approach as menu images)
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        // Sanitize filename
+        const sanitizedFileName = input.fileName
+          .replace(/\s+/g, '-')
+          .replace(/[^a-zA-Z0-9.-]/g, '')
+          .toLowerCase();
         const randomSuffix = Math.random().toString(36).substring(2, 10);
-        const fileKey = `restaurant-logos/${input.fileName}-${randomSuffix}`;
-        const { url } = await storagePut(fileKey, buffer, input.mimeType);
-
+        const fileName = `logo-${randomSuffix}.${sanitizedFileName.split('.').pop()}`;
+        
+        // Ensure logos directory exists
+        const logosDir = path.join(process.cwd(), 'client', 'public', 'logos');
+        await fs.mkdir(logosDir, { recursive: true });
+        
+        // Write file
+        const filePath = path.join(logosDir, fileName);
+        await fs.writeFile(filePath, buffer);
+        
+        // Public URL path
+        const publicUrl = `/logos/${fileName}`;
+        
         // Save logo URL to settings
         const [existing] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'restaurant_logo')).limit(1);
-
         if (existing) {
           await db.update(siteSettings)
-            .set({ settingValue: url })
+            .set({ settingValue: publicUrl })
             .where(eq(siteSettings.settingKey, 'restaurant_logo'));
         } else {
           await db.insert(siteSettings).values({
             settingKey: 'restaurant_logo',
-            settingValue: url,
+            settingValue: publicUrl,
           });
         }
 
-        return { success: true, url };
+        return { success: true, url: publicUrl };
       }),
   }),
 
