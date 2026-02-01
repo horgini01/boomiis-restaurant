@@ -70,8 +70,9 @@ export default function Checkout() {
     const latestTime = new Date(earliestTime.getTime() + 15 * 60000); // 15-minute window
     
     return {
-      earliest: earliestTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-      latest: latestTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      earliestDisplay: earliestTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      latestDisplay: latestTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      earliestTime: earliestTime.toTimeString().slice(0, 5), // HH:MM format for server
       totalMinutes,
     };
   };
@@ -149,9 +150,9 @@ export default function Checkout() {
       return;
     }
 
-    // For delivery orders, set estimated delivery time
+    // For delivery orders, set estimated delivery time in HH:MM format
     const finalPreferredTime = orderType === 'delivery' 
-      ? deliveryWindow?.earliest || ''
+      ? deliveryWindow?.earliestTime || ''
       : formData.preferredTime;
 
     createOrderMutation.mutate({
@@ -305,7 +306,7 @@ export default function Checkout() {
                         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl font-bold text-primary">
-                              {deliveryWindow?.earliest} - {deliveryWindow?.latest}
+                              {deliveryWindow?.earliestDisplay} - {deliveryWindow?.latestDisplay}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground">

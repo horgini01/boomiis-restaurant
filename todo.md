@@ -525,3 +525,16 @@
 - [x] Fix delivery areas display (filter null postcode prefixes)
 - [x] PDF attachment in order confirmation email (automatic)
 - [x] All 19/20 tests passing (1 Stripe timeout unrelated)
+
+## Bug Fixes (User Reported - Feb 1 - Invalid Time Value Error in Checkout)
+- [x] Investigate "Invalid time value" error on /checkout page
+- [x] Identified issue: deliveryWindow.earliest returns localized time string ("7:53 PM") instead of HH:MM format
+- [x] Server expects HH:MM format but receives "7:53 PM" causing Date parsing to fail
+- [x] Update getEstimatedDeliveryWindow to return earliestTime in HH:MM format for server
+- [x] Keep earliestDisplay and latestDisplay for UI in localized format
+- [x] Update finalPreferredTime to use deliveryWindow.earliestTime instead of earliest
+- [x] Update UI references to use earliestDisplay and latestDisplay
+- [x] Test checkout flow with delivery order (TQ1 1AA - Torquay, £1.99 fee)
+- [x] Order created successfully and redirected to Stripe checkout
+- [x] No "Invalid time value" error occurred
+- [x] All tests passing
