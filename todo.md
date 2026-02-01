@@ -366,3 +366,31 @@
 - [x] Test admin email management UI in browser
 - [x] Test Sound On/Off button in Admin Orders page
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Email Templates Editor & Delivery Tracking)
+- [x] Create email_templates table (id, template_type, subject, body_html, header_color, footer_text, is_active, created_at, updated_at)
+- [x] Create email_logs table (id, template_type, recipient_email, recipient_name, subject, status, resend_id, sent_at, delivered_at, opened_at, clicked_at, bounced_at, error_message, metadata)
+- [x] Run db:push to apply schema changes
+- [x] Create EmailTemplatesEditor component with template selector
+- [x] Add HTML textarea for email body customization with variable hints
+- [x] Add color picker for header colors
+- [x] Add subject line and footer text inputs
+- [x] Add preview button with modal showing rendered email
+- [x] Add save/reset to default buttons for template changes
+- [x] Create Email Templates tab in Restaurant Settings
+- [x] Add getEmailTemplates and saveEmailTemplate tRPC endpoints
+- [x] Create logEmail() helper function for tracking
+- [x] Add email logging to sendOrderConfirmationEmail
+- [x] Add email logging to sendAdminOrderNotification (multiple recipients)
+- [x] Add email logging to sendReservationConfirmationEmail
+- [x] Store Resend email IDs and metadata for tracking
+- [x] Create EmailDeliveryDashboard component with statistics cards
+- [x] Add filters (template type, status, limit)
+- [x] Display email statistics (total sent, delivered, opened, bounced)
+- [x] Show email list table with status indicators and timestamps
+- [x] Add getEmailLogs and getEmailStats tRPC endpoints
+- [x] Create /admin/email-delivery route in App.tsx
+- [x] Add Email Delivery nav item to admin sidebar with Mail icon
+- [x] Test email template editor in browser (working perfectly)
+- [x] Test email delivery tracking dashboard (showing 2 logged emails)
+- [x] All 20 tests passing

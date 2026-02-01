@@ -216,3 +216,44 @@ export const siteSettings = mysqlTable("site_settings", {
 
 export type SiteSetting = typeof siteSettings.$inferSelect;
 export type InsertSiteSetting = typeof siteSettings.$inferInsert;
+
+/**
+ * Email templates for customizable email communications
+ */
+export const emailTemplates = mysqlTable("email_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  templateType: varchar("template_type", { length: 50 }).notNull().unique(), // 'order_confirmation', 'reservation_confirmation', 'admin_order_notification'
+  subject: varchar("subject", { length: 200 }).notNull(),
+  bodyHtml: text("body_html").notNull(),
+  headerColor: varchar("header_color", { length: 7 }).default("#d4a574").notNull(),
+  footerText: text("footer_text"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
+
+/**
+ * Email delivery logs for tracking and analytics
+ */
+export const emailLogs = mysqlTable("email_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  templateType: varchar("template_type", { length: 50 }).notNull(),
+  recipientEmail: varchar("recipient_email", { length: 320 }).notNull(),
+  recipientName: varchar("recipient_name", { length: 200 }),
+  subject: varchar("subject", { length: 200 }).notNull(),
+  status: mysqlEnum("status", ["sent", "delivered", "opened", "clicked", "bounced", "failed"]).default("sent").notNull(),
+  resendId: varchar("resend_id", { length: 100 }), // Resend email ID for tracking
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  deliveredAt: timestamp("delivered_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  bouncedAt: timestamp("bounced_at"),
+  errorMessage: text("error_message"),
+  metadata: text("metadata"), // JSON string for additional data (order_id, reservation_id, etc.)
+});
+
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type InsertEmailLog = typeof emailLogs.$inferInsert;

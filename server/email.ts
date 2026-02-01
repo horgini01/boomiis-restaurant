@@ -58,6 +58,44 @@ function getResendClient(): Resend | null {
   return resendClient;
 }
 
+// Log email to database for tracking
+async function logEmail({
+  templateType,
+  recipientEmail,
+  recipientName,
+  subject,
+  resendId,
+  metadata,
+}: {
+  templateType: string;
+  recipientEmail: string;
+  recipientName?: string;
+  subject: string;
+  resendId?: string;
+  metadata?: any;
+}) {
+  try {
+    const db = await getDb();
+    if (!db) return;
+
+    const { emailLogs } = await import('../drizzle/schema');
+    await db.insert(emailLogs).values({
+      templateType,
+      recipientEmail,
+      recipientName: recipientName || null,
+      subject,
+      resendId: resendId || null,
+      status: 'sent',
+      sentAt: new Date(),
+      metadata: metadata ? JSON.stringify(metadata) : null,
+    });
+
+    console.log(`[Email] Logged email to ${recipientEmail} (${templateType})`);
+  } catch (error) {
+    console.error('[Email] Failed to log email:', error);
+  }
+}
+
 interface OrderEmailData {
   orderNumber: string;
   customerName: string;
@@ -199,6 +237,17 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
     }
 
     console.log('[Email] Order confirmation sent:', result?.id);
+    
+    // Log email to database
+    await logEmail({
+      templateType: 'order_confirmation',
+      recipientEmail: data.customerEmail,
+      recipientName: data.customerName,
+      subject: `Order Confirmation - #${data.orderNumber}`,
+      resendId: result?.id,
+      metadata: { orderId: data.orderNumber },
+    });
+    
     return { success: true, id: result?.id };
   } catch (error) {
     console.error('[Email] Error sending order confirmation:', error);
@@ -291,6 +340,18 @@ export async function sendAdminOrderNotification(data: OrderEmailData) {
     }
 
     console.log(`[Email] Admin order notification sent to ${adminEmails.length} recipient(s):`, result?.id);
+    
+    // Log email to database for each admin recipient
+    for (const adminEmail of adminEmails) {
+      await logEmail({
+        templateType: 'admin_order_notification',
+        recipientEmail: adminEmail,
+        subject: `🔔 New Order #${data.orderNumber} - £${data.total.toFixed(2)}`,
+        resendId: result?.id,
+        metadata: { orderId: data.orderNumber },
+      });
+    }
+    
     return { success: true, id: result?.id };
   } catch (error) {
     console.error('[Email] Error sending admin order notification:', error);
@@ -394,6 +455,17 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
     }
 
     console.log('[Email] Reservation confirmation sent:', result?.id);
+    
+    // Log email to database
+    await logEmail({
+      templateType: 'reservation_confirmation',
+      recipientEmail: data.customerEmail,
+      recipientName: data.customerName,
+      subject: `Reservation Confirmed - ${formattedDate} at ${data.time}`,
+      resendId: result?.id,
+      metadata: { reservationDate: data.date, reservationTime: data.time, guests: data.guests },
+    });
+    
     return { success: true, id: result?.id };
   } catch (error) {
     console.error('[Email] Error sending reservation confirmation:', error);

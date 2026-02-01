@@ -786,6 +786,127 @@ export const appRouter = router({
         
         return { html: previews[input.templateType] };
       }),
+
+    getEmailTemplates: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { emailTemplates } = await import('../drizzle/schema');
+        const templates = await db.select().from(emailTemplates);
+        return templates;
+      }),
+
+    saveEmailTemplate: protectedProcedure
+      .input(z.object({
+        templateType: z.string(),
+        subject: z.string(),
+        bodyHtml: z.string(),
+        headerColor: z.string(),
+        footerText: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { emailTemplates } = await import('../drizzle/schema');
+        
+        // Check if template exists
+        const [existing] = await db.select().from(emailTemplates).where(eq(emailTemplates.templateType, input.templateType));
+        
+        if (existing) {
+          // Update existing template
+          await db.update(emailTemplates)
+            .set({
+              subject: input.subject,
+              bodyHtml: input.bodyHtml,
+              headerColor: input.headerColor,
+              footerText: input.footerText || null,
+              updatedAt: new Date(),
+            })
+            .where(eq(emailTemplates.templateType, input.templateType));
+        } else {
+          // Insert new template
+          await db.insert(emailTemplates).values({
+            templateType: input.templateType,
+            subject: input.subject,
+            bodyHtml: input.bodyHtml,
+            headerColor: input.headerColor,
+            footerText: input.footerText || null,
+            isActive: true,
+          });
+        }
+
+        return { success: true };
+      }),
+
+    getEmailLogs: protectedProcedure
+      .input(z.object({
+        templateType: z.string().optional(),
+        status: z.string().optional(),
+        limit: z.number().optional().default(100),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { emailLogs } = await import('../drizzle/schema');
+        const { desc, and } = await import('drizzle-orm');
+        
+        // Build where clause
+        let whereClause = undefined;
+        if (input.templateType && input.status) {
+          whereClause = and(
+            eq(emailLogs.templateType, input.templateType),
+            sql`${emailLogs.status} = ${input.status}`
+          );
+        } else if (input.templateType) {
+          whereClause = eq(emailLogs.templateType, input.templateType);
+        } else if (input.status) {
+          whereClause = sql`${emailLogs.status} = ${input.status}`;
+        }
+        
+        const logs = await db.select()
+          .from(emailLogs)
+          .where(whereClause)
+          .orderBy(desc(emailLogs.sentAt))
+          .limit(input.limit);
+
+        return logs;
+      }),
+
+    getEmailStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { emailLogs } = await import('../drizzle/schema');
+        
+        const allLogs = await db.select().from(emailLogs);
+        
+        return {
+          totalSent: allLogs.length,
+          delivered: allLogs.filter(log => log.status === 'delivered' || log.openedAt).length,
+          opened: allLogs.filter(log => log.openedAt).length,
+          bounced: allLogs.filter(log => log.status === 'bounced').length,
+        };
+      }),
   }),
 
   payment: router({

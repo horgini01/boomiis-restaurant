@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Loader2, Save, Upload, Image as ImageIcon } from "lucide-react";
 import EmailPreview from "./EmailPreview";
 import AdminEmailSettings from "./AdminEmailSettings";
+import EmailTemplatesEditor from "./EmailTemplatesEditor";
 
 export default function RestaurantSettings() {
   const { data: settings, isLoading, refetch } = trpc.admin.getSettings.useQuery();
@@ -200,6 +201,7 @@ export default function RestaurantSettings() {
               <TabsTrigger value="hours">Opening Hours</TabsTrigger>
               <TabsTrigger value="social">Social Media</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="templates">Email Templates</TabsTrigger>
               <TabsTrigger value="email">Email Preview</TabsTrigger>
             </TabsList>
 
@@ -472,6 +474,10 @@ export default function RestaurantSettings() {
 
             <TabsContent value="notifications">
               <AdminEmailSettings />
+            </TabsContent>
+
+            <TabsContent value="templates">
+              <EmailTemplatesEditor />
             </TabsContent>
 
             <TabsContent value="email">
