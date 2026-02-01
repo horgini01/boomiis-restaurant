@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { ENV } from './_core/env';
 import { getDb } from './db';
 import { siteSettings, deliveryAreas } from '../drizzle/schema';
+import { generateOrderReceiptPDF } from './pdf-receipt';
 
 // Email configuration
 export const FROM_EMAIL = ENV.fromEmail || 'Boomiis Restaurant <orders@boomiis.com>';
@@ -360,11 +361,36 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
         .replace(/{restaurantName}/g, 'Boomiis Restaurant');
     }
 
+    // Generate PDF receipt
+    const pdfBuffer = await generateOrderReceiptPDF({
+      orderId: data.orderNumber,
+      orderNumber: data.orderNumber,
+      orderDate: new Date(),
+      orderType: data.orderType,
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      customerPhone: data.customerPhone || '',
+      deliveryAddress: data.deliveryAddress,
+      postcode: data.deliveryPostcode,
+      scheduledFor: typeof data.scheduledFor === 'string' ? new Date(data.scheduledFor) : data.scheduledFor,
+      items: data.items,
+      subtotal: data.subtotal,
+      deliveryFee: data.deliveryFee,
+      total: data.total,
+      paymentStatus: 'Paid',
+    });
+
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.customerEmail,
       subject,
       html,
+      attachments: [
+        {
+          filename: `receipt-${data.orderNumber}.pdf`,
+          content: pdfBuffer,
+        },
+      ],
     });
 
     if (error) {

@@ -137,6 +137,35 @@ export default function OrdersManagement() {
     setIsDetailsOpen(true);
   };
 
+  const handleDownloadReceipt = async (orderId: number, orderNumber: string) => {
+    try {
+      const result = await utils.client.admin.downloadReceipt.query({ orderId });
+      
+      // Convert base64 to blob
+      const byteCharacters = atob(result.pdf);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Receipt downloaded successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to download receipt');
+    }
+  };
+
   const parseOrderItems = (itemsJson: string | null | undefined): any[] => {
     if (!itemsJson) return [];
     try {
@@ -587,6 +616,14 @@ export default function OrdersManagement() {
                                 >
                                   <Eye className="h-4 w-4 mr-1" />
                                   Details
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDownloadReceipt(order.id, order.orderNumber)}
+                                >
+                                  <Download className="h-4 w-4 mr-1" />
+                                  Receipt
                                 </Button>
                                 <Select
                                   value={order.status}

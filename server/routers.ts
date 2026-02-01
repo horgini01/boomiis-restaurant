@@ -6,7 +6,7 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
-import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories, siteSettings, deliveryAreas } from "../drizzle/schema";
+import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers } from '../drizzle/schema';
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL } from "./email";
@@ -1028,6 +1028,60 @@ export const appRouter = router({
         await db.delete(deliveryAreas).where(eq(deliveryAreas.id, input.id));
 
         return { success: true };
+      }),
+
+    downloadReceipt: protectedProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Fetch order details
+        const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
+        if (!order) {
+          throw new Error('Order not found');
+        }
+
+        // Fetch order items
+        const items = await db.select({
+          name: orderItemsTable.menuItemName,
+          quantity: orderItemsTable.quantity,
+          price: orderItemsTable.price,
+        }).from(orderItemsTable).where(eq(orderItemsTable.orderId, input.orderId));
+
+        // Generate PDF
+        const { generateOrderReceiptPDF } = await import('./pdf-receipt');
+        const pdfBuffer = await generateOrderReceiptPDF({
+          orderId: order.id.toString(),
+          orderNumber: order.orderNumber,
+          orderDate: order.createdAt,
+          orderType: order.orderType,
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          customerPhone: order.customerPhone,
+          deliveryAddress: order.deliveryAddress || undefined,
+          postcode: order.deliveryPostcode || undefined,
+          scheduledFor: order.scheduledFor || undefined,
+          items: items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: parseFloat(item.price),
+          })),
+          subtotal: parseFloat(order.subtotal),
+          deliveryFee: parseFloat(order.deliveryFee),
+          total: parseFloat(order.total),
+          paymentStatus: order.paymentStatus === 'paid' ? 'Paid' : 'Pending',
+        });
+
+        // Return base64 encoded PDF
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `receipt-${order.orderNumber}.pdf`,
+        };
       }),
   }),
 

@@ -504,3 +504,24 @@
 - [x] Test delivery fee updates order total correctly (£39.97 → £40.97)
 - [x] Free delivery zones supported (set fee to £0)
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - PDF Receipt Generation)
+- [x] Install PDF generation library (pdfkit)
+- [x] Create generateOrderReceiptPDF function in server/pdf-receipt.ts
+- [x] Include restaurant logo, name, contact info in PDF header
+- [x] Add order number, date/time, order type badge to PDF
+- [x] Add customer information section (name, email, phone, address/pickup time)
+- [x] Add itemized order details table with quantities and prices
+- [x] Add subtotal, delivery fee (if applicable), total to PDF
+- [x] Add delivery areas coverage in footer (filters null postcodes)
+- [x] Add restaurant hours (JSON parsed and formatted) and thank you message
+- [x] Create downloadReceipt tRPC endpoint in admin router
+- [x] Update sendOrderConfirmationEmail to attach PDF receipt automatically
+- [x] Add Download Receipt button to admin orders list
+- [x] Test PDF generation for delivery order (working with all details)
+- [x] Test PDF generation for pickup order (BO-ML416M4M-N9HU - perfect!)
+- [x] Test PDF download from admin orders list (receipt-BO-ML416M4M-N9HU.pdf)
+- [x] Fix opening hours formatting (JSON to readable text)
+- [x] Fix delivery areas display (filter null postcode prefixes)
+- [x] PDF attachment in order confirmation email (automatic)
+- [x] All 19/20 tests passing (1 Stripe timeout unrelated)
