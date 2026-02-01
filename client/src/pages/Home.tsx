@@ -8,10 +8,12 @@ import { UtensilsCrossed, Calendar, Truck, Star } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function Home() {
   const [email, setEmail] = useState('');
   const { data: featuredItems = [], isLoading: isFeaturedLoading } = trpc.menu.featured.useQuery();
+  const { restaurantName, restaurantTagline } = useSettings();
   
   const subscribeMutation = trpc.newsletter.subscribe.useMutation({
     onSuccess: () => {
@@ -46,7 +48,7 @@ export default function Home() {
               <span className="block text-primary mt-2">African Cuisine</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Discover the rich flavors of West Africa, crafted with love and tradition
+              {restaurantTagline}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/menu">

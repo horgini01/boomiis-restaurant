@@ -14,8 +14,10 @@ import {
   X,
   BarChart3,
   Settings as SettingsIcon,
+  Store,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useSettings } from '@/hooks/useSettings';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -25,6 +27,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { restaurantName } = useSettings();
   
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -41,6 +44,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
     { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store },
     { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -69,7 +73,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-background">
-        <h1 className="text-xl font-bold text-primary">Boomiis Admin</h1>
+        <h1 className="text-xl font-bold text-primary">{restaurantName} Admin</h1>
         <Button
           variant="ghost"
           size="icon"
@@ -88,7 +92,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         `}
       >
         <div className="p-6 border-b border-border hidden md:block">
-          <h1 className="text-2xl font-bold text-primary">Boomiis Admin</h1>
+          <h1 className="text-2xl font-bold text-primary">{restaurantName} Admin</h1>
           <p className="text-sm text-muted-foreground mt-1">Restaurant Management</p>
         </div>
 

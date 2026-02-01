@@ -6,12 +6,14 @@ import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { Clock, CheckCircle2, AlertCircle, ChefHat, Printer } from 'lucide-react';
 import { format } from 'date-fns';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function KitchenDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [previousUrgentOrders, setPreviousUrgentOrders] = useState<Set<number>>(new Set());
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [orderTypeFilter, setOrderTypeFilter] = useState<'all' | 'delivery' | 'pickup'>('all');
+  const { restaurantName } = useSettings();
   
   // Update current time every second for timers
   useEffect(() => {

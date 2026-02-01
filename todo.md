@@ -266,3 +266,16 @@
 - [x] Apply semi-transparent overlay to out-of-stock item cards
 - [x] Keep out-of-stock items visible in search and category filters
 - [x] Test that out-of-stock items remain visible but non-orderable
+
+## New Features (User Request - Feb 1 - Dynamic Restaurant Settings Management)
+- [x] Create restaurantSettings table in database schema (using existing siteSettings table)
+- [x] Add default settings seed data (name, description, contact, hours, social media)
+- [x] Create admin Restaurant Settings page with tabbed interface (General, Contact, Hours, Social Media)
+- [x] Add tRPC procedures for getting and updating restaurant settings (public and admin)
+- [x] Update Header component to load restaurant name dynamically
+- [x] Update Footer component to load contact details and opening hours dynamically
+- [x] Update Home page hero section to load restaurant name and description dynamically
+- [x] Update Kitchen Display to load restaurant name dynamically
+- [x] Update Admin Layout to load restaurant name dynamically
+- [x] Create useSettings hook for easy access to restaurant settings
+- [x] Test settings updates reflect immediately across all pages

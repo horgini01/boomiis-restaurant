@@ -3,10 +3,12 @@ import { Link } from 'wouter';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { totalItems } = useCart();
+  const { restaurantName } = useSettings();
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -25,7 +27,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/">
           <span className="text-2xl font-bold text-primary cursor-pointer">
-            Boomiis
+            {restaurantName}
           </span>
         </Link>
 

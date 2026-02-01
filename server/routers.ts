@@ -76,6 +76,23 @@ export const appRouter = router({
       }),
   }),
 
+  settings: router({
+    getPublic: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const settings = await db.select().from(siteSettings);
+      
+      // Convert to key-value object for easier access
+      const settingsMap: Record<string, string> = {};
+      settings.forEach((setting) => {
+        settingsMap[setting.settingKey] = setting.settingValue;
+      });
+      
+      return settingsMap;
+    }),
+  }),
+
   menu: router({
     categories: publicProcedure.query(async () => {
       return await getAllMenuCategories();

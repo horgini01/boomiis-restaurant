@@ -20,6 +20,7 @@ import OrdersManagement from "./pages/admin/Orders";
 import ReservationsManagement from "./pages/admin/ReservationsManagement";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
+import RestaurantSettings from "./pages/admin/RestaurantSettings";
 import Kitchen from "./pages/Kitchen";
 
 function Router() {
@@ -39,6 +40,7 @@ function Router() {
       <Route path={"/ admin/reservations"} component={ReservationsManagement} />
       <Route path={"/admin/analytics"} component={Analytics} />
       <Route path={"/admin/settings"} component={Settings} />
+      <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/kitchen"} component={Kitchen} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
