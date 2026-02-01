@@ -11,4 +11,5 @@ export const ENV = {
   resendApiKey: process.env.RESEND_API_KEY ?? "",
   fromEmail: process.env.FROM_EMAIL ?? "",
   adminEmail: process.env.ADMIN_EMAIL ?? "",
+  baseUrl: process.env.BASE_URL ?? process.env.VITE_BASE_URL ?? "",
 };

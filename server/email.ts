@@ -84,11 +84,17 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
     // Fetch restaurant settings
     const settings = await getRestaurantSettings();
     const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
-    const restaurantLogo = settings?.restaurant_logo || '';
+    let restaurantLogo = settings?.restaurant_logo || '';
     const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
     const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
     const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
     const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
+    // Convert relative logo path to absolute URL for emails
+    if (restaurantLogo && restaurantLogo.startsWith('/')) {
+      const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
+      restaurantLogo = `${baseUrl}${restaurantLogo}`;
+    }
 
     const itemsList = data.items
       .map(item => `<li>${item.quantity}x ${item.name} - £${item.price.toFixed(2)}</li>`)
@@ -278,11 +284,17 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
     // Fetch restaurant settings
     const settings = await getRestaurantSettings();
     const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
-    const restaurantLogo = settings?.restaurant_logo || '';
+    let restaurantLogo = settings?.restaurant_logo || '';
     const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
     const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
     const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
     const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
+    // Convert relative logo path to absolute URL for emails
+    if (restaurantLogo && restaurantLogo.startsWith('/')) {
+      const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
+      restaurantLogo = `${baseUrl}${restaurantLogo}`;
+    }
 
     const formattedDate = new Date(data.date).toLocaleDateString('en-GB', {
       weekday: 'long',

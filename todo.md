@@ -322,3 +322,12 @@
 - [x] Test logo reset functionality
 - [x] Test favicon upload and display in browser tabs
 - [x] All 20 tests passing
+
+## Bug Fixes (User Reported - Feb 1 - Email Logo Not Displaying)
+- [x] Fix broken logo image in email templates (showing broken image icon)
+- [x] Convert relative logo paths to absolute URLs in email templates
+- [x] Add BASE_URL environment variable for absolute URL construction
+- [x] Update order confirmation email to use absolute logo URL
+- [x] Update reservation confirmation email to use absolute logo URL
+- [x] Test emails send successfully with absolute URLs
+- [x] All 20 tests passing
