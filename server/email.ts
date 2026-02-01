@@ -137,6 +137,7 @@ interface OrderEmailData {
   customerEmail: string;
   customerPhone: string;
   orderType: 'delivery' | 'pickup';
+  scheduledFor?: Date | string;
   items: Array<{
     name: string;
     quantity: number;
@@ -189,10 +190,15 @@ export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): 
 
   // If custom template exists, use it
   if (customTemplate) {
+    const scheduledTime = data.scheduledFor 
+      ? new Date(data.scheduledFor).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      : 'To be confirmed';
+    
     let customBody = customTemplate.bodyHtml
       .replace(/{customerName}/g, data.customerName)
       .replace(/{orderNumber}/g, data.orderNumber)
       .replace(/{orderType}/g, data.orderType === 'delivery' ? 'Delivery' : 'Pickup')
+      .replace(/{scheduledTime}/g, scheduledTime)
       .replace(/{deliveryAddress}/g, data.deliveryAddress || 'N/A')
       .replace(/{itemsList}/g, itemsList)
       .replace(/{subtotal}/g, data.subtotal.toFixed(2))
@@ -271,7 +277,8 @@ export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): 
             
             <div class="order-details">
               <h2>Order #${data.orderNumber}</h2>
-              <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
+              <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}</p>
+              ${data.scheduledFor ? `<p><strong>${data.orderType === 'delivery' ? '⏰ Estimated Delivery:' : '⏰ Pickup Time:'}</strong> ${new Date(data.scheduledFor).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
               <p><strong>Contact Phone:</strong> ${data.customerPhone}</p>
               ${data.deliveryAddress ? `<p><strong>Delivery Address:</strong> ${data.deliveryAddress}${data.deliveryPostcode ? `, ${data.deliveryPostcode}` : ''}</p>` : ''}
               ${data.specialInstructions ? `<p><strong>Special Instructions:</strong> ${data.specialInstructions}</p>` : ''}
@@ -1076,7 +1083,8 @@ export async function generateAdminOrderNotificationEmailHTML(data: OrderEmailDa
               <p><strong>Customer:</strong> ${data.customerName}</p>
               <p><strong>Email:</strong> ${data.customerEmail}</p>
               <p><strong>Phone:</strong> ${data.customerPhone}</p>
-              <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
+              <p><strong>Order Type:</strong> ${data.orderType === 'delivery' ? '🚚 Delivery' : '🏪 Pickup'}</p>
+              ${data.scheduledFor ? `<p><strong>${data.orderType === 'delivery' ? '⏰ Estimated Delivery:' : '⏰ Pickup Time:'}</strong> ${new Date(data.scheduledFor).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
               ${data.deliveryAddress ? `<p><strong>Delivery Address:</strong> ${data.deliveryAddress}${data.deliveryPostcode ? `, ${data.deliveryPostcode}` : ''}</p>` : ''}
               ${data.specialInstructions ? `<p><strong>Special Instructions:</strong> ${data.specialInstructions}</p>` : ''}
               

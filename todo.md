@@ -455,3 +455,16 @@
 - [x] Test pickup order flow (showing slots from 7:30 PM with 40 mins prep time)
 - [x] Test Operations settings tab (all fields configurable)
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Add Delivery/Pickup Timing to Email Notifications)
+- [x] Check current order confirmation email template structure
+- [x] Check what timing data is stored in orders table (scheduledFor timestamp)
+- [x] Update order confirmation email to show delivery window for delivery orders
+- [x] Update order confirmation email to show pickup time for pickup orders
+- [x] Update email template variables to include {scheduledTime} placeholder
+- [x] Update generateOrderConfirmationEmailHTML to format scheduledFor timestamp
+- [x] Update generateAdminOrderNotificationEmailHTML to include timing info
+- [x] Pass scheduledFor from order creation API to email functions
+- [x] Pass scheduledFor from Stripe webhook to email functions
+- [x] Test email preview showing "Scheduled For" field
+- [x] All 20 tests passing

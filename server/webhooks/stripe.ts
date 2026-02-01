@@ -78,6 +78,7 @@ export async function handleStripeWebhook(req: Request, res: Response) {
                   customerEmail: order.customerEmail,
                   customerPhone: order.customerPhone,
                   orderType: order.orderType,
+                  scheduledFor: order.scheduledFor || undefined,
                   items: items.map((item: any) => ({
                     name: item.name || 'Unknown Item',
                     quantity: item.quantity,

@@ -1100,6 +1100,7 @@ export const appRouter = router({
                   customerPhone: order.customerPhone,
                   orderNumber: order.orderNumber,
                   orderType: order.orderType,
+                  scheduledFor: order.scheduledFor || undefined,
                   items: items.map(item => ({
                     name: item.name,
                     quantity: item.quantity,
