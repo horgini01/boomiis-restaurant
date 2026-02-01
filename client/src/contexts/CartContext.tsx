@@ -6,6 +6,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   imageUrl?: string;
+  prepTime?: number; // Preparation time in minutes
 }
 
 interface CartContextType {

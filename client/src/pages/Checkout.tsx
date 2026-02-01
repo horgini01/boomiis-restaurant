@@ -18,6 +18,7 @@ export default function Checkout() {
   const [, setLocation] = useLocation();
   const { items, totalPrice, clearCart } = useCart();
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
+  const { data: settings } = trpc.admin.getSettings.useQuery();
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -28,27 +29,68 @@ export default function Checkout() {
     preferredTime: '',
   });
 
-  // Generate time slots (30-minute intervals from 11:00 AM to 9:00 PM)
-  const generateTimeSlots = () => {
-    const slots = [];
-    const startHour = 11;
-    const endHour = 21;
+  // Get delivery settings
+  const prepBufferMinutes = Number(settings?.find(s => s.settingKey === 'prep_buffer_minutes')?.settingValue || 10);
+  const avgDeliveryMinutes = Number(settings?.find(s => s.settingKey === 'average_delivery_time_minutes')?.settingValue || 30);
+  const deliveryFee = Number(settings?.find(s => s.settingKey === 'delivery_fee')?.settingValue || 3.99);
+  const minOrderFreeDelivery = Number(settings?.find(s => s.settingKey === 'min_order_free_delivery')?.settingValue || 0);
+
+  // Calculate total prep time from cart items
+  const calculateTotalPrepTime = () => {
+    const itemsPrepTime = items.reduce((total, item) => {
+      return total + (item.prepTime || 15) * item.quantity; // Default 15 mins if not set
+    }, 0);
+    return Math.max(itemsPrepTime, 20) + prepBufferMinutes; // Minimum 20 mins + buffer
+  };
+
+  const totalPrepTime = calculateTotalPrepTime();
+
+  // Calculate estimated delivery window
+  const getEstimatedDeliveryWindow = () => {
+    const now = new Date();
+    const totalMinutes = totalPrepTime + avgDeliveryMinutes;
+    const earliestTime = new Date(now.getTime() + totalMinutes * 60000);
+    const latestTime = new Date(earliestTime.getTime() + 15 * 60000); // 15-minute window
     
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute of [0, 30]) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const displayTime = new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        });
-        slots.push({ value: time, label: displayTime });
-      }
+    return {
+      earliest: earliestTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      latest: latestTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      totalMinutes,
+    };
+  };
+
+  // Generate pickup time slots starting from minimum pickup time
+  const generatePickupTimeSlots = () => {
+    const slots = [];
+    const now = new Date();
+    const minPickupTime = new Date(now.getTime() + totalPrepTime * 60000);
+    
+    // Round up to next 15-minute interval
+    const minutes = minPickupTime.getMinutes();
+    const roundedMinutes = Math.ceil(minutes / 15) * 15;
+    minPickupTime.setMinutes(roundedMinutes);
+    minPickupTime.setSeconds(0);
+    
+    // Generate slots for next 4 hours
+    for (let i = 0; i < 16; i++) {
+      const slotTime = new Date(minPickupTime.getTime() + i * 15 * 60000);
+      const timeValue = slotTime.toTimeString().slice(0, 5);
+      const displayTime = slotTime.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+      slots.push({ value: timeValue, label: displayTime });
     }
     return slots;
   };
 
-  const timeSlots = generateTimeSlots();
+  const deliveryWindow = orderType === 'delivery' ? getEstimatedDeliveryWindow() : null;
+  const pickupSlots = orderType === 'pickup' ? generatePickupTimeSlots() : [];
+
+  // Calculate final delivery fee
+  const finalDeliveryFee = orderType === 'delivery' && minOrderFreeDelivery > 0 && totalPrice >= minOrderFreeDelivery ? 0 : deliveryFee;
+  const orderTotal = totalPrice + (orderType === 'delivery' ? finalDeliveryFee : 0);
 
   const createOrderMutation = trpc.orders.create.useMutation({
     onSuccess: async (data: any) => {
@@ -84,14 +126,20 @@ export default function Checkout() {
       return;
     }
 
-    // Validate time slot selection
-    if (!formData.preferredTime) {
-      toast.error('Please select a preferred delivery/pickup time');
+    // Validate time slot selection for pickup orders
+    if (orderType === 'pickup' && !formData.preferredTime) {
+      toast.error('Please select a pickup time');
       return;
     }
 
+    // For delivery orders, set estimated delivery time
+    const finalPreferredTime = orderType === 'delivery' 
+      ? deliveryWindow?.earliest || ''
+      : formData.preferredTime;
+
     createOrderMutation.mutate({
       ...formData,
+      preferredTime: finalPreferredTime,
       orderType,
       items: items.map(item => ({
         menuItemId: item.id,
@@ -125,7 +173,14 @@ export default function Checkout() {
                     <RadioGroup value={orderType} onValueChange={(value: any) => setOrderType(value)}>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="delivery" id="delivery" />
-                        <Label htmlFor="delivery" className="cursor-pointer">Delivery (£3.99)</Label>
+                        <Label htmlFor="delivery" className="cursor-pointer">
+                          Delivery (£{deliveryFee.toFixed(2)})
+                          {minOrderFreeDelivery > 0 && (
+                            <span className="text-xs text-muted-foreground ml-2">
+                              Free over £{minOrderFreeDelivery.toFixed(2)}
+                            </span>
+                          )}
+                        </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="pickup" id="pickup" />
@@ -202,32 +257,55 @@ export default function Checkout() {
                   </Card>
                 )}
 
-                {/* Preferred Time Slot */}
+                {/* Delivery/Pickup Time */}
                 <Card className="border-border/50">
                   <CardContent className="p-6">
-                    <h2 className="text-xl font-bold mb-4">Preferred {orderType === 'delivery' ? 'Delivery' : 'Pickup'} Time</h2>
-                    <div>
-                      <Label htmlFor="preferredTime">Select Time Slot *</Label>
-                      <Select
-                        value={formData.preferredTime}
-                        onValueChange={(value) => setFormData({ ...formData, preferredTime: value })}
-                        required
-                      >
-                        <SelectTrigger id="preferredTime">
-                          <SelectValue placeholder="Choose a time slot" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {timeSlots.map((slot) => (
-                            <SelectItem key={slot.value} value={slot.value}>
-                              {slot.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        We'll do our best to {orderType === 'delivery' ? 'deliver' : 'have your order ready'} at your preferred time.
-                      </p>
-                    </div>
+                    {orderType === 'delivery' ? (
+                      // Delivery: Show estimated delivery window
+                      <>
+                        <h2 className="text-xl font-bold mb-4">🚚 Estimated Delivery Time</h2>
+                        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-2xl font-bold text-primary">
+                              {deliveryWindow?.earliest} - {deliveryWindow?.latest}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Estimated delivery in {deliveryWindow?.totalMinutes} minutes
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            💡 Prep time: {totalPrepTime} mins • Delivery: {avgDeliveryMinutes} mins
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      // Pickup: Show time slot selector
+                      <>
+                        <h2 className="text-xl font-bold mb-4">🏪 Pickup Time</h2>
+                        <div>
+                          <Label htmlFor="preferredTime">Select Pickup Time *</Label>
+                          <Select
+                            value={formData.preferredTime}
+                            onValueChange={(value) => setFormData({ ...formData, preferredTime: value })}
+                            required
+                          >
+                            <SelectTrigger id="preferredTime">
+                              <SelectValue placeholder="Choose a time slot" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {pickupSlots.map((slot: any) => (
+                                <SelectItem key={slot.value} value={slot.value}>
+                                  {slot.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            ⏰ Earliest pickup: {pickupSlots[0]?.label} ({totalPrepTime} mins prep time)
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -268,12 +346,27 @@ export default function Checkout() {
                         </div>
                         <div className="flex justify-between text-muted-foreground">
                           <span>Delivery Fee</span>
-                          <span>£{orderType === 'delivery' ? '3.99' : '0.00'}</span>
+                          <span>
+                            {orderType === 'delivery' ? (
+                              finalDeliveryFee === 0 ? (
+                                <span className="text-green-600 font-medium">FREE</span>
+                              ) : (
+                                `£${finalDeliveryFee.toFixed(2)}`
+                              )
+                            ) : (
+                              '£0.00'
+                            )}
+                          </span>
                         </div>
+                        {orderType === 'delivery' && minOrderFreeDelivery > 0 && totalPrice < minOrderFreeDelivery && (
+                          <div className="text-xs text-muted-foreground italic">
+                            💡 Spend £{(minOrderFreeDelivery - totalPrice).toFixed(2)} more for free delivery!
+                          </div>
+                        )}
                         <div className="border-t border-border pt-2 flex justify-between text-lg font-bold">
                           <span>Total</span>
                           <span className="text-primary">
-                            £{(totalPrice + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)}
+                            £{orderTotal.toFixed(2)}
                           </span>
                         </div>
                       </div>

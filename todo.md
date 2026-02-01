@@ -432,3 +432,26 @@
 - [x] Add success/error toast notifications
 - [x] Test Send Test Email UI in browser (working perfectly)
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Smart Checkout Flow with Prep Time Calculation)
+- [x] Add prep_buffer_minutes setting (default: 10 minutes)
+- [x] Add average_delivery_time_minutes setting (default: 30 minutes)
+- [x] Add delivery_fee setting (replace hardcoded £3.99)
+- [x] Add min_order_free_delivery setting (optional, e.g., £25)
+- [x] Create DeliverySettings component for operations configuration
+- [x] Add Operations tab to Restaurant Settings
+- [x] Add UI fields for all four configurable settings with descriptions
+- [x] Add prepTime field to CartItem interface
+- [x] Create calculateTotalPrepTime helper function in checkout
+- [x] Fetch delivery settings from database in checkout page
+- [x] Calculate delivery window (current time + prep time + buffer + delivery time)
+- [x] For delivery orders: show estimated delivery window with breakdown
+- [x] For pickup orders: calculate minimum pickup time, generate 15-min interval slots
+- [x] Update order summary to show dynamic delivery fee
+- [x] Add free delivery indicator when threshold is met
+- [x] Add "Spend £X more for free delivery" hint
+- [x] Update validation to only require time slot for pickup orders
+- [x] Test delivery order flow (showing 7:53 PM - 8:08 PM window)
+- [x] Test pickup order flow (showing slots from 7:30 PM with 40 mins prep time)
+- [x] Test Operations settings tab (all fields configurable)
+- [x] All 20 tests passing
