@@ -19,6 +19,8 @@ export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
   const { data: settings } = trpc.admin.getSettings.useQuery();
+  const { data: deliveryAreas = [] } = trpc.admin.getDeliveryAreas.useQuery();
+  const [postcodeError, setPostcodeError] = useState<string>('');
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -245,12 +247,33 @@ export default function Checkout() {
                         </div>
                         <div>
                           <Label htmlFor="postcode">Postcode *</Label>
-                          <Input
+                           <Input
                             id="postcode"
                             required={orderType === 'delivery'}
                             value={formData.deliveryPostcode}
-                            onChange={(e) => setFormData({ ...formData, deliveryPostcode: e.target.value })}
+                            onChange={(e) => {
+                              const value = e.target.value.toUpperCase();
+                              setFormData({ ...formData, deliveryPostcode: value });
+                              setPostcodeError('');
+                            }}
+                            onBlur={() => {
+                              if (orderType === 'delivery' && formData.deliveryPostcode && deliveryAreas.length > 0) {
+                                const postcode = formData.deliveryPostcode.trim().toUpperCase();
+                                const isValid = deliveryAreas.some(area => {
+                                  const prefixes = area.postcodesPrefixes.split(',').map(p => p.trim().toUpperCase());
+                                  return prefixes.some(prefix => postcode.startsWith(prefix));
+                                });
+                                if (!isValid) {
+                                  const areasList = deliveryAreas.map(a => `${a.areaName} (${a.postcodesPrefixes})`).join(', ');
+                                  setPostcodeError(`Sorry, we don't deliver to this postcode. We deliver to: ${areasList}`);
+                                }
+                              }
+                            }}
+                            className={postcodeError ? 'border-red-500' : ''}
                           />
+                          {postcodeError && (
+                            <p className="text-sm text-red-500 mt-1">{postcodeError}</p>
+                          )}
                         </div>
                       </div>
                     </CardContent>

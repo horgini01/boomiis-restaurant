@@ -257,3 +257,18 @@ export const emailLogs = mysqlTable("email_logs", {
 
 export type EmailLog = typeof emailLogs.$inferSelect;
 export type InsertEmailLog = typeof emailLogs.$inferInsert;
+
+/**
+ * Delivery coverage areas with postcode prefixes
+ */
+export const deliveryAreas = mysqlTable("delivery_areas", {
+  id: int("id").autoincrement().primaryKey(),
+  areaName: varchar("area_name", { length: 100 }).notNull(),
+  postcodesPrefixes: text("postcodes_prefixes").notNull(), // Comma-separated postcode prefixes (e.g., "SW1, SW7, SW10")
+  displayOrder: int("display_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DeliveryArea = typeof deliveryAreas.$inferSelect;
+export type InsertDeliveryArea = typeof deliveryAreas.$inferInsert;

@@ -6,7 +6,7 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
-import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories, siteSettings } from "../drizzle/schema";
+import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservations, menuCategories, siteSettings, deliveryAreas } from "../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL } from "./email";
@@ -960,6 +960,71 @@ export const appRouter = router({
 
         console.log('[Email] Test email sent:', result?.id);
         return { success: true, emailId: result?.id };
+      }),
+
+    // Delivery Areas Management
+    getDeliveryAreas: publicProcedure
+      .query(async () => {        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { asc } = await import('drizzle-orm');
+        const areas = await db.select()
+          .from(deliveryAreas)
+          .orderBy(asc(deliveryAreas.displayOrder));
+
+        return areas;
+      }),
+
+    saveDeliveryArea: protectedProcedure
+      .input(z.object({
+        id: z.number().optional(),
+        areaName: z.string().min(1),
+        postcodesPrefixes: z.string().min(1),
+        displayOrder: z.number().default(0),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        if (input.id) {
+          // Update existing area
+          await db.update(deliveryAreas)
+            .set({
+              areaName: input.areaName,
+              postcodesPrefixes: input.postcodesPrefixes,
+              displayOrder: input.displayOrder,
+              updatedAt: new Date(),
+            })
+            .where(eq(deliveryAreas.id, input.id));
+        } else {
+          // Insert new area
+          await db.insert(deliveryAreas).values({
+            areaName: input.areaName,
+            postcodesPrefixes: input.postcodesPrefixes,
+            displayOrder: input.displayOrder,
+          });
+        }
+
+        return { success: true };
+      }),
+
+    deleteDeliveryArea: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(deliveryAreas).where(eq(deliveryAreas.id, input.id));
+
+        return { success: true };
       }),
   }),
 

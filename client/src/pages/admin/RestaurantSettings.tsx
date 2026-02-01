@@ -14,6 +14,7 @@ import EmailPreview from "./EmailPreview";
 import AdminEmailSettings from "./AdminEmailSettings";
 import EmailTemplatesEditor from "./EmailTemplatesEditor";
 import DeliverySettings from "./DeliverySettings";
+import { DeliveryAreasSettings } from "@/components/DeliveryAreasSettings";
 
 export default function RestaurantSettings() {
   const { data: settings, isLoading, refetch } = trpc.admin.getSettings.useQuery();
@@ -202,6 +203,7 @@ export default function RestaurantSettings() {
               <TabsTrigger value="hours">Opening Hours</TabsTrigger>
               <TabsTrigger value="social">Social Media</TabsTrigger>
               <TabsTrigger value="operations">Operations</TabsTrigger>
+              <TabsTrigger value="delivery-areas">Delivery Areas</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
               <TabsTrigger value="templates">Email Templates</TabsTrigger>
               <TabsTrigger value="email">Email Preview</TabsTrigger>
@@ -476,6 +478,10 @@ export default function RestaurantSettings() {
 
             <TabsContent value="operations">
               <DeliverySettings />
+            </TabsContent>
+
+            <TabsContent value="delivery-areas">
+              <DeliveryAreasSettings />
             </TabsContent>
 
             <TabsContent value="notifications">

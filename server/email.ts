@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { ENV } from './_core/env';
 import { getDb } from './db';
-import { siteSettings } from '../drizzle/schema';
+import { siteSettings, deliveryAreas } from '../drizzle/schema';
 
 // Email configuration
 export const FROM_EMAIL = ENV.fromEmail || 'Boomiis Restaurant <orders@boomiis.com>';
@@ -163,6 +163,25 @@ interface ReservationEmailData {
 }
 
 /**
+ * Get delivery areas for email footer
+ */
+async function getDeliveryAreasText(): Promise<string> {
+  try {
+    const db = await getDb();
+    if (!db) return '';
+    
+    const areas = await db.select().from(deliveryAreas).orderBy(deliveryAreas.displayOrder);
+    if (areas.length === 0) return '';
+    
+    const areasList = areas.map((a: { areaName: string; postcodesPrefixes: string }) => `${a.areaName} (${a.postcodesPrefixes})`).join(', ');
+    return `<p>🚚 We Deliver To: ${areasList}</p>`;
+  } catch (error) {
+    console.error('Error fetching delivery areas for email:', error);
+    return '';
+  }
+}
+
+/**
  * Generate order confirmation email HTML
  */
 export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): Promise<string> {
@@ -187,6 +206,9 @@ export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): 
   const itemsList = data.items
     .map(item => `<li>${item.quantity}x ${item.name} - £${item.price.toFixed(2)}</li>`)
     .join('');
+
+  // Get delivery areas text
+  const deliveryAreasText = await getDeliveryAreasText();
 
   // If custom template exists, use it
   if (customTemplate) {
@@ -239,6 +261,7 @@ export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): 
                 <p>📍 ${contactAddress}</p>
                 <p>📞 ${contactPhone}</p>
                 <p>✉️ ${contactEmail}</p>
+                ${deliveryAreasText}
               </div>
             </div>
           </div>
@@ -305,6 +328,7 @@ export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): 
               <p>📍 ${contactAddress}</p>
               <p>📞 ${contactPhone}</p>
               <p>✉️ ${contactEmail}</p>
+              ${deliveryAreasText}
             </div>
           </div>
         </div>
@@ -934,6 +958,9 @@ export async function generateReservationConfirmationEmailHTML(data: Reservation
     restaurantLogo = `${baseUrl}${restaurantLogo}`;
   }
 
+  // Get delivery areas text
+  const deliveryAreasText = await getDeliveryAreasText();
+
   const formattedDate = new Date(data.date).toLocaleDateString('en-GB', {
     weekday: 'long',
     year: 'numeric',
@@ -984,6 +1011,7 @@ export async function generateReservationConfirmationEmailHTML(data: Reservation
                 <p>📍 ${contactAddress}</p>
                 <p>📞 ${contactPhone}</p>
                 <p>✉️ ${contactEmail}</p>
+                ${deliveryAreasText}
               </div>
             </div>
           </div>
@@ -1038,6 +1066,7 @@ export async function generateReservationConfirmationEmailHTML(data: Reservation
               <p>📍 ${contactAddress}</p>
               <p>📞 ${contactPhone}</p>
               <p>✉️ ${contactEmail}</p>
+              ${deliveryAreasText}
             </div>
           </div>
         </div>

@@ -468,3 +468,23 @@
 - [x] Pass scheduledFor from Stripe webhook to email functions
 - [x] Test email preview showing "Scheduled For" field
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Delivery Areas/Coverage Management)
+- [x] Add delivery_areas table to database schema (id, area_name, postcode_prefixes, display_order, created_at, updated_at)
+- [x] Push database schema changes for delivery areas
+- [x] Create DeliveryAreasSettings component for admin interface
+- [x] Add "Delivery Areas" tab to Restaurant Settings
+- [x] Add form to add new delivery area (area name + postcode prefixes input)
+- [x] Display list of configured delivery areas with edit/delete buttons
+- [x] Create getDeliveryAreas, addDeliveryArea, updateDeliveryArea tRPC endpoints
+- [x] Create deleteDeliveryArea tRPC endpoint
+- [x] Implement postcode validation in checkout page against delivery areas
+- [x] Show error message if postcode not in coverage area with list of areas we cover
+- [x] Update Footer component to display delivery areas dynamically
+- [x] Update email templates to include delivery coverage section in footer
+- [x] Test admin interface for adding/editing/deleting areas (Westminster added successfully)
+- [x] Test postcode validation during checkout (M1 1AA rejected, SW1A 1AA accepted)
+- [x] Test delivery areas display on footer (showing "We Deliver To: Westminster (SW1, SW7, SW10)")
+- [x] Test delivery areas in email templates (added to all email footers)
+- [x] PDF receipt generation not yet implemented (can be added as separate feature)
+- [x] All 20 tests passing

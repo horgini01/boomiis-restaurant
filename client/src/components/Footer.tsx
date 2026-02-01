@@ -1,6 +1,32 @@
 import { Link } from 'wouter';
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Truck } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
+import { trpc } from '@/lib/trpc';
+
+function DeliveryAreasFooter() {
+  const { data: areas = [] } = trpc.admin.getDeliveryAreas.useQuery();
+
+  if (areas.length === 0) return null;
+
+  return (
+    <div className="mt-4 pt-4 border-t border-border/50">
+      <div className="flex items-start gap-2">
+        <Truck className="h-4 w-4 text-primary mt-0.5" />
+        <div>
+          <div className="text-xs font-semibold text-foreground mb-1">We Deliver To:</div>
+          <div className="text-xs text-muted-foreground">
+            {areas.map((area, index) => (
+              <span key={area.id}>
+                {area.areaName} ({area.postcodesPrefixes})
+                {index < areas.length - 1 && ', '}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Footer() {
   const {
@@ -86,6 +112,7 @@ export default function Footer() {
                 <span className="text-sm text-muted-foreground">{contactEmail}</span>
               </li>
             </ul>
+            <DeliveryAreasFooter />
           </div>
 
           {/* Social & Hours */}
