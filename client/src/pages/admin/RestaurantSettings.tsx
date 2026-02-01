@@ -37,6 +37,7 @@ export default function RestaurantSettings() {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [openingHours, setOpeningHours] = useState<any>({});
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
 
   // Initialize form data when settings load
   useEffect(() => {
@@ -117,6 +118,45 @@ export default function RestaurantSettings() {
         fileName: file.name,
         mimeType: file.type,
       });
+    };
+    fileReader.readAsDataURL(file);
+  };
+
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 1MB for favicon)
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error("Favicon file size must be less than 1MB");
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFaviconPreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server using same uploadLogo mutation but save to favicon setting
+    const fileReader = new FileReader();
+    fileReader.onload = async (event) => {
+      const base64Data = event.target?.result as string;
+      const result = await uploadLogo.mutateAsync({
+        fileData: base64Data,
+        fileName: `favicon-${file.name}`,
+        mimeType: file.type,
+      });
+      // Update favicon setting
+      setFormData(prev => ({ ...prev, favicon: result.url }));
+      toast.success("Favicon uploaded successfully");
     };
     fileReader.readAsDataURL(file);
   };
@@ -213,15 +253,77 @@ export default function RestaurantSettings() {
                         </div>
                       )}
                       <div className="flex-1 space-y-2">
-                        <Input
-                          id="restaurant_logo"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoUpload}
-                          className="cursor-pointer"
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            id="restaurant_logo"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoUpload}
+                            className="cursor-pointer flex-1"
+                          />
+                          {formData.restaurant_logo && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, restaurant_logo: "" }));
+                                setLogoPreview(null);
+                                toast.success("Logo removed");
+                              }}
+                            >
+                              Remove Logo
+                            </Button>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           Upload your restaurant logo (PNG, JPG, SVG). Displayed in header, kitchen display, and emails.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="favicon">Favicon</Label>
+                    <div className="flex items-center gap-4">
+                      {(faviconPreview || formData.favicon) && (
+                        <div className="relative w-16 h-16 border rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                          <img
+                            src={faviconPreview || formData.favicon}
+                            alt="Favicon"
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        </div>
+                      )}
+                      {!(faviconPreview || formData.favicon) && (
+                        <div className="w-16 h-16 border-2 border-dashed rounded-lg flex items-center justify-center bg-muted">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            id="favicon"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFaviconUpload}
+                            className="cursor-pointer flex-1"
+                          />
+                          {formData.favicon && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, favicon: "" }));
+                                setFaviconPreview(null);
+                                toast.success("Favicon removed");
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Upload your favicon (ICO, PNG). Displayed in browser tabs. Recommended size: 32x32 or 16x16 pixels.
                         </p>
                       </div>
                     </div>

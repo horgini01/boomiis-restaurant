@@ -1,5 +1,7 @@
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useSettings } from "@/hooks/useSettings";
+import { useEffect } from "react";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -54,6 +56,28 @@ function Router() {
 //   to keep consistent foreground/background color across components
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
+function AppContent() {
+  const { settings } = useSettings();
+
+  // Update favicon dynamically
+  useEffect(() => {
+    const favicon = settings?.favicon;
+    if (favicon) {
+      // Remove existing favicon links
+      const existingLinks = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+      existingLinks.forEach(link => link.remove());
+
+      // Add new favicon link
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = favicon;
+      document.head.appendChild(link);
+    }
+  }, [settings?.favicon]);
+
+  return <Router />;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -63,7 +87,7 @@ function App() {
         <CartProvider>
           <TooltipProvider>
             <Toaster />
-            <Router />
+            <AppContent />
           </TooltipProvider>
         </CartProvider>
       </ThemeProvider>

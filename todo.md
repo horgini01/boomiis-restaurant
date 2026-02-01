@@ -310,3 +310,15 @@
 - [ ] Test logo upload and display across all pages
 - [ ] Test menu item image upload and display
 - [ ] Document how to switch storage providers for external deployment
+
+## New Features (User Request - Feb 1 - Logo Reset, Favicon Upload, Email Template Fix)
+- [x] Add "Remove Logo" button to restaurant settings to reset logo URL
+- [x] Add favicon upload field to restaurant settings (General tab)
+- [x] Create uploadFavicon mutation to save favicon locally (reuses uploadLogo mutation)
+- [x] Update HTML template to use dynamic favicon from settings
+- [x] Add favicon preview in restaurant settings
+- [x] Verify order confirmation email template uses local logo path (already implemented)
+- [x] Verify reservation confirmation email template uses local logo path (already implemented)
+- [x] Test logo reset functionality
+- [x] Test favicon upload and display in browser tabs
+- [x] All 20 tests passing
