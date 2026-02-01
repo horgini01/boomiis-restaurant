@@ -1,0 +1,1 @@
+ALTER TABLE `delivery_areas` ADD `delivery_fee` decimal(10,2) NOT NULL;

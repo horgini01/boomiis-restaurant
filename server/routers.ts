@@ -980,6 +980,7 @@ export const appRouter = router({
         id: z.number().optional(),
         areaName: z.string().min(1),
         postcodesPrefixes: z.string().min(1),
+        deliveryFee: z.number().min(0),
         displayOrder: z.number().default(0),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -996,6 +997,7 @@ export const appRouter = router({
             .set({
               areaName: input.areaName,
               postcodesPrefixes: input.postcodesPrefixes,
+              deliveryFee: input.deliveryFee.toString(),
               displayOrder: input.displayOrder,
               updatedAt: new Date(),
             })
@@ -1005,6 +1007,7 @@ export const appRouter = router({
           await db.insert(deliveryAreas).values({
             areaName: input.areaName,
             postcodesPrefixes: input.postcodesPrefixes,
+            deliveryFee: input.deliveryFee.toString(),
             displayOrder: input.displayOrder,
           });
         }

@@ -34,8 +34,23 @@ export default function Checkout() {
   // Get delivery settings
   const prepBufferMinutes = Number(settings?.find(s => s.settingKey === 'prep_buffer_minutes')?.settingValue || 10);
   const avgDeliveryMinutes = Number(settings?.find(s => s.settingKey === 'average_delivery_time_minutes')?.settingValue || 30);
-  const deliveryFee = Number(settings?.find(s => s.settingKey === 'delivery_fee')?.settingValue || 3.99);
+  const standardDeliveryFee = Number(settings?.find(s => s.settingKey === 'delivery_fee')?.settingValue || 3.99);
   const minOrderFreeDelivery = Number(settings?.find(s => s.settingKey === 'min_order_free_delivery')?.settingValue || 0);
+
+  // Get zone-specific delivery fee based on postcode
+  const getZoneDeliveryFee = () => {
+    if (orderType !== 'delivery' || !formData.deliveryPostcode) return standardDeliveryFee;
+    
+    const postcode = formData.deliveryPostcode.trim().toUpperCase();
+    const matchedArea = deliveryAreas.find(area => {
+      const prefixes = area.postcodesPrefixes.split(',').map(p => p.trim().toUpperCase());
+      return prefixes.some(prefix => postcode.startsWith(prefix));
+    });
+    
+    return matchedArea ? parseFloat(matchedArea.deliveryFee) : standardDeliveryFee;
+  };
+
+  const deliveryFee = getZoneDeliveryFee();
 
   // Calculate total prep time from cart items
   const calculateTotalPrepTime = () => {

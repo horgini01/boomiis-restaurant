@@ -488,3 +488,19 @@
 - [x] Test delivery areas in email templates (added to all email footers)
 - [x] PDF receipt generation not yet implemented (can be added as separate feature)
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 1 - Zone-Based Variable Delivery Fees)
+- [x] Add delivery_fee field to delivery_areas table (decimal, default 0.00)
+- [x] Push database schema changes for delivery_fee field
+- [x] Update DeliveryAreasSettings component to include delivery fee input field
+- [x] Update addDeliveryArea mutation to accept delivery_fee parameter
+- [x] Update updateDeliveryArea mutation to accept delivery_fee parameter
+- [x] Add delivery fee display in area list (edit mode and view mode)
+- [x] Update checkout page to fetch delivery fee from matched delivery area
+- [x] Update order summary to show zone-specific delivery fee dynamically
+- [x] Update Order Type label to show zone-specific fee (e.g., "Delivery (£4.99)")
+- [x] Test adding new delivery area with custom fee (Camden £4.99 added successfully)
+- [x] Test checkout with Camden postcode NW1 1AA showing £4.99 fee (working perfectly)
+- [x] Test delivery fee updates order total correctly (£39.97 → £40.97)
+- [x] Free delivery zones supported (set fee to £0)
+- [x] All 20 tests passing

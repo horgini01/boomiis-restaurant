@@ -15,7 +15,7 @@ export function DeliveryAreasSettings() {
     onSuccess: () => {
       utils.admin.getDeliveryAreas.invalidate();
       toast.success('Delivery area saved successfully');
-      setNewArea({ areaName: '', postcodesPrefixes: '' });
+      setNewArea({ areaName: '', postcodesPrefixes: '', deliveryFee: '3.99' });
     },
     onError: (error) => {
       toast.error(`Failed: ${error.message}`);
@@ -35,12 +35,14 @@ export function DeliveryAreasSettings() {
   const [newArea, setNewArea] = useState({
     areaName: '',
     postcodesPrefixes: '',
+    deliveryFee: '3.99',
   });
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingArea, setEditingArea] = useState({
     areaName: '',
     postcodesPrefixes: '',
+    deliveryFee: '3.99',
   });
 
   const handleAddArea = () => {
@@ -52,6 +54,7 @@ export function DeliveryAreasSettings() {
     saveAreaMutation.mutate({
       areaName: newArea.areaName.trim(),
       postcodesPrefixes: newArea.postcodesPrefixes.trim(),
+      deliveryFee: parseFloat(newArea.deliveryFee),
       displayOrder: areas.length,
     });
   };
@@ -69,6 +72,7 @@ export function DeliveryAreasSettings() {
       id,
       areaName: editingArea.areaName.trim(),
       postcodesPrefixes: editingArea.postcodesPrefixes.trim(),
+      deliveryFee: parseFloat(editingArea.deliveryFee),
       displayOrder: area.displayOrder,
     });
     setEditingId(null);
@@ -90,6 +94,7 @@ export function DeliveryAreasSettings() {
       id,
       areaName: area.areaName,
       postcodesPrefixes: area.postcodesPrefixes,
+      deliveryFee: parseFloat(area.deliveryFee),
       displayOrder: currentOrder - 1,
     });
   };
@@ -104,6 +109,7 @@ export function DeliveryAreasSettings() {
       id,
       areaName: area.areaName,
       postcodesPrefixes: area.postcodesPrefixes,
+      deliveryFee: parseFloat(area.deliveryFee),
       displayOrder: currentOrder + 1,
     });
   };
@@ -113,6 +119,7 @@ export function DeliveryAreasSettings() {
     setEditingArea({
       areaName: area.areaName,
       postcodesPrefixes: area.postcodesPrefixes,
+      deliveryFee: area.deliveryFee,
     });
   };
 
@@ -136,7 +143,7 @@ export function DeliveryAreasSettings() {
           {/* Add New Area Form */}
           <div className="space-y-4 p-4 border border-dashed rounded-lg bg-muted/30">
             <h3 className="font-semibold text-sm">Add New Delivery Area</h3>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="new-area-name">Area Name</Label>
                 <Input
@@ -153,6 +160,18 @@ export function DeliveryAreasSettings() {
                   placeholder="e.g., SW1, SW7, SW10"
                   value={newArea.postcodesPrefixes}
                   onChange={(e) => setNewArea({ ...newArea, postcodesPrefixes: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-delivery-fee">Delivery Fee (£)</Label>
+                <Input
+                  id="new-delivery-fee"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="3.99"
+                  value={newArea.deliveryFee}
+                  onChange={(e) => setNewArea({ ...newArea, deliveryFee: e.target.value })}
                 />
               </div>
             </div>
@@ -175,7 +194,7 @@ export function DeliveryAreasSettings() {
                   <CardContent className="p-4">
                     {editingId === area.id ? (
                       <div className="space-y-3">
-                        <div className="grid gap-3 md:grid-cols-2">
+                        <div className="grid gap-3 md:grid-cols-3">
                           <div className="space-y-1">
                             <Label htmlFor={`edit-area-${area.id}`}>Area Name</Label>
                             <Input
@@ -190,6 +209,17 @@ export function DeliveryAreasSettings() {
                               id={`edit-postcodes-${area.id}`}
                               value={editingArea.postcodesPrefixes}
                               onChange={(e) => setEditingArea({ ...editingArea, postcodesPrefixes: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor={`edit-fee-${area.id}`}>Delivery Fee (£)</Label>
+                            <Input
+                              id={`edit-fee-${area.id}`}
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={editingArea.deliveryFee}
+                              onChange={(e) => setEditingArea({ ...editingArea, deliveryFee: e.target.value })}
                             />
                           </div>
                         </div>
@@ -216,6 +246,9 @@ export function DeliveryAreasSettings() {
                           <div className="font-semibold text-base">{area.areaName}</div>
                           <div className="text-sm text-muted-foreground mt-1">
                             Postcodes: {area.postcodesPrefixes}
+                          </div>
+                          <div className="text-sm font-medium text-primary mt-1">
+                            Delivery Fee: £{parseFloat(area.deliveryFee).toFixed(2)}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
