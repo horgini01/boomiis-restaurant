@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Upload, Image as ImageIcon } from "lucide-react";
 
 export default function RestaurantSettings() {
   const { data: settings, isLoading, refetch } = trpc.admin.getSettings.useQuery();
@@ -23,8 +23,20 @@ export default function RestaurantSettings() {
     },
   });
 
+  const uploadLogo = trpc.admin.uploadLogo.useMutation({
+    onSuccess: (data) => {
+      toast.success("Logo uploaded successfully");
+      setFormData(prev => ({ ...prev, restaurant_logo: data.url }));
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [openingHours, setOpeningHours] = useState<any>({});
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Initialize form data when settings load
   useEffect(() => {
@@ -71,6 +83,42 @@ export default function RestaurantSettings() {
     };
     setOpeningHours(updated);
     handleInputChange("opening_hours", JSON.stringify(updated));
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Logo file size must be less than 5MB");
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setLogoPreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    const fileReader = new FileReader();
+    fileReader.onload = async (event) => {
+      const base64Data = event.target?.result as string;
+      await uploadLogo.mutateAsync({
+        fileData: base64Data,
+        fileName: file.name,
+        mimeType: file.type,
+      });
+    };
+    fileReader.readAsDataURL(file);
   };
 
   if (isLoading) {
@@ -145,6 +193,38 @@ export default function RestaurantSettings() {
                     <p className="text-sm text-muted-foreground">
                       Shown on the homepage and footer
                     </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="restaurant_logo">Restaurant Logo</Label>
+                    <div className="flex items-center gap-4">
+                      {(logoPreview || formData.restaurant_logo) && (
+                        <div className="relative w-32 h-32 border rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                          <img
+                            src={logoPreview || formData.restaurant_logo}
+                            alt="Restaurant logo"
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        </div>
+                      )}
+                      {!(logoPreview || formData.restaurant_logo) && (
+                        <div className="w-32 h-32 border-2 border-dashed rounded-lg flex items-center justify-center bg-muted">
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          id="restaurant_logo"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="cursor-pointer"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Upload your restaurant logo (PNG, JPG, SVG). Displayed in header, kitchen display, and emails.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

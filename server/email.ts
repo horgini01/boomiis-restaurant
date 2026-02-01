@@ -1,9 +1,29 @@
 import { Resend } from 'resend';
 import { ENV } from './_core/env';
+import { getDb } from './db';
+import { siteSettings } from '../drizzle/schema';
 
 // Email configuration
 const FROM_EMAIL = ENV.fromEmail || 'Boomiis Restaurant <orders@boomiis.com>';
 const ADMIN_EMAIL = ENV.adminEmail || (ENV.ownerName ? `${ENV.ownerName} <admin@boomiis.com>` : 'admin@boomiis.com');
+
+// Fetch restaurant settings for email templates
+async function getRestaurantSettings() {
+  try {
+    const db = await getDb();
+    if (!db) return null;
+    
+    const settings = await db.select().from(siteSettings);
+    const settingsMap: Record<string, string> = {};
+    settings.forEach(s => {
+      settingsMap[s.settingKey] = s.settingValue;
+    });
+    return settingsMap;
+  } catch (error) {
+    console.error('[Email] Failed to fetch settings:', error);
+    return null;
+  }
+}
 
 // Lazy initialization of Resend client
 let resendClient: Resend | null = null;
@@ -61,6 +81,15 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   }
   
   try {
+    // Fetch restaurant settings
+    const settings = await getRestaurantSettings();
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+    const restaurantLogo = settings?.restaurant_logo || '';
+    const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
+    const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
+    const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
+    const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
     const itemsList = data.items
       .map(item => `<li>${item.quantity}x ${item.name} - £${item.price.toFixed(2)}</li>`)
       .join('');
@@ -72,21 +101,24 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #d4a574; color: white; padding: 20px; text-align: center; }
+            .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
+            .header img { max-height: 60px; margin-bottom: 15px; }
             .content { background: #f9f9f9; padding: 20px; }
             .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
             .total { font-size: 1.2em; font-weight: bold; color: #d4a574; }
-            .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; border-top: 1px solid #ddd; margin-top: 20px; }
+            .footer-contact { margin: 10px 0; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
+              ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
               <h1>Order Confirmation</h1>
             </div>
             <div class="content">
               <p>Dear ${data.customerName},</p>
-              <p>Thank you for your order! We've received your payment and are preparing your delicious West African cuisine.</p>
+              <p>Thank you for your order! We've received your payment and are preparing your delicious meal.</p>
               
               <div class="order-details">
                 <h2>Order #${data.orderNumber}</h2>
@@ -111,9 +143,13 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
               <p>If you have any questions, please don't hesitate to contact us.</p>
             </div>
             <div class="footer">
-              <p>Boomiis Restaurant - Authentic West African Cuisine</p>
-              <p>123 High Street, London, UK SW1A 1AA</p>
-              <p>+44 20 1234 5678</p>
+              <p><strong>${restaurantName}</strong></p>
+              <p style="font-style: italic; color: #888;">${restaurantTagline}</p>
+              <div class="footer-contact">
+                <p>📍 ${contactAddress}</p>
+                <p>📞 ${contactPhone}</p>
+                <p>✉️ ${contactEmail}</p>
+              </div>
             </div>
           </div>
         </body>
@@ -239,6 +275,15 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
   }
   
   try{
+    // Fetch restaurant settings
+    const settings = await getRestaurantSettings();
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+    const restaurantLogo = settings?.restaurant_logo || '';
+    const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
+    const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
+    const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
+    const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
     const formattedDate = new Date(data.date).toLocaleDateString('en-GB', {
       weekday: 'long',
       year: 'numeric',
@@ -253,20 +298,23 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #d4a574; color: white; padding: 20px; text-align: center; }
+            .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
+            .header img { max-height: 60px; margin-bottom: 15px; }
             .content { background: #f9f9f9; padding: 20px; }
             .reservation-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
-            .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; border-top: 1px solid #ddd; margin-top: 20px; }
+            .footer-contact { margin: 10px 0; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
+              ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
               <h1>Reservation Confirmed</h1>
             </div>
             <div class="content">
               <p>Dear ${data.customerName},</p>
-              <p>Your table reservation has been confirmed! We look forward to welcoming you to Boomiis Restaurant.</p>
+              <p>Your table reservation has been confirmed! We look forward to welcoming you to ${restaurantName}.</p>
               
               <div class="reservation-details">
                 <h2>Reservation Details</h2>
@@ -281,9 +329,13 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
               <p>Please arrive on time. If you need to modify or cancel your reservation, please contact us at least 24 hours in advance.</p>
             </div>
             <div class="footer">
-              <p>Boomiis Restaurant - Authentic West African Cuisine</p>
-              <p>123 High Street, London, UK SW1A 1AA</p>
-              <p>+44 20 1234 5678</p>
+              <p><strong>${restaurantName}</strong></p>
+              <p style="font-style: italic; color: #888;">${restaurantTagline}</p>
+              <div class="footer-contact">
+                <p>📍 ${contactAddress}</p>
+                <p>📞 ${contactPhone}</p>
+                <p>✉️ ${contactEmail}</p>
+              </div>
             </div>
           </div>
         </body>

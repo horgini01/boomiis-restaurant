@@ -79,6 +79,7 @@ export function useSettings() {
     isLoading,
     restaurantName: settings?.restaurant_name || "Boomiis",
     restaurantTagline: settings?.restaurant_tagline || "Authentic African Cuisine",
+    restaurantLogo: settings?.restaurant_logo || "",
     contactAddress: settings?.contact_address || "",
     contactPhone: settings?.contact_phone || "",
     contactEmail: settings?.contact_email || "",

@@ -8,7 +8,7 @@ import { useSettings } from '@/hooks/useSettings';
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { totalItems } = useCart();
-  const { restaurantName } = useSettings();
+  const { restaurantName, restaurantLogo } = useSettings();
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -26,9 +26,17 @@ export default function Header() {
       <nav className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/">
-          <span className="text-2xl font-bold text-primary cursor-pointer">
-            {restaurantName}
-          </span>
+          {restaurantLogo ? (
+            <img 
+              src={restaurantLogo} 
+              alt={restaurantName} 
+              className="h-10 w-auto object-contain cursor-pointer"
+            />
+          ) : (
+            <span className="text-2xl font-bold text-primary cursor-pointer">
+              {restaurantName}
+            </span>
+          )}
         </Link>
 
         {/* Desktop Navigation */}

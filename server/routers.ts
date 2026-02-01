@@ -10,6 +10,7 @@ import { subscribers, orders, orderItems as orderItemsTable, menuItems, reservat
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail } from "./email";
+import { storagePut } from "./storage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -714,6 +715,46 @@ export const appRouter = router({
         }
 
         return { success: true };
+      }),
+
+    uploadLogo: protectedProcedure
+      .input(z.object({ 
+        fileData: z.string(), // base64 encoded image
+        fileName: z.string(),
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Convert base64 to buffer
+        const base64Data = input.fileData.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        // Upload to S3
+        const randomSuffix = Math.random().toString(36).substring(2, 10);
+        const fileKey = `restaurant-logos/${input.fileName}-${randomSuffix}`;
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+
+        // Save logo URL to settings
+        const [existing] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'restaurant_logo')).limit(1);
+
+        if (existing) {
+          await db.update(siteSettings)
+            .set({ settingValue: url })
+            .where(eq(siteSettings.settingKey, 'restaurant_logo'));
+        } else {
+          await db.insert(siteSettings).values({
+            settingKey: 'restaurant_logo',
+            settingValue: url,
+          });
+        }
+
+        return { success: true, url };
       }),
   }),
 

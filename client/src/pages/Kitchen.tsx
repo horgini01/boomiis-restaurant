@@ -13,7 +13,7 @@ export default function KitchenDisplay() {
   const [previousUrgentOrders, setPreviousUrgentOrders] = useState<Set<number>>(new Set());
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [orderTypeFilter, setOrderTypeFilter] = useState<'all' | 'delivery' | 'pickup'>('all');
-  const { restaurantName } = useSettings();
+  const { restaurantName, restaurantLogo } = useSettings();
   
   // Update current time every second for timers
   useEffect(() => {
@@ -166,9 +166,18 @@ export default function KitchenDisplay() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <ChefHat className="h-10 w-10 text-orange-500" />
+          {restaurantLogo ? (
+            <img 
+              src={restaurantLogo} 
+              alt={restaurantName} 
+              className="h-16 w-auto object-contain"
+            />
+          ) : (
+            <ChefHat className="h-10 w-10 text-orange-500" />
+          )}
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-white">Kitchen Display</h1>
+            <p className="text-gray-400 text-sm">{restaurantName}</p>
             <p className="text-gray-400 text-lg">{format(currentTime, 'EEEE, MMMM d, yyyy • h:mm:ss a')}</p>
           </div>
         </div>

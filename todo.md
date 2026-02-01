@@ -279,3 +279,13 @@
 - [x] Update Admin Layout to load restaurant name dynamically
 - [x] Create useSettings hook for easy access to restaurant settings
 - [x] Test settings updates reflect immediately across all pages
+## New Features (User Request - Feb 1 - Logo Upload & Email Branding)
+- [x] Add logo upload field to admin restaurant settings page (General tab)
+- [x] Create tRPC mutation for uploading logo to S3 storage
+- [x] Store logo URL in siteSettings table
+- [x] Update Header component to display uploaded logo
+- [x] Update Kitchen Display to show uploaded logo
+- [x] Enhance order confirmation email template with logo and contact details
+- [x] Enhance reservation confirmation email template with logo and contact details
+- [x] Add fallback for when no logo is uploaded (show restaurant name)
+- [x] Fetch restaurant settings dynamically in email templates
