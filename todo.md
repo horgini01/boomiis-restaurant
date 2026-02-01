@@ -407,3 +407,15 @@
 - [x] Test all templates pre-populate correctly when selected (verified in browser)
 - [x] Test Order Preparing template pre-populates correctly
 - [x] All 20 tests passing
+
+## Bug Fixes (User Reported - Feb 1 - Custom Templates Not Being Used)
+- [x] Create getCustomTemplate() helper function to fetch templates from database
+- [x] Update generateOrderConfirmationEmailHTML to check for custom templates first
+- [x] Update generateReservationConfirmationEmailHTML to check for custom templates first
+- [x] Update sendOrderConfirmationEmail to use custom subject lines
+- [x] Update sendReservationConfirmationEmail to use custom subject lines
+- [x] Add variable replacement for custom template body HTML
+- [x] Add variable replacement for custom template subjects
+- [x] Test saving custom template in Email Templates editor
+- [x] Test custom template preview shows correctly
+- [x] All 20 tests passing

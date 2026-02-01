@@ -58,6 +58,41 @@ function getResendClient(): Resend | null {
   return resendClient;
 }
 
+// Fetch custom email template from database
+async function getCustomTemplate(templateType: string): Promise<{
+  subject: string;
+  bodyHtml: string;
+  headerColor: string;
+  footerText: string;
+} | null> {
+  try {
+    const db = await getDb();
+    if (!db) return null;
+
+    const { emailTemplates } = await import('../drizzle/schema');
+    const { eq } = await import('drizzle-orm');
+    
+    const templates = await db.select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.templateType, templateType))
+      .limit(1);
+
+    if (templates.length > 0 && templates[0].isActive) {
+      return {
+        subject: templates[0].subject,
+        bodyHtml: templates[0].bodyHtml,
+        headerColor: templates[0].headerColor,
+        footerText: templates[0].footerText || '',
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('[Email] Failed to fetch custom template:', error);
+    return null;
+  }
+}
+
 // Log email to database for tracking
 async function logEmail({
   templateType,
@@ -130,6 +165,9 @@ interface ReservationEmailData {
  * Generate order confirmation email HTML
  */
 export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): Promise<string> {
+  // Check for custom template first
+  const customTemplate = await getCustomTemplate('order_confirmation');
+  
   // Fetch restaurant settings
   const settings = await getRestaurantSettings();
   const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
@@ -148,6 +186,62 @@ export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): 
   const itemsList = data.items
     .map(item => `<li>${item.quantity}x ${item.name} - £${item.price.toFixed(2)}</li>`)
     .join('');
+
+  // If custom template exists, use it
+  if (customTemplate) {
+    let customBody = customTemplate.bodyHtml
+      .replace(/{customerName}/g, data.customerName)
+      .replace(/{orderNumber}/g, data.orderNumber)
+      .replace(/{orderType}/g, data.orderType === 'delivery' ? 'Delivery' : 'Pickup')
+      .replace(/{deliveryAddress}/g, data.deliveryAddress || 'N/A')
+      .replace(/{itemsList}/g, itemsList)
+      .replace(/{subtotal}/g, data.subtotal.toFixed(2))
+      .replace(/{deliveryFee}/g, data.deliveryFee.toFixed(2))
+      .replace(/{total}/g, data.total.toFixed(2))
+      .replace(/{restaurantName}/g, restaurantName);
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: ${customTemplate.headerColor}; color: white; padding: 30px 20px; text-align: center; }
+            .header img { max-height: 60px; margin-bottom: 15px; }
+            .header h1 { margin: 0; font-size: 28px; }
+            .content { background: #f9f9f9; padding: 30px 20px; }
+            .content h2, .content h3, .content h4 { color: ${customTemplate.headerColor}; }
+            .total { font-size: 1.2em; font-weight: bold; color: ${customTemplate.headerColor}; }
+            .footer { background: #333; color: #fff; padding: 20px; text-align: center; font-size: 14px; }
+            ul, ol { padding-left: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
+              <h1>Order Confirmation</h1>
+            </div>
+            <div class="content">
+              ${customBody}
+            </div>
+            <div class="footer">
+              ${customTemplate.footerText}
+              <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #555;">
+                <p><strong>${restaurantName}</strong></p>
+                <p>📍 ${contactAddress}</p>
+                <p>📞 ${contactPhone}</p>
+                <p>✉️ ${contactEmail}</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  }
+
+  // Otherwise use default template
 
   return `
     <!DOCTYPE html>
@@ -223,11 +317,22 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   
   try {
     const html = await generateOrderConfirmationEmailHTML(data);
+    
+    // Get custom subject line if available
+    const customTemplate = await getCustomTemplate('order_confirmation');
+    let subject = `Order Confirmation - #${data.orderNumber}`;
+    if (customTemplate) {
+      subject = customTemplate.subject
+        .replace(/{orderNumber}/g, data.orderNumber)
+        .replace(/{customerName}/g, data.customerName)
+        .replace(/{total}/g, data.total.toFixed(2))
+        .replace(/{restaurantName}/g, 'Boomiis Restaurant');
+    }
 
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.customerEmail,
-      subject: `Order Confirmation - #${data.orderNumber}`,
+      subject,
       html,
     });
 
@@ -369,21 +474,6 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
   }
   
   try{
-    // Fetch restaurant settings
-    const settings = await getRestaurantSettings();
-    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
-    let restaurantLogo = settings?.restaurant_logo || '';
-    const restaurantTagline = settings?.restaurant_tagline || 'Authentic West African Cuisine';
-    const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
-    const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
-    const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
-
-    // Convert relative logo path to absolute URL for emails
-    if (restaurantLogo && restaurantLogo.startsWith('/')) {
-      const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
-      restaurantLogo = `${baseUrl}${restaurantLogo}`;
-    }
-
     const formattedDate = new Date(data.date).toLocaleDateString('en-GB', {
       weekday: 'long',
       year: 'numeric',
@@ -391,61 +481,23 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
       day: 'numeric',
     });
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
-            .header img { max-height: 60px; margin-bottom: 15px; }
-            .content { background: #f9f9f9; padding: 20px; }
-            .reservation-details { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
-            .footer { text-align: center; padding: 20px; color: #666; font-size: 0.9em; border-top: 1px solid #ddd; margin-top: 20px; }
-            .footer-contact { margin: 10px 0; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
-              <h1>Reservation Confirmed</h1>
-            </div>
-            <div class="content">
-              <p>Dear ${data.customerName},</p>
-              <p>Your table reservation has been confirmed! We look forward to welcoming you to ${restaurantName}.</p>
-              
-              <div class="reservation-details">
-                <h2>Reservation Details</h2>
-                <p><strong>Date:</strong> ${formattedDate}</p>
-                <p><strong>Time:</strong> ${data.time}</p>
-                <p><strong>Number of Guests:</strong> ${data.guests}</p>
-                <p><strong>Name:</strong> ${data.customerName}</p>
-                <p><strong>Phone:</strong> ${data.customerPhone}</p>
-                ${data.specialRequests ? `<p><strong>Special Requests:</strong> ${data.specialRequests}</p>` : ''}
-              </div>
-              
-              <p>Please arrive on time. If you need to modify or cancel your reservation, please contact us at least 24 hours in advance.</p>
-            </div>
-            <div class="footer">
-              <p><strong>${restaurantName}</strong></p>
-              <p style="font-style: italic; color: #888;">${restaurantTagline}</p>
-              <div class="footer-contact">
-                <p>📍 ${contactAddress}</p>
-                <p>📞 ${contactPhone}</p>
-                <p>✉️ ${contactEmail}</p>
-              </div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+    const html = await generateReservationConfirmationEmailHTML(data);
+    
+    // Get custom subject line if available
+    const customTemplate = await getCustomTemplate('reservation_confirmation');
+    let subject = `Reservation Confirmed - ${formattedDate} at ${data.time}`;
+    if (customTemplate) {
+      subject = customTemplate.subject
+        .replace(/{customerName}/g, data.customerName)
+        .replace(/{reservationDateTime}/g, `${formattedDate} at ${data.time}`)
+        .replace(/{partySize}/g, data.guests.toString())
+        .replace(/{restaurantName}/g, 'Boomiis Restaurant');
+    }
 
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.customerEmail,
-      subject: `Reservation Confirmed - ${formattedDate} at ${data.time}`,
+      subject,
       html,
     });
 
@@ -857,6 +909,9 @@ export async function generateEmailPreviews() {
  * Generate reservation confirmation email HTML
  */
 export async function generateReservationConfirmationEmailHTML(data: ReservationEmailData): Promise<string> {
+  // Check for custom template first
+  const customTemplate = await getCustomTemplate('reservation_confirmation');
+  
   // Fetch restaurant settings
   const settings = await getRestaurantSettings();
   const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
@@ -878,6 +933,59 @@ export async function generateReservationConfirmationEmailHTML(data: Reservation
     month: 'long',
     day: 'numeric',
   });
+
+  // If custom template exists, use it
+  if (customTemplate) {
+    let customBody = customTemplate.bodyHtml
+      .replace(/{customerName}/g, data.customerName)
+      .replace(/{reservationDateTime}/g, `${formattedDate} at ${data.time}`)
+      .replace(/{partySize}/g, data.guests.toString())
+      .replace(/{specialRequests}/g, data.specialRequests || 'None')
+      .replace(/{customerEmail}/g, data.customerEmail)
+      .replace(/{customerPhone}/g, data.customerPhone)
+      .replace(/{restaurantName}/g, restaurantName);
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: ${customTemplate.headerColor}; color: white; padding: 30px 20px; text-align: center; }
+            .header img { max-height: 60px; margin-bottom: 15px; }
+            .header h1 { margin: 0; font-size: 28px; }
+            .content { background: #f9f9f9; padding: 30px 20px; }
+            .content h2, .content h3, .content h4 { color: ${customTemplate.headerColor}; }
+            .footer { background: #333; color: #fff; padding: 20px; text-align: center; font-size: 14px; }
+            ul, ol { padding-left: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
+              <h1>Reservation Confirmed</h1>
+            </div>
+            <div class="content">
+              ${customBody}
+            </div>
+            <div class="footer">
+              ${customTemplate.footerText}
+              <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #555;">
+                <p><strong>${restaurantName}</strong></p>
+                <p>📍 ${contactAddress}</p>
+                <p>📞 ${contactPhone}</p>
+                <p>✉️ ${contactEmail}</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  }
+
+  // Otherwise use default template
 
   return `
     <!DOCTYPE html>
