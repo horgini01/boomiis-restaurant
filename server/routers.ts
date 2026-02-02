@@ -5,8 +5,8 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
-import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers, emailCampaigns } from '../drizzle/schema';
+import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getAllSmsTemplates, getSmsTemplateById } from "./db";
+import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates } from '../drizzle/schema';
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
@@ -1542,6 +1542,58 @@ export const appRouter = router({
         if (!db) throw new Error('Database not available');
 
         await db.delete(emailCampaigns).where(eq(emailCampaigns.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  smsTemplates: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const templates = await getAllSmsTemplates();
+      return templates;
+    }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const template = await getSmsTemplateById(input.id);
+        if (!template) {
+          throw new Error('Template not found');
+        }
+        return template;
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        templateName: z.string().min(1),
+        message: z.string().min(1),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(smsTemplates)
+          .set({
+            templateName: input.templateName,
+            message: input.message,
+            isActive: input.isActive,
+            updatedAt: new Date(),
+          })
+          .where(eq(smsTemplates.id, input.id));
+
         return { success: true };
       }),
   }),

@@ -26,6 +26,7 @@ import RestaurantSettings from "./pages/admin/RestaurantSettings";
 import EmailDelivery from "./pages/admin/EmailDelivery";
 import NewsletterSubscribers from "./pages/admin/NewsletterSubscribers";
 import EmailCampaigns from "./pages/admin/EmailCampaigns";
+import SMSTemplates from "./pages/admin/SMSTemplates";
 import Kitchen from "./pages/Kitchen";
 
 function Router() {
@@ -48,6 +49,7 @@ function Router() {
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/admin/email-delivery"} component={EmailDelivery} />
       <Route path={"/admin/newsletter-subscribers"} component={NewsletterSubscribers} />
+      <Route path={"/admin/sms-templates"} component={SMSTemplates} />
       <Route path={"/admin/email-campaigns"} component={EmailCampaigns} />
       <Route path={"/kitchen"} component={Kitchen} />
       <Route path={"/404"} component={NotFound} />

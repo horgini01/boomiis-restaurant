@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, menuCategories, menuItems, orders, orderItems, reservations } from "../drizzle/schema";
+import { InsertUser, users, menuCategories, menuItems, orders, orderItems, reservations, smsTemplates } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -126,5 +126,32 @@ export async function getMenuItemById(id: number) {
   if (!db) return null;
   
   const result = await db.select().from(menuItems).where(eq(menuItems.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+// SMS Template queries
+export async function getAllSmsTemplates() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(smsTemplates).orderBy(smsTemplates.templateType);
+}
+
+export async function getSmsTemplateByType(templateType: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(smsTemplates)
+    .where(and(eq(smsTemplates.templateType, templateType), eq(smsTemplates.isActive, true)))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getSmsTemplateById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(smsTemplates).where(eq(smsTemplates.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
 }

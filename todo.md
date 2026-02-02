@@ -728,3 +728,13 @@
 - [x] Test BulkSMS API integration
 - [x] Update tests to validate BulkSMS credentials
 - [x] Keep Twilio as optional alternative provider (still supported)
+
+## SMS Template Customization (User Request - Feb 2)
+- [x] Create database schema for SMS templates
+- [x] Add default SMS templates for order ready and out for delivery
+- [x] Build backend API (tRPC) for SMS template management (CRUD)
+- [x] Create admin UI page for editing SMS templates
+- [x] Support template variables (customer name, order number, estimated time)
+- [x] Update SMS service to use custom templates from database
+- [ ] Add template preview functionality (future enhancement)
+- [x] Test SMS template customization end-to-end (all 39 tests passing)

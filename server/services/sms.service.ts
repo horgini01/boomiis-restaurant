@@ -1,5 +1,6 @@
 import twilio from 'twilio';
 import { ENV } from '../_core/env';
+import { getSmsTemplateByType } from '../db';
 
 // SMS Provider type
 type SMSProvider = 'bulksms' | 'twilio' | 'none';
@@ -210,6 +211,20 @@ export async function sendSMS({ to, message }: SendSMSParams): Promise<SMSResult
 }
 
 /**
+ * Replace template variables in SMS message
+ */
+function replaceTemplateVariables(
+  template: string,
+  variables: Record<string, string | number>
+): string {
+  let message = template;
+  for (const [key, value] of Object.entries(variables)) {
+    message = message.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+  }
+  return message;
+}
+
+/**
  * Send SMS notification when order is ready for pickup
  */
 export async function sendOrderReadyForPickupSMS(
@@ -217,7 +232,20 @@ export async function sendOrderReadyForPickupSMS(
   customerPhone: string,
   orderNumber: string
 ): Promise<void> {
-  const message = `Hi ${customerName}! Your order #${orderNumber} is ready for pickup at Boomiis Restaurant. See you soon!`;
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('order_ready');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      orderNumber,
+    });
+  } else {
+    // Fallback to default message
+    message = `Hi ${customerName}! Your order #${orderNumber} is ready for pickup at Boomiis Restaurant. See you soon!`;
+  }
   
   const result = await sendSMS({
     to: customerPhone,
@@ -240,7 +268,21 @@ export async function sendOrderOutForDeliverySMS(
   orderNumber: string,
   estimatedMinutes: number = 30
 ): Promise<void> {
-  const message = `Hi ${customerName}! Your order #${orderNumber} is out for delivery and will arrive in approximately ${estimatedMinutes} minutes.`;
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('out_for_delivery');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      orderNumber,
+      estimatedMinutes,
+    });
+  } else {
+    // Fallback to default message
+    message = `Hi ${customerName}! Your order #${orderNumber} is out for delivery and will arrive in approximately ${estimatedMinutes} minutes.`;
+  }
   
   const result = await sendSMS({
     to: customerPhone,

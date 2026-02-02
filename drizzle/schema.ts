@@ -296,3 +296,19 @@ export const emailCampaigns = mysqlTable("email_campaigns", {
 
 export type EmailCampaign = typeof emailCampaigns.$inferSelect;
 export type InsertEmailCampaign = typeof emailCampaigns.$inferInsert;
+
+/**
+ * SMS notification templates for customizable SMS communications
+ */
+export const smsTemplates = mysqlTable("sms_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  templateType: varchar("template_type", { length: 50 }).notNull().unique(), // 'order_ready', 'out_for_delivery'
+  templateName: varchar("template_name", { length: 100 }).notNull(),
+  message: text("message").notNull(), // SMS message body with template variables {{customerName}}, {{orderNumber}}, {{estimatedMinutes}}
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SmsTemplate = typeof smsTemplates.$inferSelect;
+export type InsertSmsTemplate = typeof smsTemplates.$inferInsert;
