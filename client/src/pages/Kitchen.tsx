@@ -12,7 +12,7 @@ export default function KitchenDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [previousUrgentOrders, setPreviousUrgentOrders] = useState<Set<number>>(new Set());
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [orderTypeFilter, setOrderTypeFilter] = useState<'all' | 'delivery' | 'pickup'>('all');
+  const [orderTypeFilter, setOrderTypeFilter] = useState<'all' | 'delivery' | 'pickup' | 'completed'>('all');
   const { restaurantName, restaurantLogo } = useSettings();
   
   // Update current time every second for timers
@@ -24,6 +24,11 @@ export default function KitchenDisplay() {
   const utils = trpc.useUtils();
   const { data: orders, isLoading } = trpc.admin.getOrders.useQuery(undefined, {
     refetchInterval: 5000, // Auto-refresh every 5 seconds
+  });
+
+  const { data: completedOrders, isLoading: isLoadingCompleted } = trpc.admin.getCompletedOrders.useQuery(undefined, {
+    refetchInterval: 30000, // Refresh every 30 seconds
+    enabled: orderTypeFilter === 'completed', // Only fetch when Completed tab is active
   });
 
   // Play alert sound
@@ -79,18 +84,28 @@ export default function KitchenDisplay() {
     },
   });
 
-  // Filter to show only active orders (not completed or cancelled)
-  let activeOrders = orders?.filter(
-    (order) => !['completed', 'cancelled'].includes(order.status)
-  ) || [];
+  // Determine which orders to display based on filter
+  let displayOrders: any[] = [];
   
-  // Apply order type filter
-  if (orderTypeFilter !== 'all') {
-    activeOrders = activeOrders.filter(order => order.orderType === orderTypeFilter);
+  if (orderTypeFilter === 'completed') {
+    // Show completed orders from last 24 hours
+    displayOrders = completedOrders || [];
+  } else {
+    // Filter to show only active orders (not completed or cancelled)
+    let activeOrders = orders?.filter(
+      (order) => !['completed', 'cancelled'].includes(order.status)
+    ) || [];
+    
+    // Apply order type filter
+    if (orderTypeFilter !== 'all') {
+      activeOrders = activeOrders.filter(order => order.orderType === orderTypeFilter);
+    }
+    
+    displayOrders = activeOrders;
   }
 
   // Sort by urgency (scheduled time) and status
-  const sortedOrders = [...activeOrders].sort((a, b) => {
+  const sortedOrders = [...displayOrders].sort((a, b) => {
     // Priority 1: Orders that are preparing come first
     if (a.status === 'preparing' && b.status !== 'preparing') return -1;
     if (b.status === 'preparing' && a.status !== 'preparing') return 1;
@@ -153,6 +168,136 @@ export default function KitchenDisplay() {
     updateStatusMutation.mutate({ orderId, status: newStatus });
   };
 
+  const handlePrintReceipt = (order: any) => {
+    // Parse order items
+    let orderItems: any[] = [];
+    try {
+      orderItems = order.items ? JSON.parse(order.items) : [];
+    } catch (e) {
+      console.error('Failed to parse order items:', e);
+    }
+
+    // Create printable receipt content
+    const receiptContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Kitchen Receipt - ${order.orderNumber}</title>
+        <style>
+          @page { margin: 0.5cm; }
+          body {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 20px;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+          }
+          .order-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+          }
+          .section {
+            margin: 15px 0;
+            padding: 10px 0;
+            border-bottom: 1px dashed #000;
+          }
+          .section:last-child {
+            border-bottom: 2px dashed #000;
+          }
+          .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+          }
+          .items {
+            margin: 10px 0;
+          }
+          .item {
+            margin: 5px 0;
+            padding-left: 10px;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>${restaurantName || 'Boomiis Restaurant'}</h2>
+          <div class="order-number">#${order.orderNumber}</div>
+          <div>${new Date(order.createdAt).toLocaleString()}</div>
+        </div>
+
+        <div class="section">
+          <div><span class="label">Customer:</span>${order.customerName}</div>
+          <div><span class="label">Phone:</span>${order.customerPhone}</div>
+          ${order.orderType === 'delivery' ? `
+            <div><span class="label">Address:</span>${order.customerAddress || ''}</div>
+            <div><span class="label">Postcode:</span>${order.customerPostcode || ''}</div>
+          ` : ''}
+        </div>
+
+        <div class="section">
+          <div><span class="label">Order Type:</span>${order.orderType.toUpperCase()}</div>
+          <div><span class="label">${order.orderType === 'pickup' ? 'Pickup' : 'Delivery'} Time:</span>${order.scheduledFor ? new Date(order.scheduledFor).toLocaleTimeString() : 'ASAP'}</div>
+          <div><span class="label">Completed:</span>${new Date(order.updatedAt).toLocaleTimeString()}</div>
+        </div>
+
+        <div class="section">
+          <div class="label">Items:</div>
+          <div class="items">
+            ${orderItems.map(item => `
+              <div class="item">${item.quantity}x ${item.name} - £${parseFloat(item.price || 0).toFixed(2)}</div>
+            `).join('')}
+          </div>
+        </div>
+
+        ${order.specialInstructions ? `
+          <div class="section">
+            <div class="label">Special Instructions:</div>
+            <div style="padding-left: 10px; margin-top: 5px;">${order.specialInstructions}</div>
+          </div>
+        ` : ''}
+
+        <div class="section">
+          <div><span class="label">Subtotal:</span>£${parseFloat(order.subtotal || 0).toFixed(2)}</div>
+          ${parseFloat(order.deliveryFee || 0) > 0 ? `<div><span class="label">Delivery Fee:</span>£${parseFloat(order.deliveryFee || 0).toFixed(2)}</div>` : ''}
+          <div style="font-size: 18px; font-weight: bold; margin-top: 10px;">
+            <span class="label">TOTAL:</span>£${parseFloat(order.total || 0).toFixed(2)}
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>Thank you for your order!</p>
+          <p>Kitchen Receipt - For Driver Handoff</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Open print window
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(receiptContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    } else {
+      toast.error('Please allow popups to print receipts');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -183,8 +328,8 @@ export default function KitchenDisplay() {
         </div>
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <div className="text-5xl font-bold text-white">{activeOrders.length}</div>
-            <div className="text-gray-400 text-lg">Active Orders</div>
+            <div className="text-5xl font-bold text-white">{orderTypeFilter === 'completed' ? (completedOrders?.length || 0) : (displayOrders.length)}</div>
+            <div className="text-gray-400 text-lg">{orderTypeFilter === 'completed' ? 'Completed Orders' : 'Active Orders'}</div>
           </div>
           <div className="flex gap-3">
             <Button
@@ -233,6 +378,14 @@ export default function KitchenDisplay() {
           className="h-12 px-8 text-lg"
         >
           Pickup Only
+        </Button>
+        <Button
+          size="lg"
+          variant={orderTypeFilter === 'completed' ? 'default' : 'outline'}
+          onClick={() => setOrderTypeFilter('completed')}
+          className="h-12 px-8 text-lg"
+        >
+          ✅ Completed
         </Button>
       </div>
 
@@ -360,6 +513,16 @@ export default function KitchenDisplay() {
 
                   {/* Action Buttons */}
                   <div className="grid grid-cols-2 gap-2 pt-2">
+                    {orderTypeFilter === 'completed' && (
+                      <Button
+                        size="lg"
+                        className="col-span-2 bg-yellow-600 hover:bg-yellow-700 text-white text-lg h-14 flex items-center justify-center gap-2"
+                        onClick={() => handlePrintReceipt(order)}
+                      >
+                        <Printer className="h-5 w-5" />
+                        Print Receipt
+                      </Button>
+                    )}
                     {order.status === 'pending' && (
                       <Button
                         size="lg"

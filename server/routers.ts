@@ -601,6 +601,50 @@ export const appRouter = router({
       return ordersWithItems;
     }),
 
+    getCompletedOrders: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();  
+      if (!db) throw new Error('Database not available');
+
+      // Get orders completed in last 24 hours
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const completedOrders = await db
+        .select()
+        .from(orders)
+        .where(sql`${orders.status} = 'completed' AND ${orders.updatedAt} >= ${twentyFourHoursAgo}`);
+      
+      // For each order, fetch its items
+      const ordersWithItems = await Promise.all(
+        completedOrders.map(async (order) => {
+          const items = await db
+            .select()
+            .from(orderItemsTable)
+            .where(eq(orderItemsTable.orderId, order.id));
+          
+          const itemsJson = JSON.stringify(
+            items.map(item => ({
+              name: item.menuItemName,
+              quantity: item.quantity,
+              price: item.price,
+            }))
+          );
+          
+          return {
+            ...order,
+            items: itemsJson,
+          };
+        })
+      );
+      
+      // Sort by completion time (most recent first)
+      return ordersWithItems.sort((a, b) => 
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+    }),
+
     updateOrderStatus: protectedProcedure
       .input(z.object({ orderId: z.number(), status: z.string() }))
       .mutation(async ({ ctx, input }) => {
