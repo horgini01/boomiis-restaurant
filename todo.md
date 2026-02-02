@@ -538,3 +538,18 @@
 - [x] Order created successfully and redirected to Stripe checkout
 - [x] No "Invalid time value" error occurred
 - [x] All tests passing
+
+## Bug Fixes (User Reported - Feb 1 - Email Logo and Admin Notification Issues)
+- [x] Investigate why logo is not showing in customer order confirmation emails
+- [x] Found hardcoded old dev server URL in email.ts (line 203)
+- [x] Logo URL was using fallback: 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer'
+- [x] Current dev server URL is different, causing broken image links
+- [x] Investigate why admin notification emails are not being sent
+- [x] Server logs confirm admin emails ARE being sent successfully
+- [x] Email sent to boomiis2026@gmail.com at 2026-02-02T00:16:45.690Z
+- [x] Likely in spam folder or delayed delivery
+- [x] Fix logo URL to use ENV.baseUrl without hardcoded fallback
+- [x] Remove hardcoded URL fallback from both email template functions
+- [ ] Test customer order confirmation email shows logo correctly (requires new test order)
+- [ ] Verify admin email received (check spam folder at boomiis2026@gmail.com)
+- [x] All 20 tests passing

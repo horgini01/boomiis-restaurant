@@ -200,8 +200,7 @@ export async function generateOrderConfirmationEmailHTML(data: OrderEmailData): 
 
   // Convert relative logo path to absolute URL for emails
   if (restaurantLogo && restaurantLogo.startsWith('/')) {
-    const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
-    restaurantLogo = `${baseUrl}${restaurantLogo}`;
+    restaurantLogo = `${ENV.baseUrl}${restaurantLogo}`;
   }
 
   const itemsList = data.items
@@ -980,8 +979,7 @@ export async function generateReservationConfirmationEmailHTML(data: Reservation
 
   // Convert relative logo path to absolute URL for emails
   if (restaurantLogo && restaurantLogo.startsWith('/')) {
-    const baseUrl = ENV.baseUrl || 'https://3000-i02qgi4jns0wq7v87i2yc-7f7065a3.us2.manus.computer';
-    restaurantLogo = `${baseUrl}${restaurantLogo}`;
+    restaurantLogo = `${ENV.baseUrl}${restaurantLogo}`;
   }
 
   // Get delivery areas text
