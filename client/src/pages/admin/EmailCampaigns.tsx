@@ -10,12 +10,15 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Loader2, Mail, Send, Trash2, Plus, Eye } from 'lucide-react';
+import { Loader2, Mail, Send, Trash2, Plus, Eye, BookTemplate } from 'lucide-react';
+import { EmailTemplateLibrary } from '@/components/EmailTemplateLibrary';
+import type { EmailTemplate } from '@/lib/emailTemplates';
 
 export default function EmailCampaigns() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isTemplateLibraryOpen, setIsTemplateLibraryOpen] = useState(false);
   const [formData, setFormData] = useState({
     campaignName: '',
     subject: '',
@@ -26,6 +29,15 @@ export default function EmailCampaigns() {
   const { data: subscribers = [] } = trpc.subscribers.getAll.useQuery();
   const { data: settings } = trpc.settings.getPublic.useQuery();
   
+  const handleSelectTemplate = (template: EmailTemplate) => {
+    setFormData({
+      campaignName: template.name,
+      subject: template.defaultSubject,
+      bodyHtml: template.bodyHtml,
+    });
+    toast.success(`Template "${template.name}" loaded. Customize and save when ready.`);
+  };
+
   const createMutation = trpc.campaigns.create.useMutation({
     onSuccess: () => {
       toast.success('Campaign created successfully');
@@ -142,6 +154,7 @@ export default function EmailCampaigns() {
   }
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -158,6 +171,16 @@ export default function EmailCampaigns() {
               <DialogTitle>Create Email Campaign</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsTemplateLibraryOpen(true)}
+                >
+                  <BookTemplate className="h-4 w-4 mr-2" />
+                  Choose from Template Library
+                </Button>
+              </div>
               <div>
                 <Label htmlFor="campaignName">Campaign Name *</Label>
                 <Input
@@ -381,5 +404,13 @@ export default function EmailCampaigns() {
       </Dialog>
     </div>
     </AdminLayout>
+    
+      {/* Template Library Modal */}
+      <EmailTemplateLibrary
+        open={isTemplateLibraryOpen}
+        onClose={() => setIsTemplateLibraryOpen(false)}
+        onSelectTemplate={handleSelectTemplate}
+      />
+    </>
   );
 }

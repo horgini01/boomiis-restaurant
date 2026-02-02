@@ -630,3 +630,18 @@
 - [x] Test resend functionality sends to all active subscribers
 - [x] Test preview displays logo and restaurant branding correctly
 - [x] All 28 tests passing
+
+## Email Template Library (User Request - Feb 2)
+- [x] Create email template data structure with categories
+- [x] Design Welcome Newsletter template (based on existing confirmation email)
+- [x] Design Monthly Specials template with food imagery placeholders
+- [x] Design Event Announcement template
+- [x] Design Seasonal Offers template
+- [x] Design Discount & Promotion template
+- [x] Design Catering Services template
+- [x] Build template library UI component with preview
+- [x] Add template selection modal to campaign composer
+- [x] Implement one-click template insertion into campaign bodyHtml
+- [x] Add template preview before insertion
+- [x] Test template selection and insertion workflow
+- [x] All 28 tests passing
