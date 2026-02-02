@@ -720,3 +720,11 @@
 - [x] Add phone number validation for SMS delivery (formatPhoneNumberE164 function)
 - [ ] Add SMS provider selection in admin settings (future enhancement)
 - [x] Test SMS delivery end-to-end with both providers (tests passing, manual testing with credentials)
+
+## SMS Provider Update (User Request - Feb 2)
+- [x] Research BulkSMS API documentation
+- [x] Replace Textlocal with BulkSMS in SMS service (Textlocal shutting down Nov 2025)
+- [x] Update environment variables for BulkSMS
+- [x] Test BulkSMS API integration
+- [x] Update tests to validate BulkSMS credentials
+- [x] Keep Twilio as optional alternative provider (still supported)

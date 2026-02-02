@@ -2,14 +2,14 @@ import twilio from 'twilio';
 import { ENV } from '../_core/env';
 
 // SMS Provider type
-type SMSProvider = 'textlocal' | 'twilio' | 'none';
+type SMSProvider = 'bulksms' | 'twilio' | 'none';
 
 // Get configured SMS provider
 function getSMSProvider(): SMSProvider {
   const provider = ENV.smsProvider?.toLowerCase();
   
-  if (provider === 'textlocal' && ENV.textlocalApiKey) {
-    return 'textlocal';
+  if (provider === 'bulksms' && ENV.bulksmsTokenId && ENV.bulksmsTokenSecret) {
+    return 'bulksms';
   }
   
   if (provider === 'twilio' && ENV.twilioAccountSid && ENV.twilioAuthToken) {
@@ -17,8 +17,8 @@ function getSMSProvider(): SMSProvider {
   }
   
   // Auto-detect based on available credentials
-  if (ENV.textlocalApiKey) {
-    return 'textlocal';
+  if (ENV.bulksmsTokenId && ENV.bulksmsTokenSecret) {
+    return 'bulksms';
   }
   
   if (ENV.twilioAccountSid && ENV.twilioAuthToken) {
@@ -57,109 +57,87 @@ interface SMSResult {
 }
 
 /**
- * Format phone number for Textlocal (UK format without + prefix)
- * @param phone - Phone number in various formats
- * @returns Formatted number for Textlocal (e.g., 447911123456)
- */
-function formatPhoneForTextlocal(phone: string): string {
-  // Remove all non-digit characters
-  let cleaned = phone.replace(/\D/g, '');
-  
-  // If starts with +44, remove the +
-  if (phone.startsWith('+44')) {
-    cleaned = '44' + cleaned.substring(2);
-  }
-  
-  // If starts with 0 (UK local format), replace with 44
-  if (cleaned.startsWith('0')) {
-    cleaned = '44' + cleaned.substring(1);
-  }
-  
-  // If starts with 44, keep as is
-  // Otherwise assume UK and prepend 44
-  if (!cleaned.startsWith('44')) {
-    cleaned = '44' + cleaned;
-  }
-  
-  return cleaned;
-}
-
-/**
- * Format phone number to E.164 format for Twilio
+ * Format phone number to E.164 format (required by both BulkSMS and Twilio)
  * @param phone - Phone number in various formats
  * @returns E.164 formatted number (e.g., +447911123456)
  */
 export function formatPhoneNumberE164(phone: string): string {
-  // Remove all non-digit characters
-  let cleaned = phone.replace(/\D/g, '');
+  // Remove all non-digit characters except +
+  let cleaned = phone.replace(/[^\d+]/g, '');
   
   // If starts with 0, assume UK number and replace with +44
   if (cleaned.startsWith('0')) {
-    cleaned = '44' + cleaned.substring(1);
+    cleaned = '+44' + cleaned.substring(1);
   }
   
   // Add + prefix if not present
   if (!cleaned.startsWith('+')) {
-    cleaned = '+' + cleaned;
+    // If starts with 44, add +
+    if (cleaned.startsWith('44')) {
+      cleaned = '+' + cleaned;
+    } else {
+      // Assume UK and add +44
+      cleaned = '+44' + cleaned;
+    }
   }
   
   return cleaned;
 }
 
 /**
- * Send SMS via Textlocal
+ * Send SMS via BulkSMS
  */
-async function sendViaTextlocal({ to, message }: SendSMSParams): Promise<SMSResult> {
-  const apiKey = ENV.textlocalApiKey;
-  const sender = ENV.textlocalSender || 'Boomiis';
+async function sendViaBulkSMS({ to, message }: SendSMSParams): Promise<SMSResult> {
+  const tokenId = ENV.bulksmsTokenId;
+  const tokenSecret = ENV.bulksmsTokenSecret;
   
-  if (!apiKey) {
-    return { success: false, error: 'Textlocal API key not configured', provider: 'textlocal' };
+  if (!tokenId || !tokenSecret) {
+    return { success: false, error: 'BulkSMS credentials not configured', provider: 'bulksms' };
   }
   
   try {
-    const formattedNumber = formatPhoneForTextlocal(to);
+    const formattedNumber = formatPhoneNumberE164(to);
     
-    // Prepare form data
-    const params = new URLSearchParams({
-      apikey: apiKey,
-      numbers: formattedNumber,
-      message: message,
-      sender: sender,
-    });
+    // Create Basic Auth credentials
+    const credentials = Buffer.from(`${tokenId}:${tokenSecret}`).toString('base64');
     
-    const response = await fetch('https://api.txtlocal.com/send/', {
+    const response = await fetch('https://api.bulksms.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials}`,
       },
-      body: params.toString(),
+      body: JSON.stringify({
+        to: formattedNumber,
+        body: message,
+      }),
     });
     
     const data = await response.json();
     
-    if (data.status === 'success') {
-      console.log(`[SMS][Textlocal] Message sent successfully: ${data.batch_id}`);
+    if (response.status === 201 && Array.isArray(data) && data.length > 0) {
+      const sentMessage = data[0];
+      console.log(`[SMS][BulkSMS] Message sent successfully: ${sentMessage.id}`);
       return {
         success: true,
-        messageId: data.batch_id?.toString(),
-        provider: 'textlocal',
+        messageId: sentMessage.id,
+        provider: 'bulksms',
       };
     } else {
-      const errorMsg = data.errors?.[0]?.message || 'Unknown error';
-      console.error(`[SMS][Textlocal] Failed to send SMS:`, errorMsg);
+      const errorMsg = data.detail || data.title || 'Unknown error';
+      console.error(`[SMS][BulkSMS] Failed to send SMS:`, errorMsg, data);
       return {
         success: false,
         error: errorMsg,
-        provider: 'textlocal',
+        provider: 'bulksms',
       };
     }
   } catch (error: any) {
-    console.error('[SMS][Textlocal] Exception:', error.message);
+    console.error('[SMS][BulkSMS] Exception:', error.message);
     return {
       success: false,
       error: error.message,
-      provider: 'textlocal',
+      provider: 'bulksms',
     };
   }
 }
@@ -220,8 +198,8 @@ export async function sendSMS({ to, message }: SendSMSParams): Promise<SMSResult
   
   console.log(`[SMS] Using provider: ${provider}`);
   
-  if (provider === 'textlocal') {
-    return sendViaTextlocal({ to, message });
+  if (provider === 'bulksms') {
+    return sendViaBulkSMS({ to, message });
   }
   
   if (provider === 'twilio') {

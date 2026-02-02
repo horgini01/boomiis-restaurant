@@ -15,7 +15,7 @@ export const ENV = {
   twilioAccountSid: process.env.TWILIO_ACCOUNT_SID ?? "",
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN ?? "",
   twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER ?? "",
-  textlocalApiKey: process.env.TEXTLOCAL_API_KEY ?? "",
-  textlocalSender: process.env.TEXTLOCAL_SENDER ?? "Boomiis",
-  smsProvider: process.env.SMS_PROVIDER ?? "textlocal",
+  bulksmsTokenId: process.env.BULKSMS_TOKEN_ID ?? "",
+  bulksmsTokenSecret: process.env.BULKSMS_TOKEN_SECRET ?? "",
+  smsProvider: process.env.SMS_PROVIDER ?? "bulksms",
 };
