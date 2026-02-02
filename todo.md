@@ -698,3 +698,8 @@
 - [x] Investigate newsletter checkbox visibility on checkout page
 - [x] Confirm checkbox is visible and working correctly (lines 381-392 in Checkout.tsx)
 - [x] Document findings - checkbox appears below Special Instructions section
+
+## Bug Fixes (Critical - User Reported - Feb 2)
+- [x] Fix tRPC API error on checkout page returning HTML instead of JSON
+- [x] Investigate which API endpoint is failing on /checkout page
+- [x] Fix server-side error causing HTML error page response (syntax error in EmailCampaigns.tsx)

@@ -403,14 +403,14 @@ export default function EmailCampaigns() {
         </DialogContent>
       </Dialog>
     </div>
-    </AdminLayout>
-    
+
       {/* Template Library Modal */}
       <EmailTemplateLibrary
         open={isTemplateLibraryOpen}
         onClose={() => setIsTemplateLibraryOpen(false)}
         onSelectTemplate={handleSelectTemplate}
       />
+    </AdminLayout>
     </>
   );
 }
