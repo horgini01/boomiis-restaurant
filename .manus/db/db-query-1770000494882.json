@@ -1,0 +1,18 @@
+{
+  "query": "SELECT * FROM site_settings LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM site_settings LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "setting_key": "restaurant_name",
+      "setting_value": "Boomiis",
+      "setting_type": "text",
+      "description": "Restaurant name displayed across the site",
+      "updated_at": "2026-02-01 16:49:09"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsetting_key\tsetting_value\tsetting_type\tdescription\tupdated_at\n1\trestaurant_name\tBoomiis\ttext\tRestaurant name displayed across the site\t2026-02-01 16:49:09\n",
+  "stderr": "",
+  "execution_time_ms": 105
+}

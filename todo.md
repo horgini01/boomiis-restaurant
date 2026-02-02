@@ -653,3 +653,14 @@
 - [x] Test campaign preview matches confirmation email
 - [x] Verify campaign can be sent to subscribers
 - [x] All 28 tests passing
+
+## Bug Fixes (User Reported - Feb 2 - Logo Not Showing in Customer Emails)
+- [x] Investigate why logo shows in admin preview but not in Gmail
+- [x] Check current logo URL implementation in email templates
+- [x] Convert local logo path to absolute public URL accessible by email clients
+- [x] Upload logo to S3 storage for permanent public URL
+- [x] Update database with S3 logo URL
+- [x] Email templates already use absolute URL conversion (ENV.baseUrl + path)
+- [x] Test logo displays correctly in actual Gmail inbox (sent to 2 subscribers)
+- [x] Logo now at: https://d2xsxph8kpxj0f.cloudfront.net/.../boomiis-logo.png
+- [x] All 28 tests passing
