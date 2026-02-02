@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,7 +87,8 @@ export default function NewsletterSubscribers() {
   }
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Newsletter Subscribers</h1>
         <Button onClick={handleExportCSV} variant="outline">
@@ -216,5 +218,6 @@ export default function NewsletterSubscribers() {
         </CardContent>
       </Card>
     </div>
+    </AdminLayout>
   );
 }

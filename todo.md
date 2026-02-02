@@ -614,3 +614,11 @@
 - [x] Test promotional email campaign creation
 - [x] Test bulk email sending to subscribers
 - [x] All 28 tests passing (including 8 new newsletter tests)
+
+## Bug Fixes (User Reported - Feb 2 - Newsletter Pages Issues)
+- [x] Wrap Newsletter Subscribers page in AdminLayout component to show sidebar
+- [x] Wrap Email Campaigns page in AdminLayout component to show sidebar
+- [x] Fix email preview showing blank content in iframe
+- [x] Test sidebar navigation works on both newsletter pages
+- [x] Test email preview displays HTML content correctly
+- [x] All 28 tests passing

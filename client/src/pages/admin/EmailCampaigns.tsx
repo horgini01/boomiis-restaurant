@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -83,7 +84,44 @@ export default function EmailCampaigns() {
   };
 
   const handlePreview = (bodyHtml: string) => {
-    setPreviewHtml(bodyHtml);
+    // Wrap the content in the same template used for actual emails
+    const wrappedHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
+            .header img { max-height: 60px; margin-bottom: 15px; }
+            .content { background: #f9f9f9; padding: 30px 20px; }
+            .footer { background: #333; color: #fff; padding: 20px; text-align: center; font-size: 14px; }
+            .unsubscribe { color: #999; font-size: 12px; margin-top: 15px; }
+            .unsubscribe a { color: #d4a574; text-decoration: none; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 24px;">Boomiis Restaurant</h1>
+            </div>
+            <div class="content">
+              ${bodyHtml}
+            </div>
+            <div class="footer">
+              <p><strong>Boomiis Restaurant</strong></p>
+              <p>Authentic West African Cuisine</p>
+              <p>✉️ hello@boomiis.uk</p>
+              <div class="unsubscribe">
+                <p>You're receiving this email because you subscribed to our newsletter.</p>
+                <p>If you no longer wish to receive these emails, you can <a href="#">unsubscribe here</a>.</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    setPreviewHtml(wrappedHtml);
     setIsPreviewOpen(true);
   };
 
@@ -98,7 +136,8 @@ export default function EmailCampaigns() {
   }
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Email Campaigns</h1>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -324,5 +363,6 @@ export default function EmailCampaigns() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 }
