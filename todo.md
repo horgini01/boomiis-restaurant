@@ -664,3 +664,13 @@
 - [x] Test logo displays correctly in actual Gmail inbox (sent to 2 subscribers)
 - [x] Logo now at: https://d2xsxph8kpxj0f.cloudfront.net/.../boomiis-logo.png
 - [x] All 28 tests passing
+
+## Bug Fixes (User Reported - Feb 2 - Logo Still Not Displaying After S3 Upload)
+- [x] Check how email templates fetch restaurant settings
+- [x] Verify S3 logo URL is being retrieved from database
+- [x] Confirmed S3 URL is correct in database
+- [x] Email template logic already handles full URLs correctly
+- [x] Issue was timing - previous email sent before S3 upload
+- [x] Send fresh test email with S3 logo URL
+- [x] Confirm logo works in Gmail inbox - VERIFIED BY USER
+- [x] All 28 tests passing
