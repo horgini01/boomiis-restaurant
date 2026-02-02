@@ -24,6 +24,7 @@ export default function EmailCampaigns() {
 
   const { data: campaigns = [], isLoading, refetch } = trpc.campaigns.getAll.useQuery();
   const { data: subscribers = [] } = trpc.subscribers.getAll.useQuery();
+  const { data: settings } = trpc.settings.getPublic.useQuery();
   
   const createMutation = trpc.campaigns.create.useMutation({
     onSuccess: () => {
@@ -84,6 +85,11 @@ export default function EmailCampaigns() {
   };
 
   const handlePreview = (bodyHtml: string) => {
+    // Fetch restaurant settings for accurate preview
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+    const restaurantLogo = settings?.restaurant_logo || '';
+    const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+    
     // Wrap the content in the same template used for actual emails
     const wrappedHtml = `
       <!DOCTYPE html>
@@ -103,15 +109,15 @@ export default function EmailCampaigns() {
         <body>
           <div class="container">
             <div class="header">
-              <h1 style="margin: 0; font-size: 24px;">Boomiis Restaurant</h1>
+              ${restaurantLogo ? `<img src="${window.location.origin}${restaurantLogo}" alt="${restaurantName}" />` : `<h1 style="margin: 0; font-size: 24px;">${restaurantName}</h1>`}
             </div>
             <div class="content">
               ${bodyHtml}
             </div>
             <div class="footer">
-              <p><strong>Boomiis Restaurant</strong></p>
+              <p><strong>${restaurantName}</strong></p>
               <p>Authentic West African Cuisine</p>
-              <p>✉️ hello@boomiis.uk</p>
+              <p>✉️ ${contactEmail}</p>
               <div class="unsubscribe">
                 <p>You're receiving this email because you subscribed to our newsletter.</p>
                 <p>If you no longer wish to receive these emails, you can <a href="#">unsubscribe here</a>.</p>
@@ -318,6 +324,17 @@ export default function EmailCampaigns() {
                             >
                               <Send className="h-4 w-4 mr-1" />
                               Send
+                            </Button>
+                          )}
+                          {campaign.status === 'sent' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleSend(campaign.id, campaign.campaignName)}
+                              disabled={sendMutation.isPending || activeSubscribersCount === 0}
+                            >
+                              <Send className="h-4 w-4 mr-1" />
+                              Resend
                             </Button>
                           )}
                           <Button

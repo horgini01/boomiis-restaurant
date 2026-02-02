@@ -622,3 +622,11 @@
 - [x] Test sidebar navigation works on both newsletter pages
 - [x] Test email preview displays HTML content correctly
 - [x] All 28 tests passing
+
+## Email Campaign Improvements (User Request - Feb 2)
+- [x] Add "Resend" button for sent campaigns to reach new subscribers
+- [x] Fix email preview to fetch restaurant settings (logo, name, contact)
+- [x] Make preview match exactly what subscribers receive
+- [x] Test resend functionality sends to all active subscribers
+- [x] Test preview displays logo and restaurant branding correctly
+- [x] All 28 tests passing
