@@ -13,6 +13,9 @@ export default function KitchenDisplay() {
   const [previousUrgentOrders, setPreviousUrgentOrders] = useState<Set<number>>(new Set());
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [orderTypeFilter, setOrderTypeFilter] = useState<'all' | 'delivery' | 'pickup' | 'completed'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [timeFilter, setTimeFilter] = useState<'all' | 'overdue' | 'next30' | 'today'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'preparing' | 'ready'>('all');
   const { restaurantName, restaurantLogo } = useSettings();
   
   // Update current time every second for timers
@@ -99,6 +102,49 @@ export default function KitchenDisplay() {
     // Apply order type filter
     if (orderTypeFilter !== 'all') {
       activeOrders = activeOrders.filter(order => order.orderType === orderTypeFilter);
+    }
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      activeOrders = activeOrders.filter(order => {
+        const orderNumber = order.orderNumber?.toLowerCase() || '';
+        const customerName = order.customerName?.toLowerCase() || '';
+        const customerPhone = order.customerPhone?.toLowerCase() || '';
+        const status = order.status?.toLowerCase() || '';
+        
+        return orderNumber.includes(query) || 
+               customerName.includes(query) || 
+               customerPhone.includes(query) ||
+               status.includes(query);
+      });
+    }
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      activeOrders = activeOrders.filter(order => order.status === statusFilter);
+    }
+    
+    // Apply time-based filter
+    if (timeFilter !== 'all') {
+      const now = currentTime.getTime();
+      const thirtyMinsFromNow = now + (30 * 60 * 1000);
+      const startOfToday = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate()).getTime();
+      const endOfToday = startOfToday + (24 * 60 * 60 * 1000);
+      
+      activeOrders = activeOrders.filter(order => {
+        if (!order.scheduledFor) return false;
+        const scheduledTime = new Date(order.scheduledFor).getTime();
+        
+        if (timeFilter === 'overdue') {
+          return scheduledTime < now;
+        } else if (timeFilter === 'next30') {
+          return scheduledTime >= now && scheduledTime <= thirtyMinsFromNow;
+        } else if (timeFilter === 'today') {
+          return scheduledTime >= startOfToday && scheduledTime < endOfToday;
+        }
+        return true;
+      });
     }
     
     displayOrders = activeOrders;
@@ -350,6 +396,120 @@ export default function KitchenDisplay() {
               {soundEnabled ? '🔔 Sound On' : '🔕 Sound Off'}
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="mb-6 space-y-4">
+        {/* Search Bar */}
+        <div className="flex items-center gap-3 max-w-4xl mx-auto">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              placeholder="Search by order number, customer name, phone, or status..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 px-4 pr-10 text-lg bg-gray-800 border-2 border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-orange-500 focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Time-based Filters */}
+        <div className="flex justify-center gap-3 flex-wrap">
+          <Button
+            size="sm"
+            variant={timeFilter === 'all' ? 'default' : 'outline'}
+            onClick={() => setTimeFilter('all')}
+            className="h-10 px-4"
+          >
+            All Time
+          </Button>
+          <Button
+            size="sm"
+            variant={timeFilter === 'overdue' ? 'destructive' : 'outline'}
+            onClick={() => setTimeFilter('overdue')}
+            className="h-10 px-4"
+          >
+            🚨 Overdue
+          </Button>
+          <Button
+            size="sm"
+            variant={timeFilter === 'next30' ? 'default' : 'outline'}
+            onClick={() => setTimeFilter('next30')}
+            className="h-10 px-4 bg-orange-600 hover:bg-orange-700"
+          >
+            ⏰ Next 30 Mins
+          </Button>
+          <Button
+            size="sm"
+            variant={timeFilter === 'today' ? 'default' : 'outline'}
+            onClick={() => setTimeFilter('today')}
+            className="h-10 px-4"
+          >
+            📅 Today
+          </Button>
+          <Button
+            size="sm"
+            variant={statusFilter === 'all' ? 'default' : 'outline'}
+            onClick={() => setStatusFilter('all')}
+            className="h-10 px-4"
+          >
+            All Status
+          </Button>
+          <Button
+            size="sm"
+            variant={statusFilter === 'pending' ? 'default' : 'outline'}
+            onClick={() => setStatusFilter('pending')}
+            className="h-10 px-4"
+          >
+            Pending
+          </Button>
+          <Button
+            size="sm"
+            variant={statusFilter === 'confirmed' ? 'default' : 'outline'}
+            onClick={() => setStatusFilter('confirmed')}
+            className="h-10 px-4"
+          >
+            Confirmed
+          </Button>
+          <Button
+            size="sm"
+            variant={statusFilter === 'preparing' ? 'default' : 'outline'}
+            onClick={() => setStatusFilter('preparing')}
+            className="h-10 px-4"
+          >
+            Preparing
+          </Button>
+          <Button
+            size="sm"
+            variant={statusFilter === 'ready' ? 'default' : 'outline'}
+            onClick={() => setStatusFilter('ready')}
+            className="h-10 px-4"
+          >
+            Ready
+          </Button>
+          {(searchQuery || timeFilter !== 'all' || statusFilter !== 'all') && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setSearchQuery('');
+                setTimeFilter('all');
+                setStatusFilter('all');
+              }}
+              className="h-10 px-4 text-gray-400 hover:text-white"
+            >
+              ✕ Clear All Filters
+            </Button>
+          )}
         </div>
       </div>
 

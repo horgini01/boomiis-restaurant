@@ -569,3 +569,25 @@
 - [x] Test Completed tab shows 1 completed order (BO-MKSB29CJ-9VPY)
 - [x] Test Print Receipt button (working, opens print window)
 - [x] All 20 tests passing
+
+## New Features (User Request - Feb 2 - Kitchen Display Filters & Search)
+- [x] Add search input field to kitchen display header with placeholder text
+- [x] Add time-based filter buttons (All Time, Overdue, Next 30 Mins, Today)
+- [x] Add status filter buttons (All Status, Pending, Confirmed, Preparing, Ready)
+- [x] Implement real-time search filtering by order number (case-insensitive)
+- [x] Implement real-time search filtering by customer name (case-insensitive)
+- [x] Implement real-time search filtering by customer phone
+- [x] Implement real-time search filtering by order status
+- [x] Implement overdue filter logic (scheduledFor < current time)
+- [x] Implement next 30 mins filter logic (scheduledFor within next 30 minutes)
+- [x] Implement today filter logic (scheduledFor is today)
+- [x] Combine search and time/status filters with existing delivery/pickup filters
+- [x] Add "Clear All Filters" button that resets all filters
+- [x] Add clear button (✕) inside search input when text is entered
+- [x] Active filter buttons change to yellow/destructive variant
+- [x] Test search by order number (BO-ML4F54GM: 45→1 orders)
+- [x] Test overdue filter (45→4 orders showing only overdue)
+- [x] Test pending status filter (45→39 orders showing only pending)
+- [x] Test Clear All Filters button (resets from 4→45 orders)
+- [x] Test search clear button (✕) clears search input
+- [x] All 20 tests passing
