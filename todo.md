@@ -703,3 +703,20 @@
 - [x] Fix tRPC API error on checkout page returning HTML instead of JSON
 - [x] Investigate which API endpoint is failing on /checkout page
 - [x] Fix server-side error causing HTML error page response (syntax error in EmailCampaigns.tsx)
+
+## New Features (User Request - Feb 2 - UX & Communication Improvements)
+- [x] Add loading animation to checkout page for better user feedback during API calls
+- [x] Show loading state during form submission
+- [x] Show loading state during payment processing
+- [x] Research SMS providers (Twilio has UK limitations, A2P 10DLC required for US)
+- [x] Research UK-friendly SMS providers (Textlocal, BulkSMS, MessageBird)
+- [x] Implement multi-provider SMS system (support Twilio + UK provider)
+- [x] Make SMS optional - system works without SMS credentials
+- [x] Add Textlocal integration for UK SMS
+- [x] Keep Twilio integration as optional alternative
+- [x] Add SMS notification system for order status updates
+- [x] Send SMS when order is ready for pickup
+- [x] Send SMS when order is out for delivery
+- [x] Add phone number validation for SMS delivery (formatPhoneNumberE164 function)
+- [ ] Add SMS provider selection in admin settings (future enhancement)
+- [x] Test SMS delivery end-to-end with both providers (tests passing, manual testing with credentials)

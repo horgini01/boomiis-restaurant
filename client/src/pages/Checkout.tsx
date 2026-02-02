@@ -192,6 +192,22 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Full-page loading overlay */}
+      {(createOrderMutation.isPending || createCheckoutMutation.isPending) && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-card p-8 rounded-lg shadow-lg flex flex-col items-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">
+                {createCheckoutMutation.isPending ? 'Redirecting to payment...' : 'Processing your order...'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Please wait while we prepare your checkout
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <Header />
       
       <main className="flex-1 py-12">

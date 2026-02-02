@@ -12,4 +12,10 @@ export const ENV = {
   fromEmail: process.env.FROM_EMAIL ?? "",
   adminEmail: process.env.ADMIN_EMAIL ?? "",
   baseUrl: process.env.BASE_URL ?? process.env.VITE_BASE_URL ?? "",
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID ?? "",
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN ?? "",
+  twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER ?? "",
+  textlocalApiKey: process.env.TEXTLOCAL_API_KEY ?? "",
+  textlocalSender: process.env.TEXTLOCAL_SENDER ?? "Boomiis",
+  smsProvider: process.env.SMS_PROVIDER ?? "textlocal",
 };

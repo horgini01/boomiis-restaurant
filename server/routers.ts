@@ -10,6 +10,7 @@ import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
+import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, formatPhoneNumberE164 } from "./services/sms.service";
 import { storagePut, storageGet } from "./storage";
 
 export const appRouter = router({
@@ -731,6 +732,28 @@ export const appRouter = router({
           orderType: order.orderType,
           scheduledFor: order.scheduledFor,
         });
+
+        // Send SMS notifications for key status changes
+        if (order.customerPhone) {
+          const formattedPhone = formatPhoneNumberE164(order.customerPhone);
+          
+          if (input.status === 'ready' && order.orderType === 'pickup') {
+            // Order is ready for pickup
+            await sendOrderReadyForPickupSMS(
+              order.customerName,
+              formattedPhone,
+              order.orderNumber
+            );
+          } else if (input.status === 'out_for_delivery' && order.orderType === 'delivery') {
+            // Order is out for delivery
+            await sendOrderOutForDeliverySMS(
+              order.customerName,
+              formattedPhone,
+              order.orderNumber,
+              30 // Default 30 minutes estimated delivery time
+            );
+          }
+        }
 
         return { success: true };
       }),
