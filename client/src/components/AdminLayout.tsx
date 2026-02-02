@@ -18,6 +18,7 @@ import {
   Mail,
   Users,
   Send,
+  MessageSquare,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
@@ -50,6 +51,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail },
     { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users },
     { path: '/admin/email-campaigns', label: 'Email Campaigns', icon: Send },
+    { path: '/admin/sms-templates', label: 'SMS Templates', icon: MessageSquare },
     { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store },
     { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
   ];

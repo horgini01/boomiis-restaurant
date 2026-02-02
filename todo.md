@@ -738,3 +738,8 @@
 - [x] Update SMS service to use custom templates from database
 - [ ] Add template preview functionality (future enhancement)
 - [x] Test SMS template customization end-to-end (all 39 tests passing)
+
+## Admin Navigation Enhancement (User Request - Feb 2)
+- [x] Add "SMS Templates" link to admin sidebar navigation
+- [x] Ensure link is visible and accessible from all admin pages
+- [x] Test navigation flow from dashboard to SMS templates page
