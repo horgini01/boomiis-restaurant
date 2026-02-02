@@ -645,3 +645,11 @@
 - [x] Add template preview before insertion
 - [x] Test template selection and insertion workflow
 - [x] All 28 tests passing
+
+## Custom Welcome Campaign (User Request - Feb 2)
+- [x] Create "Welcome" campaign based on newsletter confirmation email design
+- [x] Use exact content and styling from confirmation email
+- [x] Save as draft campaign for easy access
+- [x] Test campaign preview matches confirmation email
+- [x] Verify campaign can be sent to subscribers
+- [x] All 28 tests passing
