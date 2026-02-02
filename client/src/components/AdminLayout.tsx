@@ -16,6 +16,8 @@ import {
   Settings as SettingsIcon,
   Store,
   Mail,
+  Users,
+  Send,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
@@ -46,6 +48,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
     { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail },
+    { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users },
+    { path: '/admin/email-campaigns', label: 'Email Campaigns', icon: Send },
     { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store },
     { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
   ];

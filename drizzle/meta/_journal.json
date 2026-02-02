@@ -57,6 +57,13 @@
       "when": 1769975030213,
       "tag": "0007_melodic_xavin",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1769996165247,
+      "tag": "0008_smooth_hercules",
+      "breakpoints": true
     }
   ]
 }

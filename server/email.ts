@@ -1165,3 +1165,205 @@ export async function generateAdminOrderNotificationEmailHTML(data: OrderEmailDa
     </html>
   `;
 }
+
+/**
+ * Send newsletter subscription confirmation email
+ */
+export async function sendNewsletterConfirmationEmail(email: string, name: string): Promise<boolean> {
+  const resend = getResendClient();
+  if (!resend) {
+    console.log('[Email] Skipping newsletter confirmation email - Resend not configured');
+    return false;
+  }
+
+  // Fetch restaurant settings
+  const settings = await getRestaurantSettings();
+  const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+  let restaurantLogo = settings?.restaurant_logo || '';
+  const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
+  // Convert relative logo path to absolute URL for emails
+  if (restaurantLogo && restaurantLogo.startsWith('/')) {
+    restaurantLogo = `${ENV.baseUrl}${restaurantLogo}`;
+  }
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; }
+          .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
+          .header img { max-height: 60px; margin-bottom: 15px; }
+          .header h1 { margin: 0; font-size: 28px; }
+          .content { background: #f9f9f9; padding: 30px 20px; }
+          .welcome-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d4a574; }
+          .benefits { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .benefits ul { list-style: none; padding: 0; }
+          .benefits li { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+          .benefits li:before { content: "✓ "; color: #d4a574; font-weight: bold; margin-right: 10px; }
+          .footer { background: #333; color: #fff; padding: 20px; text-align: center; font-size: 14px; }
+          .unsubscribe { color: #999; font-size: 12px; margin-top: 15px; }
+          .unsubscribe a { color: #d4a574; text-decoration: none; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
+            <h1>Welcome to Our Newsletter! 🎉</h1>
+          </div>
+          <div class="content">
+            <div class="welcome-box">
+              <h2 style="color: #d4a574; margin-top: 0;">Thank you for subscribing, ${name}!</h2>
+              <p>We're thrilled to have you join our community of food lovers. You'll now be the first to know about our latest dishes, special offers, and exclusive events.</p>
+            </div>
+
+            <div class="benefits">
+              <h3 style="color: #333; margin-top: 0;">What to expect:</h3>
+              <ul>
+                <li>🍽️ New menu items and seasonal specials</li>
+                <li>🎉 Exclusive promotions and discounts</li>
+                <li>📅 Upcoming events and catering opportunities</li>
+                <li>🌟 Behind-the-scenes stories and recipes</li>
+                <li>🎁 Special birthday treats and surprises</li>
+              </ul>
+            </div>
+
+            <p style="text-align: center; margin: 30px 0;">
+              <a href="${ENV.baseUrl}/menu" style="display: inline-block; background: #d4a574; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Explore Our Menu</a>
+            </p>
+
+            <p style="color: #666; font-size: 14px; text-align: center;">
+              Stay tuned for delicious updates! 🍴
+            </p>
+          </div>
+          <div class="footer">
+            <p><strong>${restaurantName}</strong></p>
+            <p>Authentic West African Cuisine</p>
+            <p>✉️ ${contactEmail}</p>
+            <div class="unsubscribe">
+              <p>You're receiving this email because you subscribed to our newsletter.</p>
+              <p>If you no longer wish to receive these emails, you can <a href="${ENV.baseUrl}/unsubscribe?email=${encodeURIComponent(email)}">unsubscribe here</a>.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    const result = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: `Welcome to ${restaurantName} Newsletter! 🎉`,
+      html: htmlContent,
+    });
+
+    console.log(`[Email] Newsletter confirmation sent to ${email}: ${result.data?.id}`);
+    
+    // Log email
+    await logEmail({
+      templateType: 'newsletter_confirmation',
+      recipientEmail: email,
+      recipientName: name,
+      subject: `Welcome to ${restaurantName} Newsletter! 🎉`,
+      resendId: result.data?.id,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('[Email] Failed to send newsletter confirmation:', error);
+    return false;
+  }
+}
+
+/**
+ * Send promotional campaign email to subscriber
+ */
+export async function sendCampaignEmail(
+  email: string,
+  name: string,
+  subject: string,
+  bodyHtml: string
+): Promise<{ success: boolean; resendId?: string; error?: string }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Resend not configured' };
+  }
+
+  // Fetch restaurant settings
+  const settings = await getRestaurantSettings();
+  const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+  let restaurantLogo = settings?.restaurant_logo || '';
+  const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
+
+  // Convert relative logo path to absolute URL for emails
+  if (restaurantLogo && restaurantLogo.startsWith('/')) {
+    restaurantLogo = `${ENV.baseUrl}${restaurantLogo}`;
+  }
+
+  // Wrap campaign content in email template
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; }
+          .header { background: #d4a574; color: white; padding: 30px 20px; text-align: center; }
+          .header img { max-height: 60px; margin-bottom: 15px; }
+          .content { background: #f9f9f9; padding: 30px 20px; }
+          .footer { background: #333; color: #fff; padding: 20px; text-align: center; font-size: 14px; }
+          .unsubscribe { color: #999; font-size: 12px; margin-top: 15px; }
+          .unsubscribe a { color: #d4a574; text-decoration: none; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            ${restaurantLogo ? `<img src="${restaurantLogo}" alt="${restaurantName}" />` : ''}
+          </div>
+          <div class="content">
+            ${bodyHtml}
+          </div>
+          <div class="footer">
+            <p><strong>${restaurantName}</strong></p>
+            <p>Authentic West African Cuisine</p>
+            <p>✉️ ${contactEmail}</p>
+            <div class="unsubscribe">
+              <p>You're receiving this email because you subscribed to our newsletter.</p>
+              <p>If you no longer wish to receive these emails, you can <a href="${ENV.baseUrl}/unsubscribe?email=${encodeURIComponent(email)}">unsubscribe here</a>.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  try {
+    const result = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: subject,
+      html: htmlContent,
+    });
+
+    console.log(`[Email] Campaign email sent to ${email}: ${result.data?.id}`);
+    
+    // Log email
+    await logEmail({
+      templateType: 'campaign',
+      recipientEmail: email,
+      recipientName: name,
+      subject: subject,
+      resendId: result.data?.id,
+    });
+
+    return { success: true, resendId: result.data?.id };
+  } catch (error: any) {
+    console.error(`[Email] Failed to send campaign email to ${email}:`, error);
+    return { success: false, error: error.message || 'Unknown error' };
+  }
+}

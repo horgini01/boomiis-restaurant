@@ -24,6 +24,8 @@ import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import RestaurantSettings from "./pages/admin/RestaurantSettings";
 import EmailDelivery from "./pages/admin/EmailDelivery";
+import NewsletterSubscribers from "./pages/admin/NewsletterSubscribers";
+import EmailCampaigns from "./pages/admin/EmailCampaigns";
 import Kitchen from "./pages/Kitchen";
 
 function Router() {
@@ -45,6 +47,8 @@ function Router() {
       <Route path={"/admin/settings"} component={Settings} />
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/admin/email-delivery"} component={EmailDelivery} />
+      <Route path={"/admin/newsletter-subscribers"} component={NewsletterSubscribers} />
+      <Route path={"/admin/email-campaigns"} component={EmailCampaigns} />
       <Route path={"/kitchen"} component={Kitchen} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useCart } from '@/contexts/CartContext';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ export default function Checkout() {
     specialInstructions: '',
     preferredTime: '',
   });
+  const [subscribeToNewsletter, setSubscribeToNewsletter] = useState(false);
 
   // Get delivery settings
   const prepBufferMinutes = Number(settings?.find(s => s.settingKey === 'prep_buffer_minutes')?.settingValue || 10);
@@ -110,8 +112,24 @@ export default function Checkout() {
   const finalDeliveryFee = orderType === 'delivery' && minOrderFreeDelivery > 0 && totalPrice >= minOrderFreeDelivery ? 0 : deliveryFee;
   const orderTotal = totalPrice + (orderType === 'delivery' ? finalDeliveryFee : 0);
 
+  const subscribeNewsletterMutation = trpc.newsletter.subscribe.useMutation();
+
   const createOrderMutation = trpc.orders.create.useMutation({
     onSuccess: async (data: any) => {
+      // Subscribe to newsletter if checkbox was checked
+      if (subscribeToNewsletter) {
+        try {
+          await subscribeNewsletterMutation.mutateAsync({
+            email: formData.customerEmail,
+            name: formData.customerName,
+            source: 'checkout',
+          });
+        } catch (error) {
+          // Don't block checkout if newsletter subscription fails
+          console.error('Newsletter subscription failed:', error);
+        }
+      }
+
       // Create Stripe checkout session
       try {
         const checkoutSession = await createCheckoutMutation.mutateAsync({
@@ -358,6 +376,20 @@ export default function Checkout() {
                       onChange={(e) => setFormData({ ...formData, specialInstructions: e.target.value })}
                       rows={4}
                     />
+                    
+                    <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-border">
+                      <Checkbox
+                        id="newsletter"
+                        checked={subscribeToNewsletter}
+                        onCheckedChange={(checked) => setSubscribeToNewsletter(checked as boolean)}
+                      />
+                      <Label
+                        htmlFor="newsletter"
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        Subscribe to our newsletter for special offers and new menu items
+                      </Label>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

@@ -194,6 +194,7 @@ export const subscribers = mysqlTable("subscribers", {
   id: int("id").autoincrement().primaryKey(),
   email: varchar("email", { length: 320 }).notNull().unique(),
   name: varchar("name", { length: 200 }),
+  source: mysqlEnum("source", ["homepage", "checkout", "admin"]).default("homepage").notNull(), // Where they subscribed from
   isActive: boolean("is_active").default(true).notNull(),
   subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
   unsubscribedAt: timestamp("unsubscribed_at"),
@@ -273,3 +274,25 @@ export const deliveryAreas = mysqlTable("delivery_areas", {
 
 export type DeliveryArea = typeof deliveryAreas.$inferSelect;
 export type InsertDeliveryArea = typeof deliveryAreas.$inferInsert;
+
+/**
+ * Email marketing campaigns for promotional emails
+ */
+export const emailCampaigns = mysqlTable("email_campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  campaignName: varchar("campaign_name", { length: 200 }).notNull(),
+  subject: varchar("subject", { length: 200 }).notNull(),
+  bodyHtml: text("body_html").notNull(),
+  status: mysqlEnum("status", ["draft", "scheduled", "sending", "sent", "failed"]).default("draft").notNull(),
+  recipientCount: int("recipient_count").default(0).notNull(), // Number of subscribers who received this campaign
+  sentCount: int("sent_count").default(0).notNull(), // Number of emails successfully sent
+  failedCount: int("failed_count").default(0).notNull(), // Number of emails that failed
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  createdBy: int("created_by").notNull(), // Admin user ID
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+export type InsertEmailCampaign = typeof emailCampaigns.$inferInsert;

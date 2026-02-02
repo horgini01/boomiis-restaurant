@@ -591,3 +591,26 @@
 - [x] Test Clear All Filters button (resets from 4→45 orders)
 - [x] Test search clear button (✕) clears search input
 - [x] All 20 tests passing
+
+## Newsletter & Email Marketing System (User Request - Feb 2)
+- [x] Update newsletter_subscribers table schema (add subscribed_at, source fields)
+- [x] Create email_campaigns table in database schema
+- [x] Add backend API endpoints for newsletter subscription (public)
+- [x] Add backend API endpoints for newsletter management (admin)
+- [x] Add backend API endpoints for campaign creation and sending (admin)
+- [x] Make homepage "Subscribe" button functional
+- [x] Add newsletter opt-in checkbox to checkout page
+- [x] Send confirmation email when user subscribes to newsletter
+- [x] Create admin Newsletter Subscribers page with list view
+- [x] Add export subscribers to CSV functionality
+- [x] Add unsubscribe functionality (admin and public link)
+- [x] Create admin Email Campaigns page with campaign list
+- [x] Implement campaign email composer with HTML editor
+- [x] Add campaign preview functionality
+- [x] Add bulk email sending functionality to opted-in subscribers
+- [x] Track sent campaigns in database
+- [x] Test newsletter subscription from homepage
+- [x] Test newsletter opt-in during checkout
+- [x] Test promotional email campaign creation
+- [x] Test bulk email sending to subscribers
+- [x] All 28 tests passing (including 8 new newsletter tests)

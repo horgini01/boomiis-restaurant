@@ -6,10 +6,10 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers } from '../drizzle/schema';
+import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers, emailCampaigns } from '../drizzle/schema';
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
-import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL } from "./email";
+import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
 import { storagePut, storageGet } from "./storage";
 
 export const appRouter = router({
@@ -63,17 +63,47 @@ export const appRouter = router({
 
   newsletter: router({
     subscribe: publicProcedure
-      .input(z.object({ email: z.string().email(), name: z.string().optional() }))
+      .input(z.object({ 
+        email: z.string().email(), 
+        name: z.string().optional(),
+        source: z.enum(["homepage", "checkout", "admin"]).default("homepage"),
+      }))
       .mutation(async ({ input }) => {
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        await db.insert(subscribers).values({
-          email: input.email,
-          name: input.name || null,
-        });
+        // Check if email already exists
+        const existing = await db.select().from(subscribers).where(eq(subscribers.email, input.email)).limit(1);
+        
+        if (existing.length > 0) {
+          // If already subscribed and active, throw error
+          if (existing[0].isActive) {
+            throw new Error('This email is already subscribed to our newsletter');
+          }
+          
+          // If previously unsubscribed, reactivate
+          await db.update(subscribers)
+            .set({ 
+              isActive: true, 
+              subscribedAt: new Date(),
+              unsubscribedAt: null,
+              name: input.name || existing[0].name,
+              source: input.source,
+            })
+            .where(eq(subscribers.id, existing[0].id));
+        } else {
+          // New subscriber
+          await db.insert(subscribers).values({
+            email: input.email,
+            name: input.name || null,
+            source: input.source,
+          });
+        }
 
-        return { success: true };
+        // Send confirmation email
+        await sendNewsletterConfirmationEmail(input.email, input.name || 'Valued Customer');
+
+        return { success: true, message: 'Successfully subscribed' };
       }),
   }),
 
@@ -1315,6 +1345,169 @@ export const appRouter = router({
           paymentStatus: session.payment_status,
           customerEmail: session.customer_email,
         };
+      }),
+  }),
+
+  // Newsletter management endpoints
+  subscribers: router({
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const allSubscribers = await db.select().from(subscribers).orderBy(sql`${subscribers.subscribedAt} DESC`);
+      return allSubscribers;
+    }),
+
+    unsubscribe: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(subscribers)
+          .set({ isActive: false, unsubscribedAt: new Date() })
+          .where(eq(subscribers.id, input.id));
+
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(subscribers).where(eq(subscribers.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  // Email campaigns endpoints
+  campaigns: router({
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const allCampaigns = await db.select().from(emailCampaigns).orderBy(sql`${emailCampaigns.createdAt} DESC`);
+      return allCampaigns;
+    }),
+
+    create: protectedProcedure
+      .input(z.object({
+        campaignName: z.string(),
+        subject: z.string(),
+        bodyHtml: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const [campaign] = await db.insert(emailCampaigns).values({
+          ...input,
+          createdBy: ctx.user.id,
+          status: 'draft',
+        }).$returningId();
+
+        return { success: true, campaignId: campaign.id };
+      }),
+
+    send: protectedProcedure
+      .input(z.object({ campaignId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get campaign details
+        const [campaign] = await db.select().from(emailCampaigns).where(eq(emailCampaigns.id, input.campaignId)).limit(1);
+        if (!campaign) {
+          throw new Error('Campaign not found');
+        }
+
+        // Get active subscribers
+        const activeSubscribers = await db.select().from(subscribers).where(eq(subscribers.isActive, true));
+
+        if (activeSubscribers.length === 0) {
+          throw new Error('No active subscribers found');
+        }
+
+        // Update campaign status to sending
+        await db.update(emailCampaigns)
+          .set({ status: 'sending', recipientCount: activeSubscribers.length })
+          .where(eq(emailCampaigns.id, input.campaignId));
+
+        let sentCount = 0;
+        let failedCount = 0;
+
+        // Send emails to all subscribers
+        for (const subscriber of activeSubscribers) {
+          try {
+            const result = await sendCampaignEmail(
+              subscriber.email,
+              subscriber.name || 'Valued Customer',
+              campaign.subject,
+              campaign.bodyHtml
+            );
+
+            if (result.success) {
+              sentCount++;
+            } else {
+              failedCount++;
+            }
+          } catch (error) {
+            console.error(`Failed to send campaign to ${subscriber.email}:`, error);
+            failedCount++;
+          }
+        }
+
+        // Update campaign with final counts
+        await db.update(emailCampaigns)
+          .set({
+            status: 'sent',
+            sentCount,
+            failedCount,
+            sentAt: new Date(),
+          })
+          .where(eq(emailCampaigns.id, input.campaignId));
+
+        return { success: true, sentCount, failedCount, totalSubscribers: activeSubscribers.length };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(emailCampaigns).where(eq(emailCampaigns.id, input.id));
+        return { success: true };
       }),
   }),
 });
