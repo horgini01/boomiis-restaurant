@@ -1,0 +1,46 @@
+{
+  "query": "SELECT setting_key FROM site_settings;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT setting_key FROM site_settings;",
+  "rows": [
+    {
+      "setting_key": "admin_emails"
+    },
+    {
+      "setting_key": "cc_admin_on_status_updates"
+    },
+    {
+      "setting_key": "contact_address"
+    },
+    {
+      "setting_key": "contact_email"
+    },
+    {
+      "setting_key": "contact_phone"
+    },
+    {
+      "setting_key": "opening_hours"
+    },
+    {
+      "setting_key": "restaurant_logo"
+    },
+    {
+      "setting_key": "restaurant_name"
+    },
+    {
+      "setting_key": "restaurant_tagline"
+    },
+    {
+      "setting_key": "social_facebook"
+    },
+    {
+      "setting_key": "social_instagram"
+    },
+    {
+      "setting_key": "social_twitter"
+    }
+  ],
+  "messages": [],
+  "stdout": "setting_key\nadmin_emails\ncc_admin_on_status_updates\ncontact_address\ncontact_email\ncontact_phone\nopening_hours\nrestaurant_logo\nrestaurant_name\nrestaurant_tagline\nsocial_facebook\nsocial_instagram\nsocial_twitter\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

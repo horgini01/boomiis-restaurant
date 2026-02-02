@@ -674,3 +674,27 @@
 - [x] Send fresh test email with S3 logo URL
 - [x] Confirm logo works in Gmail inbox - VERIFIED BY USER
 - [x] All 28 tests passing
+
+## Checkout Improvements (User Request - Feb 2)
+- [ ] Add visible checkbox UI element beside newsletter subscription text
+- [ ] Make checkbox properly aligned with subscription message
+- [ ] Ensure checkbox state controls newsletter opt-in
+- [ ] Implement closing hours validation on order submission
+- [ ] Check restaurant operating hours before allowing order
+- [ ] Display clear error message when restaurant is closed
+- [ ] Show opening hours in error message
+- [ ] Test newsletter checkbox functionality
+- [ ] Test closing hours validation blocks orders correctly
+- [ ] Write tests for closing hours validation
+
+## New Features (User Request - Feb 2 - Closing Hours Validation)
+- [x] Add closing hours validation to prevent orders outside operating hours
+- [x] Add opening_time and closing_time to site_settings table (already exists)
+- [x] Implement backend validation in orders.create endpoint
+- [x] Display clear error message when restaurant is closed
+- [x] Write tests for closing hours validation (2 tests passing)
+
+## Bug Investigation (User Report - Feb 2 - Newsletter Checkbox)
+- [x] Investigate newsletter checkbox visibility on checkout page
+- [x] Confirm checkbox is visible and working correctly (lines 381-392 in Checkout.tsx)
+- [x] Document findings - checkbox appears below Special Instructions section

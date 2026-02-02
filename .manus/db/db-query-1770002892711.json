@@ -1,0 +1,14 @@
+{
+  "query": "SELECT setting_key, setting_value FROM site_settings WHERE setting_key LIKE '%hour%' OR setting_key LIKE '%open%' OR setting_key LIKE '%close%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT setting_key, setting_value FROM site_settings WHERE setting_key LIKE '%hour%' OR setting_key LIKE '%open%' OR setting_key LIKE '%close%';",
+  "rows": [
+    {
+      "setting_key": "opening_hours",
+      "setting_value": "{\"monday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"tuesday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"wednesday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"thursday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"friday\":{\"open\":\"12:00\",\"close\":\"23:00\",\"closed\":false},\"saturday\":{\"open\":\"12:00\",\"close\":\"23:00\",\"closed\":false},\"sunday\":{\"open\":\"12:00\",\"close\":\"21:00\",\"closed\":false}}"
+    }
+  ],
+  "messages": [],
+  "stdout": "setting_key\tsetting_value\nopening_hours\t{\"monday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"tuesday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"wednesday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"thursday\":{\"open\":\"12:00\",\"close\":\"22:00\",\"closed\":false},\"friday\":{\"open\":\"12:00\",\"close\":\"23:00\",\"closed\":false},\"saturday\":{\"open\":\"12:00\",\"close\":\"23:00\",\"closed\":false},\"sunday\":{\"open\":\"12:00\",\"close\":\"21:00\",\"closed\":false}}\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

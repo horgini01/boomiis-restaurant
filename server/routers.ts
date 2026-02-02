@@ -159,6 +159,18 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
+        // Check if restaurant is currently open
+        const settings = await db.select().from(siteSettings);
+        const openingTime = settings.find(s => s.settingKey === 'opening_time')?.settingValue || '11:00';
+        const closingTime = settings.find(s => s.settingKey === 'closing_time')?.settingValue || '22:00';
+        
+        const now = new Date();
+        const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        
+        if (currentTime < openingTime || currentTime >= closingTime) {
+          throw new Error(`Sorry, we are currently closed. Our opening hours are ${openingTime} - ${closingTime}.`);
+        }
+
         const { items: orderItems, preferredTime, ...orderData } = input;
         const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const deliveryFee = input.orderType === 'delivery' ? 3.99 : 0;
