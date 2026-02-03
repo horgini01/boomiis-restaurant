@@ -32,6 +32,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useState, useMemo, useEffect } from 'react';
 
 export default function OrdersManagement() {
@@ -211,7 +212,7 @@ export default function OrdersManagement() {
       order.customerEmail,
       order.customerPhone,
       order.orderType,
-      order.scheduledFor ? format(new Date(order.scheduledFor), 'yyyy-MM-dd hh:mm a') : '',
+      order.scheduledFor ? formatInTimeZone(new Date(order.scheduledFor), 'Europe/London', 'yyyy-MM-dd hh:mm a') : '',
       order.status,
       order.paymentStatus,
       `£${parseFloat(order.total).toFixed(2)}`,
@@ -558,8 +559,8 @@ export default function OrdersManagement() {
                               {order.scheduledFor ? (
                                 <div className={`flex items-center gap-2 ${isOrderUrgent(order.scheduledFor) ? 'text-orange-500 font-semibold' : ''}`}>
                                   <div className="flex flex-col">
-                                    <span>{format(new Date(order.scheduledFor), 'MMM dd, yyyy')}</span>
-                                    <span className={isOrderUrgent(order.scheduledFor) ? 'text-orange-400 text-xs' : 'text-muted-foreground text-xs'}>{format(new Date(order.scheduledFor), 'h:mm a')}</span>
+                                    <span>{formatInTimeZone(new Date(order.scheduledFor), 'Europe/London', 'MMM dd, yyyy')}</span>
+                                    <span className={isOrderUrgent(order.scheduledFor) ? 'text-orange-400 text-xs' : 'text-muted-foreground text-xs'}>{formatInTimeZone(new Date(order.scheduledFor), 'Europe/London', 'h:mm a')}</span>
                                   </div>
                                   {isOrderUrgent(order.scheduledFor) && (
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-500">

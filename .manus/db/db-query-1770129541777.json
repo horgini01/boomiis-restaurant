@@ -1,0 +1,15 @@
+{
+  "query": "SELECT order_number, scheduled_for, created_at FROM orders WHERE order_number = 'BO-ML6OS00D-LB2C' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT order_number, scheduled_for, created_at FROM orders WHERE order_number = 'BO-ML6OS00D-LB2C' LIMIT 1;",
+  "rows": [
+    {
+      "order_number": "BO-ML6OS00D-LB2C",
+      "scheduled_for": "2026-02-03 20:45:00",
+      "created_at": "2026-02-03 14:20:53"
+    }
+  ],
+  "messages": [],
+  "stdout": "order_number\tscheduled_for\tcreated_at\nBO-ML6OS00D-LB2C\t2026-02-03 20:45:00\t2026-02-03 14:20:53\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

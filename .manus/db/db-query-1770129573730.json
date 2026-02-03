@@ -1,0 +1,34 @@
+{
+  "query": "SELECT order_number, scheduled_for, created_at, FROM_UNIXTIME(scheduled_for/1000) as scheduled_time_readable FROM orders WHERE created_at > '2026-02-03 14:00:00' ORDER BY created_at DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT order_number, scheduled_for, created_at, FROM_UNIXTIME(scheduled_for/1000) as scheduled_time_readable FROM orders WHERE created_at > '2026-02-03 14:00:00' ORDER BY created_at DESC LIMIT 5;",
+  "rows": [
+    {
+      "order_number": "BO-ML6OXV12-CB9N",
+      "scheduled_for": "NULL",
+      "created_at": "2026-02-03 14:25:26",
+      "scheduled_time_readable": "NULL"
+    },
+    {
+      "order_number": "TEST-PAY-1770128726713",
+      "scheduled_for": "NULL",
+      "created_at": "2026-02-03 14:25:26",
+      "scheduled_time_readable": "NULL"
+    },
+    {
+      "order_number": "BO-ML6OS00D-LB2C",
+      "scheduled_for": "2026-02-03 20:45:00",
+      "created_at": "2026-02-03 14:20:53",
+      "scheduled_time_readable": "2612-01-09 02:13:24.5000"
+    },
+    {
+      "order_number": "BO-ML6O9332-SIIW",
+      "scheduled_for": "2026-02-03 20:31:00",
+      "created_at": "2026-02-03 14:06:10",
+      "scheduled_time_readable": "2612-01-09 02:13:23.1000"
+    }
+  ],
+  "messages": [],
+  "stdout": "order_number\tscheduled_for\tcreated_at\tscheduled_time_readable\nBO-ML6OXV12-CB9N\tNULL\t2026-02-03 14:25:26\tNULL\nTEST-PAY-1770128726713\tNULL\t2026-02-03 14:25:26\tNULL\nBO-ML6OS00D-LB2C\t2026-02-03 20:45:00\t2026-02-03 14:20:53\t2612-01-09 02:13:24.5000\nBO-ML6O9332-SIIW\t2026-02-03 20:31:00\t2026-02-03 14:06:10\t2612-01-09 02:13:23.1000\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

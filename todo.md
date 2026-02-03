@@ -829,3 +829,13 @@
 - [x] Request and configure alphanumeric sender ID "Boomiis"
 - [x] Update SMS service to use approved sender ID
 - [x] Test end-to-end SMS delivery (WORKING ✅)
+
+## Bug Fixes (User Reported - Feb 3 - Scheduled Time Display)
+- [ ] Fix scheduled time in admin orders list showing wrong time (8:45 PM instead of 3:45 PM)
+- [ ] Email shows correct time (3:45 PM) but orders list shows 5 hours later
+- [ ] Ensure orders list displays scheduled time in UK timezone matching email format
+
+## Bug Fixes (User Reported - Feb 3 - Scheduled Time Display Mismatch)
+- [x] Email shows correct scheduled time (3:45 PM) but orders list shows wrong time (8:45 PM)
+- [x] Fix timezone conversion in admin orders list display
+- [x] Fix backend scheduled time calculation using UK timezone components properly
