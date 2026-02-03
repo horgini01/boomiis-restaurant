@@ -78,7 +78,7 @@ export const orders = mysqlTable("orders", {
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).default("0.00").notNull(),
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
-  status: mysqlEnum("status", ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "confirmed", "preparing", "ready", "out_for_delivery", "completed", "cancelled", "delayed"]).default("pending").notNull(),
   paymentStatus: mysqlEnum("payment_status", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
   paymentIntentId: varchar("payment_intent_id", { length: 255 }).unique(),
   specialInstructions: text("special_instructions"),

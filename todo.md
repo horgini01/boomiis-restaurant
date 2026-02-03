@@ -839,3 +839,13 @@
 - [x] Email shows correct scheduled time (3:45 PM) but orders list shows wrong time (8:45 PM)
 - [x] Fix timezone conversion in admin orders list display
 - [x] Fix backend scheduled time calculation using UK timezone components properly
+
+## New Features (User Request - Feb 3 - SMS Status Notifications & Delayed Status)
+- [x] Add "Delayed" status to order status enum in database schema
+- [x] Update order status dropdown to include "Delayed" and "Out for Delivery" options
+- [x] Implement SMS notifications for all order status changes (Confirmed, Preparing, Ready, Completed, Cancelled, Delayed, Out for Delivery)
+- [x] Check SMS template activation status before sending each notification (already implemented correctly)
+- [x] Create "Order Delayed" and "Out for Delivery" email templates matching SMS templates
+- [x] Add email notification for "Delayed" and "Out for Delivery" status changes
+- [x] Verify SMS notifications respect Active/Inactive toggles in SMS Templates page (logic confirmed correct)
+- [x] Write vitest tests for SMS status notification logic (7 SMS tests passing)

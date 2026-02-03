@@ -705,6 +705,16 @@ export async function sendOrderStatusUpdateEmail(data: {
         message: 'Thank you for dining with us! We hope you enjoyed your meal.',
         color: '#8b5cf6',
       },
+      out_for_delivery: {
+        title: 'Order Out for Delivery',
+        message: 'Your order is on its way! Our delivery driver will arrive shortly.',
+        color: '#f59e0b',
+      },
+      delayed: {
+        title: 'Order Delayed',
+        message: 'We apologize, but your order is taking longer than expected. We\'re working to get it to you as soon as possible. Thank you for your patience!',
+        color: '#f97316',
+      },
       cancelled: {
         title: 'Order Cancelled',
         message: 'Your order has been cancelled. If you have any questions, please contact us.',

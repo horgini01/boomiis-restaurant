@@ -318,6 +318,12 @@ export async function sendOrderStatusSMS(
   // Try to get custom template from database
   const template = await getSmsTemplateByType(templateType);
   
+  // If template exists but is inactive, skip sending SMS
+  if (template && !template.isActive) {
+    console.log(`[SMS] Template '${templateType}' is inactive, skipping SMS notification`);
+    return;
+  }
+  
   let message: string;
   if (template && template.isActive) {
     // Use custom template with variable replacement
@@ -327,7 +333,7 @@ export async function sendOrderStatusSMS(
       estimatedMinutes,
     });
   } else {
-    // Fallback to default messages based on template type
+    // Fallback to default messages if no custom template exists
     switch (templateType) {
       case 'order_confirmed':
         message = `Hi ${customerName}! Your order #${orderNumber} has been confirmed. We'll notify you when it's ready!`;
