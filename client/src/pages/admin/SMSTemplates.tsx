@@ -19,6 +19,7 @@ export default function SMSTemplates() {
     message: '',
     isActive: true,
   });
+  const [testPhone, setTestPhone] = useState('');
 
   const { data: templates, isLoading, refetch } = trpc.smsTemplates.list.useQuery();
   const updateMutation = trpc.smsTemplates.update.useMutation({
@@ -29,6 +30,16 @@ export default function SMSTemplates() {
     },
     onError: (error) => {
       toast.error(error.message);
+    },
+  });
+
+  const sendTestMutation = trpc.smsTemplates.sendTest.useMutation({
+    onSuccess: () => {
+      toast.success('Test SMS sent successfully!');
+      setTestPhone('');
+    },
+    onError: (error) => {
+      toast.error(`Failed to send test SMS: ${error.message}`);
     },
   });
 
@@ -56,6 +67,18 @@ export default function SMSTemplates() {
     updateMutation.mutate({
       id: editingId,
       ...formData,
+    });
+  };
+
+  const handleSendTest = async (templateId: number) => {
+    if (!testPhone) {
+      toast.error('Please enter a phone number');
+      return;
+    }
+
+    sendTestMutation.mutate({
+      templateId,
+      phoneNumber: testPhone,
     });
   };
 
@@ -251,6 +274,42 @@ export default function SMSTemplates() {
                           )}
                         </div>
                       </div>
+
+                      {/* Send Test SMS Section */}
+                      {editingId !== template.id && (
+                        <div className="space-y-2 pb-4 border-b">
+                          <Label className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            Send Test SMS
+                          </Label>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Enter phone number (e.g., +447911123456)"
+                              value={testPhone}
+                              onChange={(e) => setTestPhone(e.target.value)}
+                              className="flex-1"
+                            />
+                            <Button
+                              onClick={() => handleSendTest(template.id)}
+                              disabled={sendTestMutation.isPending || !testPhone}
+                              size="sm"
+                              variant="outline"
+                            >
+                              {sendTestMutation.isPending ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Sending...
+                                </>
+                              ) : (
+                                'Send Test'
+                              )}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Test the template by sending an SMS to your phone with sample data
+                          </p>
+                        </div>
+                      )}
 
                       {/* Mobile Preview Section */}
                       <div className="space-y-2">

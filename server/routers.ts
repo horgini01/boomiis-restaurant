@@ -153,6 +153,7 @@ export const appRouter = router({
         deliveryPostcode: z.string().optional(),
         specialInstructions: z.string().optional(),
         preferredTime: z.string().optional(),
+        smsOptIn: z.boolean().optional().default(true), // Customer SMS notification preference (GDPR)
         items: z.array(z.object({
           menuItemId: z.number(),
           quantity: z.number(),
@@ -806,7 +807,8 @@ export const appRouter = router({
               formattedPhone,
               order.orderNumber,
               templateType,
-              estimatedMinutes
+              estimatedMinutes,
+              order.smsOptIn ?? true // Customer's SMS preference (default true for existing orders)
             );
           }
         }
@@ -1438,7 +1440,9 @@ export const appRouter = router({
                     order.customerName,
                     order.customerPhone,
                     order.orderNumber,
-                    'order_confirmed'
+                    'order_confirmed',
+                    30, // estimated minutes
+                    order.smsOptIn ?? true // Customer's SMS preference (default true for existing orders)
                   );
                   console.log('[Payment] SMS notification sent');
                 } else {
@@ -1668,6 +1672,41 @@ export const appRouter = router({
             updatedAt: new Date(),
           })
           .where(eq(smsTemplates.id, input.id));
+
+        return { success: true };
+      }),
+
+    sendTest: protectedProcedure
+      .input(z.object({
+        templateId: z.number(),
+        phoneNumber: z.string().min(10),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get template
+        const template = await getSmsTemplateById(input.templateId);
+        if (!template) {
+          throw new Error('Template not found');
+        }
+
+        // Format phone number
+        const formattedPhone = formatPhoneNumberE164(input.phoneNumber);
+
+        // Send test SMS with sample data
+        await sendOrderStatusSMS(
+          'Test User', // customerName
+          formattedPhone,
+          'TEST-12345', // orderNumber
+          template.templateType,
+          30, // estimatedMinutes
+          true // smsOptIn (always true for test)
+        );
 
         return { success: true };
       }),

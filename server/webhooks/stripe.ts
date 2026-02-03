@@ -117,7 +117,9 @@ export async function handleStripeWebhook(req: Request, res: Response) {
                   order.customerName,
                   order.customerPhone,
                   order.orderNumber,
-                  'order_confirmed'
+                  'order_confirmed',
+                  30, // estimated minutes
+                  order.smsOptIn ?? true // Customer's SMS preference (default true for existing orders)
                 );
               } else {
                 console.log('[Webhook] No customer phone number, skipping SMS');

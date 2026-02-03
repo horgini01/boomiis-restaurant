@@ -32,6 +32,7 @@ export default function Checkout() {
     preferredTime: '',
   });
   const [subscribeToNewsletter, setSubscribeToNewsletter] = useState(false);
+  const [smsOptIn, setSmsOptIn] = useState(true); // Default to opted-in for SMS notifications
 
   // Get delivery settings
   const prepBufferMinutes = Number(settings?.find(s => s.settingKey === 'prep_buffer_minutes')?.settingValue || 10);
@@ -177,6 +178,7 @@ export default function Checkout() {
       ...formData,
       preferredTime: finalPreferredTime,
       orderType,
+      smsOptIn, // Customer's SMS notification preference
       items: items.map(item => ({
         menuItemId: item.id,
         quantity: item.quantity,
@@ -404,6 +406,20 @@ export default function Checkout() {
                         className="text-sm font-normal cursor-pointer"
                       >
                         Subscribe to our newsletter for special offers and new menu items
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 mt-3">
+                      <Checkbox
+                        id="sms-opt-in"
+                        checked={smsOptIn}
+                        onCheckedChange={(checked) => setSmsOptIn(checked as boolean)}
+                      />
+                      <Label
+                        htmlFor="sms-opt-in"
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        Send me SMS updates about my order status (recommended)
                       </Label>
                     </div>
                   </CardContent>

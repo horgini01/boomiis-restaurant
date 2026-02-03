@@ -82,6 +82,7 @@ export const orders = mysqlTable("orders", {
   paymentStatus: mysqlEnum("payment_status", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
   paymentIntentId: varchar("payment_intent_id", { length: 255 }).unique(),
   specialInstructions: text("special_instructions"),
+  smsOptIn: boolean("sms_opt_in").default(true).notNull(), // Customer consent to receive SMS notifications (GDPR)
   timeline: text("timeline"), // JSON array of {status, timestamp} objects tracking status changes
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

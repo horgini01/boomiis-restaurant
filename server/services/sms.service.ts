@@ -307,14 +307,22 @@ export async function sendOrderOutForDeliverySMS(
  * @param orderNumber - Order number
  * @param templateType - SMS template type (order_confirmed, order_preparing, order_ready, etc.)
  * @param estimatedMinutes - Estimated time in minutes (optional, defaults to 30)
+ * @param smsOptIn - Customer's SMS notification preference (GDPR compliance)
  */
 export async function sendOrderStatusSMS(
   customerName: string,
   customerPhone: string,
   orderNumber: string,
   templateType: string,
-  estimatedMinutes: number = 30
+  estimatedMinutes: number = 30,
+  smsOptIn: boolean = true
 ): Promise<void> {
+  // Check if customer has opted out of SMS notifications (GDPR)
+  if (!smsOptIn) {
+    console.log(`[SMS] Customer opted out of SMS notifications for order ${orderNumber}, skipping`);
+    return;
+  }
+  
   // Try to get custom template from database
   const template = await getSmsTemplateByType(templateType);
   

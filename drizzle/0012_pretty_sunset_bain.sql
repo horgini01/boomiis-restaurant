@@ -1,0 +1,1 @@
+ALTER TABLE `orders` ADD `sms_opt_in` boolean DEFAULT true NOT NULL;

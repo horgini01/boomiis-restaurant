@@ -849,3 +849,15 @@
 - [x] Add email notification for "Delayed" and "Out for Delivery" status changes
 - [x] Verify SMS notifications respect Active/Inactive toggles in SMS Templates page (logic confirmed correct)
 - [x] Write vitest tests for SMS status notification logic (7 SMS tests passing)
+
+## New Features (User Request - Feb 3 - SMS Preferences & Testing)
+- [x] Add SMS preferences field to orders table schema (smsOptIn boolean, default true)
+- [x] Add SMS opt-in checkbox to checkout form (GDPR compliant with clear explanation)
+- [x] Update SMS service to check customer SMS preferences before sending
+- [x] Add logging when SMS is skipped due to customer opt-out preference
+- [x] Add "Send Test SMS" button to SMS Templates admin page
+- [x] Create test SMS endpoint in tRPC router (admin only)
+- [x] Add phone number input field for test SMS destination
+- [x] Display success/error toast after sending test SMS
+- [x] SMS preferences logic tested (all 45 tests passing)
+- [x] Test SMS functionality implemented and ready for manual testing
