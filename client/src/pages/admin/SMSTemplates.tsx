@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import AdminGuard from '@/components/AdminGuard';
+import AdminLayout from '@/components/AdminLayout';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Loader2, Save, MessageSquare, Info } from 'lucide-react';
+import { Loader2, Save, MessageSquare, Info, Smartphone } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SMSTemplates() {
@@ -68,146 +70,242 @@ export default function SMSTemplates() {
     }
   };
 
+  // Generate preview with sample data
+  const generatePreview = (message: string) => {
+    return message
+      .replace(/\{\{customerName\}\}/g, 'John Smith')
+      .replace(/\{\{orderNumber\}\}/g, 'ORD-12345')
+      .replace(/\{\{estimatedMinutes\}\}/g, '30');
+  };
+
+  // Calculate SMS segments (160 chars per segment for standard SMS)
+  const calculateSegments = (message: string) => {
+    if (message.length === 0) return 0;
+    if (message.length <= 160) return 1;
+    return Math.ceil(message.length / 153); // Multi-part SMS uses 153 chars per segment
+  };
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AdminGuard>
+        <AdminLayout>
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </AdminLayout>
+      </AdminGuard>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">SMS Templates</h1>
-        <p className="text-muted-foreground mt-2">
-          Customize SMS notification messages sent to customers
-        </p>
-      </div>
+    <AdminGuard>
+      <AdminLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">SMS Templates</h1>
+            <p className="text-muted-foreground mt-2">
+              Customize SMS notification messages sent to customers
+            </p>
+          </div>
 
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Available template variables:</strong>
-          <ul className="list-disc list-inside mt-2 space-y-1">
-            <li><code className="bg-muted px-1 rounded">{'{{customerName}}'}</code> - Customer's name</li>
-            <li><code className="bg-muted px-1 rounded">{'{{orderNumber}}'}</code> - Order number</li>
-            <li><code className="bg-muted px-1 rounded">{'{{estimatedMinutes}}'}</code> - Estimated delivery time in minutes</li>
-          </ul>
-        </AlertDescription>
-      </Alert>
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Available template variables:</strong>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li><code className="bg-muted px-1 rounded">{'{{customerName}}'}</code> - Customer's name</li>
+                <li><code className="bg-muted px-1 rounded">{'{{orderNumber}}'}</code> - Order number</li>
+                <li><code className="bg-muted px-1 rounded">{'{{estimatedMinutes}}'}</code> - Estimated delivery time in minutes</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
 
-      <div className="grid gap-6">
-        {templates?.map((template) => (
-          <Card key={template.id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                    {editingId === template.id ? (
-                      <Input
-                        value={formData.templateName}
-                        onChange={(e) => setFormData({ ...formData, templateName: e.target.value })}
-                        className="max-w-md"
-                      />
-                    ) : (
-                      template.templateName
-                    )}
-                  </CardTitle>
-                  <CardDescription>{getTemplateDescription(template.templateType)}</CardDescription>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor={`active-${template.id}`}>Active</Label>
-                    <Switch
-                      id={`active-${template.id}`}
-                      checked={editingId === template.id ? formData.isActive : template.isActive}
-                      onCheckedChange={(checked) => {
-                        if (editingId === template.id) {
-                          setFormData({ ...formData, isActive: checked });
-                        } else {
-                          handleEdit(template);
-                          setFormData({ ...formData, isActive: checked });
-                        }
-                      }}
-                      disabled={editingId !== null && editingId !== template.id}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor={`message-${template.id}`}>Message Template</Label>
-                {editingId === template.id ? (
-                  <Textarea
-                    id={`message-${template.id}`}
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    rows={4}
-                    placeholder="Enter SMS message template..."
-                    className="font-mono text-sm"
-                  />
-                ) : (
-                  <div className="p-4 bg-muted rounded-lg font-mono text-sm whitespace-pre-wrap">
-                    {template.message}
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Character count: {editingId === template.id ? formData.message.length : template.message.length} / 160
-                  {(editingId === template.id ? formData.message.length : template.message.length) > 160 && (
-                    <span className="text-orange-500 ml-2">
-                      (This message will be split into multiple SMS)
-                    </span>
-                  )}
-                </p>
-              </div>
+          <div className="grid gap-6">
+            {templates?.map((template) => {
+              const currentMessage = editingId === template.id ? formData.message : template.message;
+              const segments = calculateSegments(currentMessage);
+              const previewText = generatePreview(currentMessage);
 
-              <div className="flex gap-2">
-                {editingId === template.id ? (
-                  <>
-                    <Button
-                      onClick={handleSave}
-                      disabled={updateMutation.isPending}
-                      size="sm"
-                    >
-                      {updateMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Save Changes
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={handleCancel}
-                      variant="outline"
-                      size="sm"
-                      disabled={updateMutation.isPending}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    onClick={() => handleEdit(template)}
-                    variant="outline"
-                    size="sm"
-                    disabled={editingId !== null}
-                  >
-                    Edit Template
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+              return (
+                <Card key={template.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquare className="h-5 w-5 text-primary" />
+                          {editingId === template.id ? (
+                            <Input
+                              value={formData.templateName}
+                              onChange={(e) => setFormData({ ...formData, templateName: e.target.value })}
+                              className="max-w-md"
+                            />
+                          ) : (
+                            template.templateName
+                          )}
+                        </CardTitle>
+                        <CardDescription>{getTemplateDescription(template.templateType)}</CardDescription>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`active-${template.id}`}>Active</Label>
+                          <Switch
+                            id={`active-${template.id}`}
+                            checked={editingId === template.id ? formData.isActive : template.isActive}
+                            onCheckedChange={(checked) => {
+                              if (editingId === template.id) {
+                                setFormData({ ...formData, isActive: checked });
+                              } else {
+                                handleEdit(template);
+                                setFormData({ ...formData, isActive: checked });
+                              }
+                            }}
+                            disabled={editingId !== null && editingId !== template.id}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid lg:grid-cols-2 gap-6">
+                      {/* Editor Section */}
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`message-${template.id}`}>Message Template</Label>
+                          {editingId === template.id ? (
+                            <Textarea
+                              id={`message-${template.id}`}
+                              value={formData.message}
+                              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                              rows={6}
+                              placeholder="Enter SMS message template..."
+                              className="font-mono text-sm"
+                            />
+                          ) : (
+                            <div className="p-4 bg-muted rounded-lg font-mono text-sm whitespace-pre-wrap min-h-[150px]">
+                              {template.message}
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>
+                              Character count: <strong>{currentMessage.length}</strong> / 160
+                            </span>
+                            <span>
+                              SMS segments: <strong>{segments}</strong>
+                              {segments > 1 && (
+                                <span className="text-orange-500 ml-2">
+                                  (Multi-part message)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          {editingId === template.id ? (
+                            <>
+                              <Button
+                                onClick={handleSave}
+                                disabled={updateMutation.isPending}
+                                size="sm"
+                              >
+                                {updateMutation.isPending ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Save Changes
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                onClick={handleCancel}
+                                variant="outline"
+                                size="sm"
+                                disabled={updateMutation.isPending}
+                              >
+                                Cancel
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              onClick={() => handleEdit(template)}
+                              variant="outline"
+                              size="sm"
+                              disabled={editingId !== null}
+                            >
+                              Edit Template
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Mobile Preview Section */}
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Smartphone className="h-4 w-4" />
+                          Mobile Preview
+                        </Label>
+                        <div className="relative">
+                          {/* iPhone-style mockup */}
+                          <div className="mx-auto w-[300px] h-[500px] bg-black rounded-[40px] p-3 shadow-2xl">
+                            {/* Screen */}
+                            <div className="w-full h-full bg-white rounded-[32px] overflow-hidden flex flex-col">
+                              {/* Status bar */}
+                              <div className="h-8 bg-gray-50 flex items-center justify-between px-6 text-xs">
+                                <span className="font-semibold">9:41</span>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-4 h-3 border border-black rounded-sm relative">
+                                    <div className="absolute inset-0.5 bg-black rounded-sm"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Message header */}
+                              <div className="bg-gray-50 border-b px-4 py-2">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                    B
+                                  </div>
+                                  <div>
+                                    <div className="font-semibold text-sm">Boomiis Restaurant</div>
+                                    <div className="text-xs text-gray-500">SMS</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Message content */}
+                              <div className="flex-1 p-4 overflow-auto bg-white">
+                                <div className="flex justify-start">
+                                  <div className="max-w-[85%] bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm">
+                                    <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">
+                                      {previewText || 'Your message preview will appear here...'}
+                                    </p>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      Just now
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Preview info */}
+                          <div className="mt-4 text-xs text-center text-muted-foreground">
+                            Preview shows how your SMS will appear on mobile devices
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </AdminLayout>
+    </AdminGuard>
   );
 }

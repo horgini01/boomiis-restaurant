@@ -743,3 +743,11 @@
 - [x] Add "SMS Templates" link to admin sidebar navigation
 - [x] Ensure link is visible and accessible from all admin pages
 - [x] Test navigation flow from dashboard to SMS templates page
+
+## SMS Templates Page Improvements (User Request - Feb 2)
+- [x] Fix SMS Templates page layout - ensure AdminLayout sidebar remains visible
+- [x] Add real-time SMS preview showing how messages appear on mobile devices
+- [x] Add character count display for SMS messages (important for SMS pricing)
+- [x] Create mobile device mockup UI for preview (iPhone-style mockup)
+- [x] Update preview in real-time as user types template content
+- [x] Add SMS segments calculator (160 chars for single, 153 for multi-part)
