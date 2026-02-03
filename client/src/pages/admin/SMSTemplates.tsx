@@ -61,10 +61,20 @@ export default function SMSTemplates() {
 
   const getTemplateDescription = (templateType: string) => {
     switch (templateType) {
+      case 'order_confirmed':
+        return 'Sent immediately after payment to confirm order receipt';
+      case 'order_preparing':
+        return 'Sent when the order starts being prepared by the kitchen';
       case 'order_ready':
         return 'Sent when an order is ready for pickup';
       case 'out_for_delivery':
         return 'Sent when an order is out for delivery';
+      case 'order_delivered':
+        return 'Sent when delivery is completed';
+      case 'order_delayed':
+        return 'Sent when an order is delayed beyond expected time';
+      case 'order_cancelled':
+        return 'Sent when an order is cancelled';
       default:
         return '';
     }

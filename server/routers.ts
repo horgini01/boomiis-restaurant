@@ -10,7 +10,7 @@ import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
-import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, formatPhoneNumberE164 } from "./services/sms.service";
+import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, sendOrderStatusSMS, formatPhoneNumberE164 } from "./services/sms.service";
 import { storagePut, storageGet } from "./storage";
 
 export const appRouter = router({
@@ -733,24 +733,51 @@ export const appRouter = router({
           scheduledFor: order.scheduledFor,
         });
 
-        // Send SMS notifications for key status changes
+        // Send SMS notifications for all status changes
         if (order.customerPhone) {
           const formattedPhone = formatPhoneNumberE164(order.customerPhone);
           
-          if (input.status === 'ready' && order.orderType === 'pickup') {
-            // Order is ready for pickup
-            await sendOrderReadyForPickupSMS(
-              order.customerName,
-              formattedPhone,
-              order.orderNumber
-            );
-          } else if (input.status === 'out_for_delivery' && order.orderType === 'delivery') {
-            // Order is out for delivery
-            await sendOrderOutForDeliverySMS(
+          // Map order status to SMS template type
+          let templateType: string | null = null;
+          let estimatedMinutes = 30; // Default estimated time
+          
+          switch (input.status) {
+            case 'confirmed':
+              templateType = 'order_confirmed';
+              break;
+            case 'preparing':
+              templateType = 'order_preparing';
+              break;
+            case 'ready':
+              if (order.orderType === 'pickup') {
+                templateType = 'order_ready';
+              }
+              break;
+            case 'out_for_delivery':
+              if (order.orderType === 'delivery') {
+                templateType = 'out_for_delivery';
+              }
+              break;
+            case 'delivered':
+              templateType = 'order_delivered';
+              break;
+            case 'delayed':
+              templateType = 'order_delayed';
+              estimatedMinutes = 45; // Extended time for delayed orders
+              break;
+            case 'cancelled':
+              templateType = 'order_cancelled';
+              break;
+          }
+          
+          // Send SMS if template type is determined
+          if (templateType) {
+            await sendOrderStatusSMS(
               order.customerName,
               formattedPhone,
               order.orderNumber,
-              30 // Default 30 minutes estimated delivery time
+              templateType,
+              estimatedMinutes
             );
           }
         }

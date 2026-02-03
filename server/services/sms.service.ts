@@ -295,3 +295,71 @@ export async function sendOrderOutForDeliverySMS(
     console.error(`[SMS] Failed to send out for delivery notification: ${result.error}`);
   }
 }
+
+/**
+ * Send SMS notification for any order status change
+ * @param customerName - Customer's name
+ * @param customerPhone - Customer's phone number (E.164 format)
+ * @param orderNumber - Order number
+ * @param templateType - SMS template type (order_confirmed, order_preparing, order_ready, etc.)
+ * @param estimatedMinutes - Estimated time in minutes (optional, defaults to 30)
+ */
+export async function sendOrderStatusSMS(
+  customerName: string,
+  customerPhone: string,
+  orderNumber: string,
+  templateType: string,
+  estimatedMinutes: number = 30
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType(templateType);
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      orderNumber,
+      estimatedMinutes,
+    });
+  } else {
+    // Fallback to default messages based on template type
+    switch (templateType) {
+      case 'order_confirmed':
+        message = `Hi ${customerName}! Your order #${orderNumber} has been confirmed. We'll notify you when it's ready!`;
+        break;
+      case 'order_preparing':
+        message = `Good news! Your order #${orderNumber} is now being prepared by our chefs at Boomiis Restaurant.`;
+        break;
+      case 'order_ready':
+        message = `Hi ${customerName}! Your order #${orderNumber} is ready for pickup at Boomiis Restaurant. See you soon!`;
+        break;
+      case 'out_for_delivery':
+        message = `Hi ${customerName}! Your order #${orderNumber} is out for delivery and will arrive in approximately ${estimatedMinutes} minutes.`;
+        break;
+      case 'order_delivered':
+        message = `Your order #${orderNumber} has been delivered. Enjoy your meal from Boomiis Restaurant! Please rate your experience.`;
+        break;
+      case 'order_delayed':
+        message = `Hi ${customerName}, your order #${orderNumber} is taking a bit longer than expected. New estimated time: ${estimatedMinutes} minutes. Sorry for the wait!`;
+        break;
+      case 'order_cancelled':
+        message = `Your order #${orderNumber} has been cancelled. If you have questions, please contact Boomiis Restaurant.`;
+        break;
+      default:
+        console.warn(`[SMS] Unknown template type: ${templateType}`);
+        return;
+    }
+  }
+  
+  const result = await sendSMS({
+    to: customerPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Order status notification (${templateType}) sent to ${customerPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send order status notification (${templateType}): ${result.error}`);
+  }
+}

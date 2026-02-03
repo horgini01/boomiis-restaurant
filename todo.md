@@ -751,3 +751,18 @@
 - [x] Create mobile device mockup UI for preview (iPhone-style mockup)
 - [x] Update preview in real-time as user types template content
 - [x] Add SMS segments calculator (160 chars for single, 153 for multi-part)
+
+## Comprehensive SMS Notification System (User Request - Feb 3)
+- [x] Update database schema to support additional SMS template types
+- [x] Add SMS template types: order_confirmed, order_preparing, order_delayed, order_delivered, order_cancelled
+- [x] Create default SMS templates for all new order statuses
+- [x] Seed database with default templates for new statuses
+- [x] Update SMS Templates editor UI to display all template types with descriptions
+- [x] Update order status change logic in routers.ts to trigger appropriate SMS notifications
+- [x] Add SMS notification for "confirmed" status
+- [x] Add SMS notification for "preparing" status
+- [x] Add SMS notification for "delayed" status
+- [x] Add SMS notification for "delivered" status
+- [x] Add SMS notification for "cancelled" status
+- [x] Create generic sendOrderStatusSMS function to handle all status types
+- [x] Test SMS notifications for all order lifecycle stages (all 39 tests passing)

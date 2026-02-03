@@ -302,7 +302,7 @@ export type InsertEmailCampaign = typeof emailCampaigns.$inferInsert;
  */
 export const smsTemplates = mysqlTable("sms_templates", {
   id: int("id").autoincrement().primaryKey(),
-  templateType: varchar("template_type", { length: 50 }).notNull().unique(), // 'order_ready', 'out_for_delivery'
+  templateType: varchar("template_type", { length: 50 }).notNull().unique(), // 'order_confirmed', 'order_preparing', 'order_ready', 'out_for_delivery', 'order_delivered', 'order_delayed', 'order_cancelled'
   templateName: varchar("template_name", { length: 100 }).notNull(),
   message: text("message").notNull(), // SMS message body with template variables {{customerName}}, {{orderNumber}}, {{estimatedMinutes}}
   isActive: boolean("is_active").default(true).notNull(),
