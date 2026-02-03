@@ -5,8 +5,8 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
-import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getAllSmsTemplates, getSmsTemplateById } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates } from '../drizzle/schema';
+import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
+import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours } from '../drizzle/schema';
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
@@ -123,6 +123,9 @@ export const appRouter = router({
       
       return settingsMap;
     }),
+    getPublicOpeningHours: publicProcedure.query(async () => {
+      return await getAllOpeningHours();
+    }),
   }),
 
   menu: router({
@@ -161,14 +164,18 @@ export const appRouter = router({
         if (!db) throw new Error('Database not available');
 
         // Check if restaurant is currently open (using UK/GMT timezone)
-        const settings = await db.select().from(siteSettings);
-        const openingTime = settings.find(s => s.settingKey === 'opening_time')?.settingValue || '11:00';
-        const closingTime = settings.find(s => s.settingKey === 'closing_time')?.settingValue || '22:00';
-        
         // Get current time in Europe/London timezone
         const now = new Date();
         const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
         const currentTime = `${ukTime.getHours().toString().padStart(2, '0')}:${ukTime.getMinutes().toString().padStart(2, '0')}`;
+        const currentDayOfWeek = ukTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        
+        // Get today's opening hours from database
+        const todayHours = await getOpeningHoursByDay(currentDayOfWeek);
+        
+        if (!todayHours) {
+          throw new Error('Unable to verify opening hours. Please try again later.');
+        }
         
         // Helper function to convert 24-hour time to 12-hour format with AM/PM
         const formatTime12Hour = (time24: string): string => {
@@ -178,8 +185,14 @@ export const appRouter = router({
           return `${hours12}:${minutes.toString().padStart(2, '0')}${period}`;
         };
         
-        if (currentTime < openingTime || currentTime >= closingTime) {
-          throw new Error(`Sorry, we are currently closed. Our opening hours are ${formatTime12Hour(openingTime)} - ${formatTime12Hour(closingTime)}.`);
+        // Check if restaurant is closed today
+        if (todayHours.isClosed) {
+          throw new Error('Sorry, we are closed today. Please check our opening hours and try again.');
+        }
+        
+        // Check if current time is within opening hours
+        if (currentTime < todayHours.openTime || currentTime >= todayHours.closeTime) {
+          throw new Error(`Sorry, we are currently closed. Our opening hours today are ${formatTime12Hour(todayHours.openTime)} - ${formatTime12Hour(todayHours.closeTime)}.`);
         }
 
         const { items: orderItems, preferredTime, ...orderData } = input;
@@ -1630,6 +1643,88 @@ export const appRouter = router({
             updatedAt: new Date(),
           })
           .where(eq(smsTemplates.id, input.id));
+
+        return { success: true };
+      }),
+  }),
+
+  openingHours: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const hours = await getAllOpeningHours();
+      return hours;
+    }),
+
+    getByDay: protectedProcedure
+      .input(z.object({ dayOfWeek: z.number().min(0).max(6) }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const hours = await getOpeningHoursByDay(input.dayOfWeek);
+        if (!hours) {
+          throw new Error('Opening hours not found for this day');
+        }
+        return hours;
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        openTime: z.string().regex(/^\d{2}:\d{2}$/),
+        closeTime: z.string().regex(/^\d{2}:\d{2}$/),
+        isClosed: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.update(openingHours)
+          .set({
+            openTime: input.openTime,
+            closeTime: input.closeTime,
+            isClosed: input.isClosed,
+            updatedAt: new Date(),
+          })
+          .where(eq(openingHours.id, input.id));
+
+        return { success: true };
+      }),
+
+    updateBulk: protectedProcedure
+      .input(z.array(z.object({
+        id: z.number(),
+        openTime: z.string().regex(/^\d{2}:\d{2}$/),
+        closeTime: z.string().regex(/^\d{2}:\d{2}$/),
+        isClosed: z.boolean(),
+      })))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Update each day's hours
+        for (const hours of input) {
+          await db.update(openingHours)
+            .set({
+              openTime: hours.openTime,
+              closeTime: hours.closeTime,
+              isClosed: hours.isClosed,
+              updatedAt: new Date(),
+            })
+            .where(eq(openingHours.id, hours.id));
+        }
 
         return { success: true };
       }),

@@ -71,6 +71,13 @@
       "when": 1770074638316,
       "tag": "0009_lucky_dracula",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1770079216388,
+      "tag": "0010_fat_hellion",
+      "breakpoints": true
     }
   ]
 }

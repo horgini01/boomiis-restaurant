@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, menuCategories, menuItems, orders, orderItems, reservations, smsTemplates } from "../drizzle/schema";
+import { InsertUser, users, menuCategories, menuItems, orders, orderItems, reservations, smsTemplates, openingHours } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -153,5 +153,38 @@ export async function getSmsTemplateById(id: number) {
   if (!db) return null;
   
   const result = await db.select().from(smsTemplates).where(eq(smsTemplates.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+// Opening Hours queries
+export async function getAllOpeningHours() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const hours = await db.select().from(openingHours).orderBy(openingHours.dayOfWeek);
+  
+  return hours.map(h => ({
+    ...h,
+    dayName: dayNames[h.dayOfWeek]
+  }));
+}
+
+export async function getOpeningHoursByDay(dayOfWeek: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(openingHours)
+    .where(eq(openingHours.dayOfWeek, dayOfWeek))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getOpeningHoursById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(openingHours).where(eq(openingHours.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
 }

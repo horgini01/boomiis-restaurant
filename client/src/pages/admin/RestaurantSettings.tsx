@@ -18,10 +18,22 @@ import { DeliveryAreasSettings } from "@/components/DeliveryAreasSettings";
 
 export default function RestaurantSettings() {
   const { data: settings, isLoading, refetch } = trpc.admin.getSettings.useQuery();
+  const { data: openingHoursData, refetch: refetchHours } = trpc.openingHours.list.useQuery();
+  
   const updateSetting = trpc.admin.updateSetting.useMutation({
     onSuccess: () => {
       toast.success("Settings updated successfully");
       refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const updateOpeningHours = trpc.openingHours.updateBulk.useMutation({
+    onSuccess: () => {
+      toast.success("Opening hours updated successfully");
+      refetchHours();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -40,7 +52,14 @@ export default function RestaurantSettings() {
   });
 
   const [formData, setFormData] = useState<Record<string, string>>({});
-  const [openingHours, setOpeningHours] = useState<any>({});
+  const [openingHours, setOpeningHours] = useState<Array<{
+    id: number;
+    dayOfWeek: number;
+    dayName: string;
+    openTime: string;
+    closeTime: string;
+    isClosed: boolean;
+  }>>([]);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
 
@@ -52,24 +71,15 @@ export default function RestaurantSettings() {
         data[setting.settingKey] = setting.settingValue;
       });
       setFormData(data);
-
-      // Parse opening hours
-      try {
-        const hours = JSON.parse(data.opening_hours || "{}");
-        setOpeningHours(hours);
-      } catch {
-        setOpeningHours({
-          monday: { open: "12:00", close: "22:00", closed: false },
-          tuesday: { open: "12:00", close: "22:00", closed: false },
-          wednesday: { open: "12:00", close: "22:00", closed: false },
-          thursday: { open: "12:00", close: "22:00", closed: false },
-          friday: { open: "12:00", close: "23:00", closed: false },
-          saturday: { open: "12:00", close: "23:00", closed: false },
-          sunday: { open: "12:00", close: "21:00", closed: false },
-        });
-      }
     }
   }, [settings]);
+
+  // Initialize opening hours from database
+  useEffect(() => {
+    if (openingHoursData) {
+      setOpeningHours(openingHoursData);
+    }
+  }, [openingHoursData]);
 
   const handleInputChange = (key: string, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -82,13 +92,25 @@ export default function RestaurantSettings() {
     await Promise.all(promises);
   };
 
-  const handleHoursChange = (day: string, field: string, value: string | boolean) => {
-    const updated = {
-      ...openingHours,
-      [day]: { ...openingHours[day], [field]: value },
-    };
-    setOpeningHours(updated);
-    handleInputChange("opening_hours", JSON.stringify(updated));
+  const handleSaveOpeningHours = async () => {
+    await updateOpeningHours.mutateAsync(
+      openingHours.map(h => ({
+        id: h.id,
+        openTime: h.openTime,
+        closeTime: h.closeTime,
+        isClosed: h.isClosed,
+      }))
+    );
+  };
+
+  const handleHoursChange = (id: number, field: 'openTime' | 'closeTime' | 'isClosed', value: string | boolean) => {
+    setOpeningHours(prev => 
+      prev.map(h => 
+        h.id === id 
+          ? { ...h, [field]: value }
+          : h
+      )
+    );
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -390,37 +412,49 @@ export default function RestaurantSettings() {
             <TabsContent value="hours">
               <Card>
                 <CardHeader>
-                  <CardTitle>Opening Hours</CardTitle>
-                  <CardDescription>
-                    Set your restaurant opening hours for each day of the week
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Opening Hours</CardTitle>
+                      <CardDescription>
+                        Set your restaurant opening hours for each day of the week
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      onClick={handleSaveOpeningHours} 
+                      disabled={updateOpeningHours.isPending}
+                    >
+                      {updateOpeningHours.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Hours
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {Object.entries(openingHours).map(([day, hours]: [string, any]) => (
-                    <div key={day} className="flex items-center gap-4 p-4 border rounded-lg">
-                      <div className="w-32 font-medium capitalize">{day}</div>
+                  {openingHours.map((hours) => (
+                    <div key={hours.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div className="w-32 font-medium">{hours.dayName}</div>
                       <div className="flex items-center gap-2 flex-1">
                         <Input
                           type="time"
-                          value={hours.open}
-                          onChange={(e) => handleHoursChange(day, "open", e.target.value)}
-                          disabled={hours.closed}
+                          value={hours.openTime}
+                          onChange={(e) => handleHoursChange(hours.id, "openTime", e.target.value)}
+                          disabled={hours.isClosed}
                           className="w-32"
                         />
                         <span>to</span>
                         <Input
                           type="time"
-                          value={hours.close}
-                          onChange={(e) => handleHoursChange(day, "close", e.target.value)}
-                          disabled={hours.closed}
+                          value={hours.closeTime}
+                          onChange={(e) => handleHoursChange(hours.id, "closeTime", e.target.value)}
+                          disabled={hours.isClosed}
                           className="w-32"
                         />
                       </div>
                       <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
-                          checked={hours.closed}
-                          onChange={(e) => handleHoursChange(day, "closed", e.target.checked)}
+                          checked={hours.isClosed}
+                          onChange={(e) => handleHoursChange(hours.id, "isClosed", e.target.checked)}
                           className="w-4 h-4"
                         />
                         <span className="text-sm">Closed</span>

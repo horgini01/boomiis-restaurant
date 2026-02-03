@@ -312,3 +312,19 @@ export const smsTemplates = mysqlTable("sms_templates", {
 
 export type SmsTemplate = typeof smsTemplates.$inferSelect;
 export type InsertSmsTemplate = typeof smsTemplates.$inferInsert;
+
+/**
+ * Opening hours for each day of the week
+ */
+export const openingHours = mysqlTable("opening_hours", {
+  id: int("id").autoincrement().primaryKey(),
+  dayOfWeek: int("day_of_week").notNull(), // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  openTime: varchar("open_time", { length: 5 }).notNull(), // Format: "HH:MM" (24-hour)
+  closeTime: varchar("close_time", { length: 5 }).notNull(), // Format: "HH:MM" (24-hour)
+  isClosed: boolean("is_closed").default(false).notNull(), // True if restaurant is closed on this day
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type OpeningHour = typeof openingHours.$inferSelect;
+export type InsertOpeningHour = typeof openingHours.$inferInsert;

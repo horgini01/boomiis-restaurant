@@ -2,47 +2,28 @@ import { trpc } from "@/lib/trpc";
 
 export function useSettings() {
   const { data: settings, isLoading } = trpc.settings.getPublic.useQuery();
-
-  const parseOpeningHours = (jsonString: string | undefined) => {
-    if (!jsonString) return null;
-    try {
-      return JSON.parse(jsonString);
-    } catch {
-      return null;
-    }
-  };
-
-  const formatOpeningHours = () => {
-    const hours = parseOpeningHours(settings?.opening_hours);
-    if (!hours) return [];
-
-    return Object.entries(hours).map(([day, times]: [string, any]) => ({
-      day: day.charAt(0).toUpperCase() + day.slice(1),
-      open: times.open,
-      close: times.close,
-      closed: times.closed,
-    }));
-  };
+  const { data: openingHoursData } = trpc.settings.getPublicOpeningHours.useQuery();
 
   const formatOpeningHoursDisplay = () => {
-    const hours = formatOpeningHours();
-    if (hours.length === 0) return "Hours not available";
+    if (!openingHoursData || openingHoursData.length === 0) {
+      return ["Hours not available"];
+    }
 
     // Group consecutive days with same hours
     const grouped: string[] = [];
     let currentGroup: any[] = [];
 
-    hours.forEach((hour, index) => {
-      if (hour.closed) {
+    openingHoursData.forEach((hour, index) => {
+      if (hour.isClosed) {
         if (currentGroup.length > 0) {
           grouped.push(formatGroup(currentGroup));
           currentGroup = [];
         }
-        grouped.push(`${hour.day}: Closed`);
+        grouped.push(`${hour.dayName}: Closed`);
       } else {
         if (
           currentGroup.length === 0 ||
-          (currentGroup[0].open === hour.open && currentGroup[0].close === hour.close)
+          (currentGroup[0].openTime === hour.openTime && currentGroup[0].closeTime === hour.closeTime)
         ) {
           currentGroup.push(hour);
         } else {
@@ -51,7 +32,7 @@ export function useSettings() {
         }
       }
 
-      if (index === hours.length - 1 && currentGroup.length > 0) {
+      if (index === openingHoursData.length - 1 && currentGroup.length > 0) {
         grouped.push(formatGroup(currentGroup));
       }
     });
@@ -61,9 +42,9 @@ export function useSettings() {
 
   const formatGroup = (group: any[]) => {
     if (group.length === 1) {
-      return `${group[0].day}: ${formatTime(group[0].open)} - ${formatTime(group[0].close)}`;
+      return `${group[0].dayName}: ${formatTime(group[0].openTime)} - ${formatTime(group[0].closeTime)}`;
     }
-    return `${group[0].day}-${group[group.length - 1].day}: ${formatTime(group[0].open)} - ${formatTime(group[0].close)}`;
+    return `${group[0].dayName}-${group[group.length - 1].dayName}: ${formatTime(group[0].openTime)} - ${formatTime(group[0].closeTime)}`;
   };
 
   const formatTime = (time: string) => {
@@ -86,7 +67,7 @@ export function useSettings() {
     socialFacebook: settings?.social_facebook || "",
     socialInstagram: settings?.social_instagram || "",
     socialTwitter: settings?.social_twitter || "",
-    openingHours: formatOpeningHours(),
+    openingHours: openingHoursData || [],
     openingHoursDisplay: formatOpeningHoursDisplay(),
   };
 }

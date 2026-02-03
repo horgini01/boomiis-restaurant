@@ -779,3 +779,29 @@
 - [x] Create helper function to convert 24-hour time to 12-hour format with AM/PM
 - [x] Update closing hours error message to display times in 12-hour format (e.g., 11:00AM - 10:00PM)
 - [x] Remove space between time and AM/PM for compact format
+
+## Opening Hours Integration (User Request - Feb 3)
+- [x] Create database schema for day-specific opening hours (Monday-Sunday)
+- [x] Add support for "closed" status for specific days
+- [x] Seed default opening hours from admin UI screenshot
+- [x] Build backend API (tRPC) for CRUD operations on opening hours
+- [x] Add query helpers for opening hours in db.ts
+- [x] Add openingHours router with list, getByDay, update, and updateBulk procedures
+- [ ] Make admin "Opening Hours" tab functional (save/update hours)
+- [ ] Update order validation to check day-specific hours instead of simple opening/closing time
+- [ ] Handle "closed" days in validation logic
+- [ ] Update footer to dynamically display hours from database
+- [ ] Remove hardcoded hours from footer
+- [ ] Test complete integration (admin UI → database → validation → footer display)
+
+## Opening Hours Integration (User Request - Feb 3)
+- [x] Create database schema for day-specific opening hours
+- [x] Seed default opening hours data (Sun-Sat with different times)
+- [x] Build backend API for managing opening hours (list, getByDay, update, updateBulk)
+- [x] Make admin Opening Hours tab functional (connect to database)
+- [x] Update order validation logic to use day-specific hours instead of simple opening/closing times
+- [x] Add support for closed days in validation
+- [x] Update footer to dynamically display hours from database
+- [x] Implement hour grouping in footer (consecutive days with same hours)
+- [x] Write comprehensive tests for opening hours integration (6 tests passing)
+- [x] Verify all three components (admin UI, validation, footer) use single data source
