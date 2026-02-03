@@ -1425,6 +1425,25 @@ export const appRouter = router({
               } catch (error) {
                 console.error('[Payment] Failed to send admin notification:', error);
               }
+
+              // Send SMS notification to customer
+              try {
+                if (order.customerPhone) {
+                  const { sendOrderStatusSMS } = await import('./services/sms.service');
+                  console.log(`[Payment] Sending SMS to ${order.customerPhone}`);
+                  await sendOrderStatusSMS(
+                    order.customerName,
+                    order.customerPhone,
+                    order.orderNumber,
+                    'order_confirmed'
+                  );
+                  console.log('[Payment] SMS notification sent');
+                } else {
+                  console.log('[Payment] No customer phone, skipping SMS');
+                }
+              } catch (error) {
+                console.error('[Payment] Failed to send SMS notification:', error);
+              }
             }
           }
         }

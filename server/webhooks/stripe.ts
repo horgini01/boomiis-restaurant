@@ -39,8 +39,10 @@ export async function handleStripeWebhook(req: Request, res: Response) {
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
+        console.log('[Webhook] checkout.session.completed event received');
         const session = event.data.object;
         const orderId = parseInt(session.metadata?.orderId || '0');
+        console.log(`[Webhook] Processing order ID: ${orderId}, payment status: ${session.payment_status}`);
 
         if (orderId && session.payment_status === 'paid') {
           const db = await getDb();
@@ -105,6 +107,7 @@ export async function handleStripeWebhook(req: Request, res: Response) {
             }
 
             // Send SMS notification to customer (separate try-catch)
+            console.log('[Webhook] About to send SMS notification');
             try {
               const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
               if (order && order.customerPhone) {

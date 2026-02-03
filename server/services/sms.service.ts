@@ -111,10 +111,14 @@ async function sendViaBulkSMS({ to, message }: SendSMSParams): Promise<SMSResult
       body: JSON.stringify({
         to: formattedNumber,
         body: message,
+        from: 'Boomiis', // Approved alphanumeric sender ID
       }),
     });
     
     const data = await response.json();
+    
+    console.log(`[SMS][BulkSMS] API Response - Status: ${response.status}, Data:`, JSON.stringify(data));
+    console.log(`[SMS][BulkSMS] Sent to number: ${formattedNumber}`);
     
     if (response.status === 201 && Array.isArray(data) && data.length > 0) {
       const sentMessage = data[0];

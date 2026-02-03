@@ -819,3 +819,13 @@
 - [x] Investigate why SMS notifications are still not being sent after webhook fix
 - [x] Check webhook logs to see if SMS function is being called
 - [x] Verify BulkSMS credentials and phone number format
+
+## Bug Fixes (User Reported - Feb 3 - SMS Not Actually Delivered)
+- [x] SMS logs show "sent successfully" but no credits deducted from BulkSMS account (still 5 credits)
+- [x] Verify phone number format includes +44 country code for UK numbers
+- [x] Check if BulkSMS API is using test/sandbox endpoint instead of production
+- [x] Ensure SMS actually reaches customer's phone
+- [x] Purchase BulkSMS credits to activate account
+- [x] Request and configure alphanumeric sender ID "Boomiis"
+- [x] Update SMS service to use approved sender ID
+- [x] Test end-to-end SMS delivery (WORKING ✅)
