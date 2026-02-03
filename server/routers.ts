@@ -160,13 +160,15 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        // Check if restaurant is currently open
+        // Check if restaurant is currently open (using UK/GMT timezone)
         const settings = await db.select().from(siteSettings);
         const openingTime = settings.find(s => s.settingKey === 'opening_time')?.settingValue || '11:00';
         const closingTime = settings.find(s => s.settingKey === 'closing_time')?.settingValue || '22:00';
         
+        // Get current time in Europe/London timezone
         const now = new Date();
-        const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+        const currentTime = `${ukTime.getHours().toString().padStart(2, '0')}:${ukTime.getMinutes().toString().padStart(2, '0')}`;
         
         if (currentTime < openingTime || currentTime >= closingTime) {
           throw new Error(`Sorry, we are currently closed. Our opening hours are ${openingTime} - ${closingTime}.`);

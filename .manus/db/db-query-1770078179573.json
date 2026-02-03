@@ -1,0 +1,26 @@
+{
+  "query": "SELECT * FROM site_settings WHERE setting_key IN ('opening_time', 'closing_time');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM site_settings WHERE setting_key IN ('opening_time', 'closing_time');",
+  "rows": [
+    {
+      "id": "60001",
+      "setting_key": "opening_time",
+      "setting_value": "11:00",
+      "setting_type": "time",
+      "description": "Restaurant opening time (24-hour format)",
+      "updated_at": "2026-02-03 00:09:55"
+    },
+    {
+      "id": "60002",
+      "setting_key": "closing_time",
+      "setting_value": "22:00",
+      "setting_type": "time",
+      "description": "Restaurant closing time (24-hour format)",
+      "updated_at": "2026-02-03 00:09:55"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsetting_key\tsetting_value\tsetting_type\tdescription\tupdated_at\n60001\topening_time\t11:00\ttime\tRestaurant opening time (24-hour format)\t2026-02-03 00:09:55\n60002\tclosing_time\t22:00\ttime\tRestaurant closing time (24-hour format)\t2026-02-03 00:09:55\n",
+  "stderr": "",
+  "execution_time_ms": 130
+}

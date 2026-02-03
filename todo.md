@@ -766,3 +766,11 @@
 - [x] Add SMS notification for "cancelled" status
 - [x] Create generic sendOrderStatusSMS function to handle all status types
 - [x] Test SMS notifications for all order lifecycle stages (all 39 tests passing)
+
+## Bug Fix - Closing Hours Validation (User Reported - Feb 3)
+- [x] Investigate why closing hours validation isn't blocking orders outside business hours
+- [x] Check if opening_time and closing_time are properly set in site_settings table
+- [x] Verify the validation logic in checkout process
+- [x] Fix the validation to use Europe/London timezone instead of server timezone (EST)
+- [x] Update closing hours test to use UK timezone
+- [x] Test with different times to ensure validation works correctly (all 39 tests passing)

@@ -92,9 +92,10 @@ describe('Closing Hours Validation', () => {
   it('should allow orders when restaurant is open', async () => {
     if (!db) throw new Error('Database not available');
 
-    // Set hours to ensure restaurant is open now
+    // Set hours to ensure restaurant is open now (using UK timezone)
     const now = new Date();
-    const currentHour = now.getHours();
+    const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const currentHour = ukTime.getHours();
     
     // Set opening time to past hour and closing time to future hour
     // Avoid wraparound by using hours that don't cross midnight
