@@ -98,21 +98,30 @@ export async function handleStripeWebhook(req: Request, res: Response) {
 
                 // Send admin notification email
                 await sendAdminOrderNotification(emailData);
-
-                // Send SMS notification to customer
-                if (order.customerPhone) {
-                  const { sendOrderStatusSMS } = await import('../services/sms.service');
-                  await sendOrderStatusSMS(
-                    order.customerName,
-                    order.customerPhone,
-                    order.orderNumber,
-                    'order_confirmed'
-                  );
-                }
               }
             } catch (emailError: any) {
               console.error('[Webhook] Failed to send email notifications:', emailError.message);
               // Don't fail the webhook if email fails
+            }
+
+            // Send SMS notification to customer (separate try-catch)
+            try {
+              const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
+              if (order && order.customerPhone) {
+                console.log(`[Webhook] Sending SMS to ${order.customerPhone}`);
+                const { sendOrderStatusSMS } = await import('../services/sms.service');
+                await sendOrderStatusSMS(
+                  order.customerName,
+                  order.customerPhone,
+                  order.orderNumber,
+                  'order_confirmed'
+                );
+              } else {
+                console.log('[Webhook] No customer phone number, skipping SMS');
+              }
+            } catch (smsError: any) {
+              console.error('[Webhook] Failed to send SMS notification:', smsError.message);
+              // Don't fail the webhook if SMS fails
             }
           }
         }

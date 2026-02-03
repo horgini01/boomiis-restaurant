@@ -1,0 +1,17 @@
+{
+  "query": "SELECT order_number, created_at, scheduled_for, customer_phone, order_type FROM orders ORDER BY created_at DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT order_number, created_at, scheduled_for, customer_phone, order_type FROM orders ORDER BY created_at DESC LIMIT 1;",
+  "rows": [
+    {
+      "order_number": "BO-ML6ICOE6-M8A1",
+      "created_at": "2026-02-03 11:21:00",
+      "scheduled_for": "2026-02-03 17:45:00",
+      "customer_phone": "07456183646",
+      "order_type": "delivery"
+    }
+  ],
+  "messages": [],
+  "stdout": "order_number\tcreated_at\tscheduled_for\tcustomer_phone\torder_type\nBO-ML6ICOE6-M8A1\t2026-02-03 11:21:00\t2026-02-03 17:45:00\t07456183646\tdelivery\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

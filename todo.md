@@ -813,3 +813,9 @@
 - [x] Fix SMS notifications not being sent when orders are placed
 - [x] Fix scheduled time showing past date/time (Feb 02 7:32 AM for order placed Feb 03 1:08 AM)
 - [x] Investigate why scheduled time is calculated incorrectly
+
+## Bug Fixes (User Reported - Feb 3 - Scheduled Time & SMS Still Broken)
+- [x] Fix scheduled time showing 5:45 PM for order placed at 11:21 AM (should be ~12:46 PM for 85min estimate)
+- [x] Investigate why SMS notifications are still not being sent after webhook fix
+- [x] Check webhook logs to see if SMS function is being called
+- [x] Verify BulkSMS credentials and phone number format

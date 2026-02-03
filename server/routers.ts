@@ -201,14 +201,14 @@ export const appRouter = router({
         const total = subtotal + deliveryFee;
         const orderNumber = `BO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
-        // Convert preferred time (HH:MM) to timestamp for today in UK timezone
+        // Convert preferred time (HH:MM) to timestamp for today
+        // The frontend already calculated this time based on current time + prep/delivery time
+        // We just need to set it as today's date with the given time
         let scheduledFor = null;
         if (preferredTime) {
           const [hours, minutes] = preferredTime.split(':').map(Number);
-          // Get current date in UK timezone
-          const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
-          // Create scheduled date in UK timezone
-          const scheduledDate = new Date(ukNow);
+          // Use the current date (already in UK timezone from 'now' variable above)
+          const scheduledDate = new Date(now);
           scheduledDate.setHours(hours, minutes, 0, 0);
           scheduledFor = scheduledDate;
         }
