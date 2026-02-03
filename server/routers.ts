@@ -170,8 +170,16 @@ export const appRouter = router({
         const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
         const currentTime = `${ukTime.getHours().toString().padStart(2, '0')}:${ukTime.getMinutes().toString().padStart(2, '0')}`;
         
+        // Helper function to convert 24-hour time to 12-hour format with AM/PM
+        const formatTime12Hour = (time24: string): string => {
+          const [hours, minutes] = time24.split(':').map(Number);
+          const period = hours >= 12 ? 'PM' : 'AM';
+          const hours12 = hours % 12 || 12;
+          return `${hours12}:${minutes.toString().padStart(2, '0')}${period}`;
+        };
+        
         if (currentTime < openingTime || currentTime >= closingTime) {
-          throw new Error(`Sorry, we are currently closed. Our opening hours are ${openingTime} - ${closingTime}.`);
+          throw new Error(`Sorry, we are currently closed. Our opening hours are ${formatTime12Hour(openingTime)} - ${formatTime12Hour(closingTime)}.`);
         }
 
         const { items: orderItems, preferredTime, ...orderData } = input;

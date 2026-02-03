@@ -774,3 +774,8 @@
 - [x] Fix the validation to use Europe/London timezone instead of server timezone (EST)
 - [x] Update closing hours test to use UK timezone
 - [x] Test with different times to ensure validation works correctly (all 39 tests passing)
+
+## UX Improvement - 12-Hour Time Format (User Request - Feb 3)
+- [x] Create helper function to convert 24-hour time to 12-hour format with AM/PM
+- [x] Update closing hours error message to display times in 12-hour format (e.g., 11:00AM - 10:00PM)
+- [x] Remove space between time and AM/PM for compact format
