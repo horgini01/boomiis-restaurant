@@ -98,6 +98,17 @@ export async function handleStripeWebhook(req: Request, res: Response) {
 
                 // Send admin notification email
                 await sendAdminOrderNotification(emailData);
+
+                // Send SMS notification to customer
+                if (order.customerPhone) {
+                  const { sendOrderStatusSMS } = await import('../services/sms.service');
+                  await sendOrderStatusSMS(
+                    order.customerName,
+                    order.customerPhone,
+                    order.orderNumber,
+                    'order_confirmed'
+                  );
+                }
               }
             } catch (emailError: any) {
               console.error('[Webhook] Failed to send email notifications:', emailError.message);

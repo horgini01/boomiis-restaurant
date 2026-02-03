@@ -808,3 +808,8 @@
 
 ## Bug Fixes (User Reported - Feb 3 - Time Display Format)
 - [x] Fix footer time display to show "00:30 AM" instead of "12:30 AM" for midnight hour times
+
+## Bug Fixes (User Reported - Feb 3 - Critical Order Issues)
+- [x] Fix SMS notifications not being sent when orders are placed
+- [x] Fix scheduled time showing past date/time (Feb 02 7:32 AM for order placed Feb 03 1:08 AM)
+- [x] Investigate why scheduled time is calculated incorrectly
