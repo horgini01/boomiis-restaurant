@@ -51,7 +51,8 @@ export function useSettings() {
     const [hours, minutes] = time.split(":");
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    // Keep 00 for midnight hour instead of converting to 12
+    const displayHour = hour === 0 ? "00" : hour > 12 ? hour - 12 : hour;
     return `${displayHour}:${minutes} ${ampm}`;
   };
 

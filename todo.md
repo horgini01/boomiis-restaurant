@@ -805,3 +805,6 @@
 - [x] Implement hour grouping in footer (consecutive days with same hours)
 - [x] Write comprehensive tests for opening hours integration (6 tests passing)
 - [x] Verify all three components (admin UI, validation, footer) use single data source
+
+## Bug Fixes (User Reported - Feb 3 - Time Display Format)
+- [x] Fix footer time display to show "00:30 AM" instead of "12:30 AM" for midnight hour times
