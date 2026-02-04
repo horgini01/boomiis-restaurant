@@ -6,7 +6,7 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours } from '../drizzle/schema';
+import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours } from '../drizzle/schema';
 import { eq, sql } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
@@ -296,6 +296,93 @@ export const appRouter = router({
         } catch (emailError: any) {
           console.error('[Reservation] Failed to send email notifications:', emailError.message);
           // Don't fail the reservation if email fails
+        }
+
+        return { success: true };
+      }),
+
+    list: protectedProcedure
+      .input(z.object({
+        status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
+        limit: z.number().default(50),
+      }).optional())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { desc } = await import('drizzle-orm');
+
+        let query = db.select().from(reservations);
+
+        if (input?.status) {
+          query = query.where(eq(reservations.status, input.status)) as any;
+        }
+
+        const results = await query
+          .orderBy(desc(reservations.reservationDate))
+          .limit(input?.limit || 50);
+
+        return results;
+      }),
+
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get reservation details for notifications
+        const [reservation] = await db.select().from(reservations).where(eq(reservations.id, input.id));
+        if (!reservation) {
+          throw new Error('Reservation not found');
+        }
+
+        // Update status
+        await db.update(reservations)
+          .set({ status: input.status, updatedAt: new Date() })
+          .where(eq(reservations.id, input.id));
+
+        // Send email notification for status change
+        try {
+          const { sendReservationStatusEmail } = await import('./email');
+          await sendReservationStatusEmail({
+            customerName: reservation.customerName,
+            customerEmail: reservation.customerEmail,
+            date: reservation.reservationDate,
+            time: reservation.reservationTime,
+            guests: reservation.partySize,
+            status: input.status,
+          });
+        } catch (emailError: any) {
+          console.error('[Reservation] Failed to send status email:', emailError.message);
+        }
+
+        // Send SMS notification for status change
+        try {
+          const { sendReservationStatusSMS } = await import('./services/sms.service');
+          const { formatPhoneNumberE164 } = await import('./services/sms.service');
+          const formattedPhone = formatPhoneNumberE164(reservation.customerPhone);
+          
+          await sendReservationStatusSMS(
+            reservation.customerName,
+            formattedPhone,
+            reservation.reservationDate,
+            reservation.reservationTime,
+            input.status
+          );
+        } catch (smsError: any) {
+          console.error('[Reservation] Failed to send status SMS:', smsError.message);
         }
 
         return { success: true };
@@ -1788,6 +1875,136 @@ export const appRouter = router({
               updatedAt: new Date(),
             })
             .where(eq(openingHours.id, hours.id));
+        }
+
+        return { success: true };
+      }),
+  }),
+
+  eventInquiries: router({
+    create: publicProcedure
+      .input(z.object({
+        customerName: z.string(),
+        customerEmail: z.string().email(),
+        customerPhone: z.string(),
+        eventType: z.string(),
+        venueAddress: z.string(),
+        eventDate: z.date().optional(),
+        guestCount: z.number().optional(),
+        budget: z.string().optional(),
+        message: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(eventInquiries).values({
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          customerPhone: input.customerPhone,
+          eventType: input.eventType,
+          venueAddress: input.venueAddress,
+          eventDate: input.eventDate || null,
+          guestCount: input.guestCount || null,
+          budget: input.budget || null,
+          message: input.message,
+        });
+
+        // Send email notifications
+        try {
+          const { sendEventInquiryConfirmationEmail, sendAdminEventInquiryNotification } = await import('./email');
+          
+          const emailData = {
+            customerName: input.customerName,
+            customerEmail: input.customerEmail,
+            customerPhone: input.customerPhone,
+            eventType: input.eventType,
+            venueAddress: input.venueAddress,
+            eventDate: input.eventDate,
+            guestCount: input.guestCount,
+            budget: input.budget,
+            message: input.message,
+          };
+
+          // Send customer confirmation
+          await sendEventInquiryConfirmationEmail(emailData);
+
+          // Send admin notification
+          await sendAdminEventInquiryNotification(emailData);
+        } catch (emailError: any) {
+          console.error('[EventInquiry] Failed to send email notifications:', emailError.message);
+          // Don't fail the inquiry if email fails
+        }
+
+        return { success: true };
+      }),
+
+    list: protectedProcedure
+      .input(z.object({
+        status: z.enum(['new', 'contacted', 'quoted', 'booked', 'cancelled']).optional(),
+        limit: z.number().default(50),
+      }).optional())
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { desc } = await import('drizzle-orm');
+
+        let query = db.select().from(eventInquiries);
+
+        if (input?.status) {
+          query = query.where(eq(eventInquiries.status, input.status)) as any;
+        }
+
+        const results = await query
+          .orderBy(desc(eventInquiries.createdAt))
+          .limit(input?.limit || 50);
+
+        return results;
+      }),
+
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['new', 'contacted', 'quoted', 'booked', 'cancelled']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get inquiry details for notifications
+        const [inquiry] = await db.select().from(eventInquiries).where(eq(eventInquiries.id, input.id));
+        if (!inquiry) {
+          throw new Error('Event inquiry not found');
+        }
+
+        // Update status
+        await db.update(eventInquiries)
+          .set({ status: input.status, updatedAt: new Date() })
+          .where(eq(eventInquiries.id, input.id));
+
+        // Send email notification for status change
+        try {
+          const { sendEventInquiryStatusEmail } = await import('./email');
+          await sendEventInquiryStatusEmail({
+            customerName: inquiry.customerName,
+            customerEmail: inquiry.customerEmail,
+            eventType: inquiry.eventType,
+            venueAddress: inquiry.venueAddress,
+            eventDate: inquiry.eventDate,
+            guestCount: inquiry.guestCount,
+            status: input.status,
+          });
+        } catch (emailError: any) {
+          console.error('[EventInquiry] Failed to send status email:', emailError.message);
         }
 
         return { success: true };

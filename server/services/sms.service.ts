@@ -381,3 +381,49 @@ export async function sendOrderStatusSMS(
     console.error(`[SMS] Failed to send order status notification (${templateType}): ${result.error}`);
   }
 }
+
+/**
+ * Send SMS notification for reservation status changes
+ * @param customerName - Customer's name
+ * @param customerPhone - Customer's phone number (E.164 format)
+ * @param reservationDate - Reservation date
+ * @param reservationTime - Reservation time
+ * @param status - Reservation status (pending, confirmed, cancelled, completed)
+ */
+export async function sendReservationStatusSMS(
+  customerName: string,
+  customerPhone: string,
+  reservationDate: Date,
+  reservationTime: string,
+  status: string
+): Promise<void> {
+  const { format } = await import('date-fns');
+  const formattedDate = format(reservationDate, 'MMM dd, yyyy');
+  
+  let message = '';
+  
+  switch (status) {
+    case 'confirmed':
+      message = `Hi ${customerName}, your reservation at Boomiis Restaurant is CONFIRMED for ${formattedDate} at ${reservationTime}. We look forward to serving you! Reply STOP to opt out.`;
+      break;
+    case 'cancelled':
+      message = `Hi ${customerName}, your reservation at Boomiis Restaurant for ${formattedDate} at ${reservationTime} has been CANCELLED. Contact us if you have questions. Reply STOP to opt out.`;
+      break;
+    case 'completed':
+      message = `Thank you for dining with us, ${customerName}! We hope you enjoyed your experience at Boomiis Restaurant. We'd love to see you again soon! Reply STOP to opt out.`;
+      break;
+    default:
+      message = `Hi ${customerName}, your reservation at Boomiis Restaurant for ${formattedDate} at ${reservationTime} has been updated. Status: ${status}. Reply STOP to opt out.`;
+  }
+  
+  const result = await sendSMS({
+    to: customerPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Reservation ${status} notification sent to ${customerPhone}`);
+  } else {
+    console.error(`[SMS] Failed to send reservation ${status} notification: ${result.error}`);
+  }
+}

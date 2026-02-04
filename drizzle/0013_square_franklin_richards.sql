@@ -1,0 +1,1 @@
+ALTER TABLE `event_inquiries` ADD `venue_address` text NOT NULL;

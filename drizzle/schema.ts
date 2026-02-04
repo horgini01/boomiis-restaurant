@@ -137,6 +137,7 @@ export const eventInquiries = mysqlTable("event_inquiries", {
   customerEmail: varchar("customer_email", { length: 320 }).notNull(),
   customerPhone: varchar("customer_phone", { length: 50 }).notNull(),
   eventType: varchar("event_type", { length: 100 }).notNull(),
+  venueAddress: text("venue_address").notNull(), // Customer's event location
   eventDate: timestamp("event_date"),
   guestCount: int("guest_count"),
   budget: varchar("budget", { length: 100 }),

@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { format } from 'date-fns';
 import { ENV } from './_core/env';
 import { getDb } from './db';
 import { siteSettings, deliveryAreas } from '../drizzle/schema';
@@ -660,6 +661,573 @@ export async function sendAdminReservationNotification(data: ReservationEmailDat
     return { success: true, id: result?.id };
   } catch (error) {
     console.error('[Email] Error sending admin reservation notification:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send reservation status update email to customer
+ */
+export async function sendReservationStatusEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  date: Date;
+  time: string;
+  guests: number;
+  status: string;
+}): Promise<{ success: boolean; id?: string; error?: any }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const formattedDate = format(data.date, 'MMMM dd, yyyy');
+    
+    let statusMessage = '';
+    let statusColor = '';
+    let statusEmoji = '';
+    
+    switch (data.status) {
+      case 'confirmed':
+        statusMessage = 'Your reservation has been confirmed!';
+        statusColor = '#10b981';
+        statusEmoji = '✅';
+        break;
+      case 'cancelled':
+        statusMessage = 'Your reservation has been cancelled.';
+        statusColor = '#ef4444';
+        statusEmoji = '❌';
+        break;
+      case 'completed':
+        statusMessage = 'Thank you for dining with us!';
+        statusColor = '#3b82f6';
+        statusEmoji = '🎉';
+        break;
+      default:
+        statusMessage = 'Your reservation status has been updated.';
+        statusColor = '#f59e0b';
+        statusEmoji = 'ℹ️';
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 40px 30px; text-align: center;">
+                <h1 style="margin: 0; color: #f59e0b; font-size: 32px; font-weight: bold;">Boomiis Restaurant</h1>
+                <p style="margin: 10px 0 0; color: #e5e7eb; font-size: 14px;">Authentic African Cuisine</p>
+              </div>
+
+              <!-- Status Badge -->
+              <div style="padding: 30px; text-align: center; background: #f9fafb;">
+                <div style="display: inline-block; background: ${statusColor}; color: white; padding: 12px 24px; border-radius: 25px; font-size: 18px; font-weight: 600;">
+                  ${statusEmoji} ${statusMessage}
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 30px;">
+                <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
+                  Hello ${data.customerName},
+                </p>
+                <p style="margin: 0 0 30px; color: #374151; font-size: 16px; line-height: 1.6;">
+                  This email is to inform you that your reservation status has been updated.
+                </p>
+
+                <!-- Reservation Details -->
+                <div style="background: #f9fafb; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                  <h2 style="margin: 0 0 15px; color: #1f2937; font-size: 18px;">Reservation Details</h2>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📅 Date:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${formattedDate}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">🕐 Time:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${data.time}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">👥 Party Size:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${data.guests} guests</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📊 Status:</td>
+                      <td style="padding: 8px 0; color: ${statusColor}; font-weight: 600; text-align: right; text-transform: capitalize;">${data.status}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                ${data.status === 'confirmed' ? `
+                  <p style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                    We look forward to serving you! Please arrive 5-10 minutes before your reservation time.
+                  </p>
+                ` : ''}
+
+                ${data.status === 'cancelled' ? `
+                  <p style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                    If you have any questions about this cancellation, please don't hesitate to contact us.
+                  </p>
+                ` : ''}
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="margin: 0 0 10px; color: #6b7280; font-size: 14px;">Questions? Contact us:</p>
+                <p style="margin: 0; color: #1f2937; font-size: 14px;">
+                  📧 info@boomiis.uk | 📞 +44 7911 123456
+                </p>
+                <p style="margin: 15px 0 0; color: #9ca3af; font-size: 12px;">
+                  © ${new Date().getFullYear()} Boomiis Restaurant. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: data.customerEmail,
+      subject: `${statusEmoji} Reservation ${data.status.charAt(0).toUpperCase() + data.status.slice(1)} - ${formattedDate}`,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Failed to send reservation status email:', error);
+      return { success: false, error };
+    }
+
+    console.log('[Email] Reservation status email sent:', result?.id);
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Error sending reservation status email:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send event inquiry confirmation email to customer
+ */
+export async function sendEventInquiryConfirmationEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  eventType: string;
+  venueAddress: string;
+  eventDate?: Date | null;
+  guestCount?: number | null;
+  budget?: string | null;
+  message: string;
+}): Promise<{ success: boolean; id?: string; error?: any }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const eventTypeLabels: Record<string, string> = {
+      wedding: 'Wedding',
+      corporate: 'Corporate Event',
+      birthday: 'Birthday Party',
+      private_dining: 'Private Dining',
+      other: 'Other',
+    };
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 40px 30px; text-align: center;">
+                <h1 style="margin: 0; color: #f59e0b; font-size: 32px; font-weight: bold;">Boomiis Restaurant</h1>
+                <p style="margin: 10px 0 0; color: #e5e7eb; font-size: 14px;">Authentic African Cuisine</p>
+              </div>
+
+              <!-- Confirmation Badge -->
+              <div style="padding: 30px; text-align: center; background: #f9fafb;">
+                <div style="display: inline-block; background: #10b981; color: white; padding: 12px 24px; border-radius: 25px; font-size: 18px; font-weight: 600;">
+                  ✅ Event Inquiry Received
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 30px;">
+                <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
+                  Hello ${data.customerName},
+                </p>
+                <p style="margin: 0 0 30px; color: #374151; font-size: 16px; line-height: 1.6;">
+                  Thank you for your interest in our catering services! We've received your event inquiry and will get back to you within 24 hours with a custom quote.
+                </p>
+
+                <!-- Event Details -->
+                <div style="background: #f9fafb; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                  <h2 style="margin: 0 0 15px; color: #1f2937; font-size: 18px;">Your Event Details</h2>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">🎉 Event Type:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${eventTypeLabels[data.eventType] || data.eventType}</td>
+                    </tr>
+                    ${data.eventDate ? `
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📅 Event Date:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${format(data.eventDate, 'MMMM dd, yyyy')}</td>
+                    </tr>
+                    ` : ''}
+                    ${data.guestCount ? `
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">👥 Guests:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${data.guestCount} guests</td>
+                    </tr>
+                    ` : ''}
+                    ${data.budget ? `
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">💰 Budget:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${data.budget.replace('_', ' - ')}</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">📍 Venue:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${data.venueAddress.replace(/\n/g, '<br>')}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <p style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                  Our catering team will review your requirements and contact you shortly to discuss menu options, pricing, and next steps.
+                </p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="margin: 0 0 10px; color: #6b7280; font-size: 14px;">Questions? Contact us:</p>
+                <p style="margin: 0; color: #1f2937; font-size: 14px;">
+                  📧 info@boomiis.uk | 📞 +44 7911 123456
+                </p>
+                <p style="margin: 15px 0 0; color: #9ca3af; font-size: 12px;">
+                  © ${new Date().getFullYear()} Boomiis Restaurant. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: data.customerEmail,
+      subject: '✅ Event Inquiry Received - Boomiis Catering',
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Failed to send event inquiry confirmation:', error);
+      return { success: false, error };
+    }
+
+    console.log('[Email] Event inquiry confirmation sent:', result?.id);
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Error sending event inquiry confirmation:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send new event inquiry notification to admin
+ */
+export async function sendAdminEventInquiryNotification(data: {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  eventType: string;
+  venueAddress: string;
+  eventDate?: Date | null;
+  guestCount?: number | null;
+  budget?: string | null;
+  message: string;
+}): Promise<{ success: boolean; id?: string; error?: any }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const eventTypeLabels: Record<string, string> = {
+      wedding: '💒 Wedding',
+      corporate: '🏢 Corporate Event',
+      birthday: '🎂 Birthday Party',
+      private_dining: '🍽️ Private Dining',
+      other: '🎉 Other',
+    };
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 30px; text-align: center;">
+                <h1 style="margin: 0; color: #f59e0b; font-size: 28px; font-weight: bold;">🔔 New Event Inquiry</h1>
+              </div>
+
+              <div style="padding: 30px;">
+                <h2 style="margin: 0 0 20px; color: #1f2937; font-size: 20px;">Customer Information</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Name:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${data.customerName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">
+                      <a href="mailto:${data.customerEmail}" style="color: #f59e0b; text-decoration: none;">${data.customerEmail}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Phone:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">
+                      <a href="tel:${data.customerPhone}" style="color: #f59e0b; text-decoration: none;">${data.customerPhone}</a>
+                    </td>
+                  </tr>
+                </table>
+
+                <h2 style="margin: 0 0 20px; color: #1f2937; font-size: 20px;">Event Details</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Event Type:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${eventTypeLabels[data.eventType] || data.eventType}</td>
+                  </tr>
+                  ${data.eventDate ? `
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Event Date:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${format(data.eventDate, 'MMMM dd, yyyy')}</td>
+                  </tr>
+                  ` : ''}
+                  ${data.guestCount ? `
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Guests:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${data.guestCount} guests</td>
+                  </tr>
+                  ` : ''}
+                  ${data.budget ? `
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Budget:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${data.budget.replace('_', ' - ')}</td>
+                  </tr>
+                  ` : ''}
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; vertical-align: top;">Venue Address:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${data.venueAddress.replace(/\n/g, '<br>')}</td>
+                  </tr>
+                </table>
+
+                <h2 style="margin: 0 0 15px; color: #1f2937; font-size: 20px;">Message</h2>
+                <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                  <p style="margin: 0; color: #374151; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${data.message}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `🔔 New Event Inquiry - ${eventTypeLabels[data.eventType] || data.eventType}`,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Failed to send admin event inquiry notification:', error);
+      return { success: false, error };
+    }
+
+    console.log('[Email] Admin event inquiry notification sent:', result?.id);
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Error sending admin event inquiry notification:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send event inquiry status update email to customer
+ */
+export async function sendEventInquiryStatusEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  eventType: string;
+  venueAddress: string;
+  eventDate?: Date | null;
+  guestCount?: number | null;
+  status: string;
+}): Promise<{ success: boolean; id?: string; error?: any }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const eventTypeLabels: Record<string, string> = {
+      wedding: 'Wedding',
+      corporate: 'Corporate Event',
+      birthday: 'Birthday Party',
+      private_dining: 'Private Dining',
+      other: 'Other',
+    };
+
+    let statusMessage = '';
+    let statusColor = '';
+    let statusEmoji = '';
+    
+    switch (data.status) {
+      case 'contacted':
+        statusMessage = 'We have reviewed your inquiry and will be in touch shortly.';
+        statusColor = '#f59e0b';
+        statusEmoji = '📧';
+        break;
+      case 'quoted':
+        statusMessage = 'We have prepared a custom quote for your event!';
+        statusColor = '#8b5cf6';
+        statusEmoji = '💰';
+        break;
+      case 'booked':
+        statusMessage = 'Your event is confirmed! We look forward to serving you.';
+        statusColor = '#10b981';
+        statusEmoji = '✅';
+        break;
+      case 'cancelled':
+        statusMessage = 'Your event inquiry has been cancelled.';
+        statusColor = '#ef4444';
+        statusEmoji = '❌';
+        break;
+      default:
+        statusMessage = 'Your event inquiry status has been updated.';
+        statusColor = '#6b7280';
+        statusEmoji = 'ℹ️';
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 40px 30px; text-align: center;">
+                <h1 style="margin: 0; color: #f59e0b; font-size: 32px; font-weight: bold;">Boomiis Restaurant</h1>
+                <p style="margin: 10px 0 0; color: #e5e7eb; font-size: 14px;">Authentic African Cuisine</p>
+              </div>
+
+              <div style="padding: 30px; text-align: center; background: #f9fafb;">
+                <div style="display: inline-block; background: ${statusColor}; color: white; padding: 12px 24px; border-radius: 25px; font-size: 18px; font-weight: 600;">
+                  ${statusEmoji} ${statusMessage}
+                </div>
+              </div>
+
+              <div style="padding: 30px;">
+                <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
+                  Hello ${data.customerName},
+                </p>
+                <p style="margin: 0 0 30px; color: #374151; font-size: 16px; line-height: 1.6;">
+                  This email is to update you on the status of your event inquiry.
+                </p>
+
+                <div style="background: #f9fafb; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                  <h2 style="margin: 0 0 15px; color: #1f2937; font-size: 18px;">Event Details</h2>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">🎉 Event Type:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${eventTypeLabels[data.eventType] || data.eventType}</td>
+                    </tr>
+                    ${data.eventDate ? `
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📅 Event Date:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${format(data.eventDate, 'MMMM dd, yyyy')}</td>
+                    </tr>
+                    ` : ''}
+                    ${data.guestCount ? `
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">👥 Guests:</td>
+                      <td style="padding: 8px 0; color: #1f2937; font-weight: 600; text-align: right;">${data.guestCount} guests</td>
+                    </tr>
+                    ` : ''}
+                    <tr>
+                      <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📊 Status:</td>
+                      <td style="padding: 8px 0; color: ${statusColor}; font-weight: 600; text-align: right; text-transform: capitalize;">${data.status}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                ${data.status === 'booked' ? `
+                  <p style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                    We're excited to cater your event! Our team will be in touch with final details and setup arrangements.
+                  </p>
+                ` : ''}
+
+                ${data.status === 'quoted' ? `
+                  <p style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                    Please check your email or give us a call to discuss the quote and finalize your booking.
+                  </p>
+                ` : ''}
+              </div>
+
+              <div style="background: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                <p style="margin: 0 0 10px; color: #6b7280; font-size: 14px;">Questions? Contact us:</p>
+                <p style="margin: 0; color: #1f2937; font-size: 14px;">
+                  📧 info@boomiis.uk | 📞 +44 7911 123456
+                </p>
+                <p style="margin: 15px 0 0; color: #9ca3af; font-size: 12px;">
+                  © ${new Date().getFullYear()} Boomiis Restaurant. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: data.customerEmail,
+      subject: `${statusEmoji} Event Inquiry ${data.status.charAt(0).toUpperCase() + data.status.slice(1)} - Boomiis Catering`,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Failed to send event inquiry status email:', error);
+      return { success: false, error };
+    }
+
+    console.log('[Email] Event inquiry status email sent:', result?.id);
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Error sending event inquiry status email:', error);
     return { success: false, error };
   }
 }

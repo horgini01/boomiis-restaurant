@@ -13,6 +13,8 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import Reservations from "./pages/Reservations";
+import EventsCatering from "./pages/EventsCatering";
+import Contact from "./pages/Contact";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CategoriesManagement from "./pages/admin/Categories";
@@ -20,6 +22,7 @@ import MenuItemsManagement from './pages/admin/MenuItems';
 import BulkOperations from './pages/admin/BulkOperations';
 import OrdersManagement from "./pages/admin/Orders";
 import ReservationsManagement from "./pages/admin/ReservationsManagement";
+import EventsManagement from "./pages/admin/EventsManagement";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import RestaurantSettings from "./pages/admin/RestaurantSettings";
@@ -39,11 +42,14 @@ function Router() {
       <Route path={"/checkout"} component={Checkout} />
       <Route path={"/order-success"} component={OrderSuccess} />
       <Route path={"/reservations"} component={Reservations} />
+      <Route path={"/events-catering"} component={EventsCatering} />
+      <Route path={"/contact"} component={Contact} />
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
       <Route path={"/admin/categories"} component={CategoriesManagement} />          <Route path="/admin/menu-items" component={MenuItemsManagement} />
           <Route path="/admin/bulk-operations" component={BulkOperations} />      <Route path={"/admin/orders"} component={OrdersManagement} />
-      <Route path={"/ admin/reservations"} component={ReservationsManagement} />
+       <Route path={"/admin/reservations"} component={ReservationsManagement} />
+      <Route path={"/admin/events"} component={EventsManagement} />
       <Route path={"/admin/analytics"} component={Analytics} />
       <Route path={"/admin/settings"} component={Settings} />
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />

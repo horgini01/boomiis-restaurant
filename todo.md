@@ -861,3 +861,40 @@
 - [x] Display success/error toast after sending test SMS
 - [x] SMS preferences logic tested (all 45 tests passing)
 - [x] Test SMS functionality implemented and ready for manual testing
+
+## New Features (User Request - Feb 3 - Complete Reservations & Events/Catering Systems)
+
+### Reservations System (Complete & Connect)
+- [x] Review existing reservations schema and frontend form
+- [x] Create reservations.create tRPC endpoint (accept form data)
+- [x] Connect frontend reservation form to backend
+- [x] Add form validation and error handling
+- [x] Build admin reservations management page (view all reservations)
+- [x] Add status management (pending → confirmed → completed → cancelled)
+- [x] Add reservation details view in admin table
+- [x] Create email template for reservation confirmation
+- [x] Create email template for reservation status updates
+- [x] Add SMS notifications for reservation confirmations
+- [x] Add SMS notifications for reservation status changes
+- [ ] Add capacity management to prevent overbooking (future enhancement)
+- [x] Reservations system tested (all 45 tests passing)
+
+### Events & Catering System (Build from Scratch)
+- [x] Design events & catering database schema (eventInquiries table)
+- [x] Add event types enum (wedding, corporate, birthday, private_dining, other)
+- [x] Create events & catering frontend form page at /events-catering
+- [x] Add venue address field for customer location
+- [x] Add event type, guest count, date, budget fields
+- [x] Create eventInquiries.create tRPC endpoint
+- [x] Build admin events & catering management page at /admin/events
+- [x] Add inquiry status management (new → contacted → quoted → booked → cancelled)
+- [x] Add inquiry details modal with full event information
+- [x] Create email template for event inquiry confirmation
+- [x] Create email template for event quote/status updates
+- [x] Add email notifications for event inquiries (customer + admin)
+- [x] Events & catering system tested (all tests passing)
+
+## Bug Fixes (User Report - Feb 4 - Missing Contact Page)
+- [x] Create Contact page component
+- [x] Add Contact route to App.tsx
+- [x] Verify Contact page is accessible at /contact
