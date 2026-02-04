@@ -1,5 +1,6 @@
 import { trpc } from '@/lib/trpc';
 import { Link } from 'wouter';
+import Header from '@/components/Header';
 import { Calendar, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -8,7 +9,8 @@ export function Blog() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <Header />
+      {/* Page Header */}
       <div className="bg-gradient-to-r from-orange-900 to-orange-800 text-white py-20">
         <div className="container mx-auto px-4">
           <h1 className="text-5xl font-bold mb-4">Blog</h1>

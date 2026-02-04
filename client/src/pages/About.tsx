@@ -1,4 +1,5 @@
-import { Award, Heart, Users, Leaf } from 'lucide-react';
+import { Heart, Leaf, Users, Award } from 'lucide-react';
+import Header from '@/components/Header';
 
 export function About() {
   const values = [
@@ -47,6 +48,7 @@ export function About() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       {/* Hero Section */}
       <div className="relative h-[400px] bg-gradient-to-r from-orange-900 to-orange-800">
         <div className="absolute inset-0 bg-black/30" />

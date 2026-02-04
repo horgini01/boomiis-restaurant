@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import Header from '@/components/Header';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,8 @@ export function Gallery() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <Header />
+      {/* Page Header */}
       <div className="bg-gradient-to-r from-orange-900 to-orange-800 text-white py-20">
         <div className="container mx-auto px-4">
           <h1 className="text-5xl font-bold mb-4">Gallery</h1>
