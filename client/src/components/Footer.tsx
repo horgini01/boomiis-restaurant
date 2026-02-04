@@ -72,7 +72,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/events">
+                <Link href="/events-catering">
                   <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                     Events & Catering
                   </span>
