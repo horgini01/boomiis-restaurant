@@ -330,3 +330,21 @@ export const openingHours = mysqlTable("opening_hours", {
 
 export type OpeningHour = typeof openingHours.$inferSelect;
 export type InsertOpeningHour = typeof openingHours.$inferInsert;
+
+/**
+ * Customer reviews for menu items
+ */
+export const menuItemReviews = mysqlTable("menu_item_reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  menuItemId: int("menu_item_id").notNull(),
+  customerName: varchar("customer_name", { length: 100 }).notNull(),
+  customerEmail: varchar("customer_email", { length: 320 }),
+  rating: int("rating").notNull(), // 1-5 stars
+  comment: text("comment"),
+  isApproved: boolean("is_approved").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MenuItemReview = typeof menuItemReviews.$inferSelect;
+export type InsertMenuItemReview = typeof menuItemReviews.$inferInsert;

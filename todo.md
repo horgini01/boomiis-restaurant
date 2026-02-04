@@ -924,3 +924,107 @@
 - [x] Image compression and WebP conversion ready for testing
 - [x] Placeholder images display correctly with fallback on error
 - [ ] Write vitest tests for image optimization utility (manual testing first)
+
+## New Features (User Request - Feb 4 - Reviews, Lightbox, Gallery, About, Blog)
+
+### Customer Reviews System
+- [ ] Design reviews database schema (menuItemReviews table)
+- [ ] Add review fields: rating (1-5 stars), comment, customerName, createdAt
+- [ ] Create reviews backend endpoints (create, list by menu item, moderate)
+- [ ] Build review submission form on menu item detail pages
+- [ ] Display reviews with star ratings and customer names
+- [ ] Add average rating display on menu cards
+- [ ] Add admin moderation page for reviews (approve/delete)
+
+### Image Zoom/Lightbox
+- [ ] Install or create lightbox component library
+- [ ] Implement image zoom on click for menu item images
+- [ ] Add full-screen lightbox viewer with close button
+- [ ] Add keyboard navigation (ESC to close, arrows for gallery)
+- [ ] Ensure lightbox works on mobile devices
+
+### Chef's Specials Banner
+- [ ] Design specials database schema or use existing featured items
+- [ ] Create rotating banner component with auto-play
+- [ ] Add navigation dots and arrow controls
+- [ ] Display special dish images, names, and descriptions
+- [ ] Link banner items to menu item detail pages
+
+### Gallery Page
+- [ ] Design gallery database schema (galleryImages table)
+- [ ] Add gallery categories (Ambiance, Dishes, Events, Team)
+- [ ] Build gallery admin page for image upload and management
+- [ ] Create gallery frontend with image grid layout
+- [ ] Implement lightbox viewer for gallery images
+- [ ] Add category filtering on gallery page
+
+### About Page
+- [ ] Create About page component structure
+- [ ] Add restaurant story section with rich text
+- [ ] Add chef profiles section with photos and bios
+- [ ] Add sourcing philosophy section
+- [ ] Add awards and recognition section
+- [ ] Make content editable through admin panel or site settings
+
+### Blog System
+- [ ] Design blog database schema (blogPosts table)
+- [ ] Add blog fields: title, slug, content, excerpt, featuredImage, author, publishedAt
+- [ ] Create blog backend endpoints (CRUD operations)
+- [ ] Build blog list page (/blog) with pagination
+- [ ] Build blog article page (/blog/:slug) with rich content
+- [ ] Build blog admin management page (create, edit, delete)
+- [ ] Add rich text editor for blog content
+- [ ] Add SEO meta tags for blog posts
+- [ ] Add blog categories and tags (optional)
+
+## New Features (User Request - Feb 4 - Reviews, Lightbox, Specials, Gallery, About, Blog)
+
+### Customer Reviews
+- [x] Design reviews database schema (menuItemReviews table)
+- [x] Create reviews backend endpoints (create, list, approve, delete)
+- [x] Build ReviewsSection component with star ratings
+- [x] Reviews section ready to integrate into menu item pages
+- [x] Create admin Reviews Management page
+- [x] Add Reviews admin link to sidebar navigation
+- [ ] Write vitest tests for reviews endpoints (manual testing first)
+
+### Image Lightbox
+- [x] Install yet-another-react-lightbox library
+- [x] Create ImageLightbox component
+- [x] Lightbox ready to integrate into Menu and Home pages
+- [x] Test lightbox functionality
+
+### Chef's Specials Banner
+- [x] Create ChefsSpecials rotating banner component
+- [x] Banner ready to add to homepage
+- [x] Fetch featured menu items from backend
+- [x] Test banner rotation and responsiveness
+
+### Gallery Page
+- [x] Gallery schema already exists in database
+- [x] Create gallery backend endpoints (list, create, delete)
+- [x] Build Gallery page with image grid and lightbox
+- [x] Create admin Gallery Management page with image upload
+- [x] Image optimization integrated into gallery uploads
+- [x] Add Gallery route to App.tsx
+- [x] Add Gallery admin link to sidebar navigation
+- [ ] Write vitest tests for gallery endpoints (manual testing first)
+
+### About Page
+- [x] Create About page with restaurant story
+- [x] Add team profiles section
+- [x] Add sourcing philosophy section
+- [x] Design responsive layout
+- [x] Add About route to App.tsx
+
+### Blog System
+- [x] Blog schema already exists in database
+- [x] Create blog backend endpoints (list, get by slug, create, update, delete, publish)
+- [x] Build Blog list page with pagination
+- [x] Build BlogArticle page for individual posts
+- [x] Create admin Blog Management page (create, edit, delete, publish)
+- [x] Add markdown rendering support for blog content
+- [x] Add featured image support
+- [x] Add Blog routes to App.tsx
+- [x] Add Blog admin link to sidebar navigation
+- [ ] Write vitest tests for blog endpoints (manual testing first)

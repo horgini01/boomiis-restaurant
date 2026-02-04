@@ -20,6 +20,9 @@ import {
   Users,
   Send,
   MessageSquare,
+  Star,
+  Image,
+  FileText,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';

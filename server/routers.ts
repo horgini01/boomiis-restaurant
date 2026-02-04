@@ -6,8 +6,8 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours } from '../drizzle/schema';
-import { eq, sql } from "drizzle-orm";
+import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts } from '../drizzle/schema';
+import { eq, sql, desc } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
 import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, sendOrderStatusSMS, formatPhoneNumberE164 } from "./services/sms.service";
@@ -2037,6 +2037,397 @@ export const appRouter = router({
         } catch (emailError: any) {
           console.error('[EventInquiry] Failed to send status email:', emailError.message);
         }
+
+        return { success: true };
+      }),
+  }),
+
+  // Customer reviews for menu items
+  reviews: router({
+    // Submit a new review (public)
+    create: publicProcedure
+      .input(z.object({
+        menuItemId: z.number(),
+        customerName: z.string().min(1).max(100),
+        customerEmail: z.string().email().optional(),
+        rating: z.number().min(1).max(5),
+        comment: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const [review] = await db.insert(menuItemReviews).values({
+          menuItemId: input.menuItemId,
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          rating: input.rating,
+          comment: input.comment,
+          isApproved: false, // Requires admin approval
+        });
+
+        return { success: true, reviewId: review.insertId };
+      }),
+
+    // Get approved reviews for a menu item (public)
+    getByMenuItem: publicProcedure
+      .input(z.object({
+        menuItemId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const reviews = await db
+          .select()
+          .from(menuItemReviews)
+          .where(sql`${menuItemReviews.menuItemId} = ${input.menuItemId} AND ${menuItemReviews.isApproved} = true`)
+          .orderBy(desc(menuItemReviews.createdAt));
+
+        return reviews;
+      }),
+
+    // Get average rating for a menu item (public)
+    getAverageRating: publicProcedure
+      .input(z.object({
+        menuItemId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const [result] = await db
+          .select({
+            averageRating: sql<number>`AVG(${menuItemReviews.rating})`,
+            totalReviews: sql<number>`COUNT(*)`,
+          })
+          .from(menuItemReviews)
+          .where(sql`${menuItemReviews.menuItemId} = ${input.menuItemId} AND ${menuItemReviews.isApproved} = true`);
+
+        return {
+          averageRating: result?.averageRating ? parseFloat(result.averageRating.toFixed(1)) : 0,
+          totalReviews: result?.totalReviews || 0,
+        };
+      }),
+
+    // Admin: List all reviews with filtering
+    list: protectedProcedure
+      .input(z.object({
+        status: z.enum(['pending', 'approved', 'all']).optional(),
+        limit: z.number().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        let query = db.select().from(menuItemReviews);
+
+        if (input.status === 'pending') {
+          query = query.where(eq(menuItemReviews.isApproved, false)) as any;
+        } else if (input.status === 'approved') {
+          query = query.where(eq(menuItemReviews.isApproved, true)) as any;
+        }
+
+        const results = await query
+          .orderBy(desc(menuItemReviews.createdAt))
+          .limit(input?.limit || 100);
+
+        return results;
+      }),
+
+    // Admin: Approve a review
+    approve: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db
+          .update(menuItemReviews)
+          .set({ isApproved: true })
+          .where(eq(menuItemReviews.id, input.id));
+
+        return { success: true };
+      }),
+
+    // Admin: Delete a review
+    delete: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db
+          .delete(menuItemReviews)
+          .where(eq(menuItemReviews.id, input.id));
+
+        return { success: true };
+      }),
+  }),
+
+  // Gallery images
+  gallery: router({
+    // Get all active gallery images (public)
+    list: publicProcedure
+      .input(z.object({
+        category: z.enum(['ambiance', 'dishes', 'events', 'team']).optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        let conditions = [eq(galleryImages.isActive, true)];
+
+        if (input.category) {
+          conditions.push(eq(galleryImages.category, input.category));
+        }
+
+        const results = await db
+          .select()
+          .from(galleryImages)
+          .where(sql`${conditions.map((c, i) => i === 0 ? c : sql` AND ${c}`).join('')}`)
+          .orderBy(galleryImages.displayOrder, desc(galleryImages.createdAt));
+        return results;
+      }),
+
+    // Admin: List all gallery images
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const results = await db.select().from(galleryImages).orderBy(desc(galleryImages.createdAt));
+      return results;
+    }),
+
+    // Admin: Create gallery image
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(200),
+        description: z.string().optional(),
+        imageUrl: z.string().url(),
+        category: z.enum(['ambiance', 'dishes', 'events', 'team']),
+        displayOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(galleryImages).values({
+          title: input.title,
+          description: input.description,
+          imageUrl: input.imageUrl,
+          category: input.category,
+          displayOrder: input.displayOrder || 0,
+        });
+
+        return { success: true };
+      }),
+
+    // Admin: Update gallery image
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).max(200).optional(),
+        description: z.string().optional(),
+        imageUrl: z.string().url().optional(),
+        category: z.enum(['ambiance', 'dishes', 'events', 'team']).optional(),
+        displayOrder: z.number().optional(),
+        isActive: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { id, ...updates } = input;
+        await db.update(galleryImages).set(updates).where(eq(galleryImages.id, id));
+
+        return { success: true };
+      }),
+
+    // Admin: Delete gallery image
+    delete: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(galleryImages).where(eq(galleryImages.id, input.id));
+
+        return { success: true };
+      }),
+  }),
+
+  // Blog posts
+  blog: router({
+    // Get published blog posts (public)
+    list: publicProcedure
+      .input(z.object({
+        limit: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const results = await db
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.isPublished, true))
+          .orderBy(desc(blogPosts.publishedAt))
+          .limit(input?.limit || 20);
+
+        return results;
+      }),
+
+    // Get single blog post by slug (public)
+    getBySlug: publicProcedure
+      .input(z.object({
+        slug: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const [post] = await db
+          .select()
+          .from(blogPosts)
+          .where(sql`${blogPosts.slug} = ${input.slug} AND ${blogPosts.isPublished} = true`);
+
+        if (!post) {
+          throw new Error('Blog post not found');
+        }
+
+        return post;
+      }),
+
+    // Admin: List all blog posts
+    listAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const results = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt));
+      return results;
+    }),
+
+    // Admin: Create blog post
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(300),
+        slug: z.string().min(1).max(300),
+        excerpt: z.string().optional(),
+        content: z.string().min(1),
+        featuredImage: z.string().url().optional(),
+        authorId: z.number(),
+        isPublished: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(blogPosts).values({
+          title: input.title,
+          slug: input.slug,
+          excerpt: input.excerpt,
+          content: input.content,
+          featuredImage: input.featuredImage,
+          authorId: input.authorId,
+          isPublished: input.isPublished || false,
+          publishedAt: input.isPublished ? new Date() : null,
+        });
+
+        return { success: true };
+      }),
+
+    // Admin: Update blog post
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).max(300).optional(),
+        slug: z.string().min(1).max(300).optional(),
+        excerpt: z.string().optional(),
+        content: z.string().optional(),
+        featuredImage: z.string().url().optional(),
+        authorId: z.number().optional(),
+        isPublished: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { id, ...updates } = input;
+        
+        // If publishing for the first time, set publishedAt
+        if (updates.isPublished) {
+          const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
+          if (post && !post.publishedAt) {
+            (updates as any).publishedAt = new Date();
+          }
+        }
+
+        await db.update(blogPosts).set(updates).where(eq(blogPosts.id, id));
+
+        return { success: true };
+      }),
+
+    // Admin: Delete blog post
+    delete: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(blogPosts).where(eq(blogPosts.id, input.id));
 
         return { success: true };
       }),

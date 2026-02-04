@@ -15,6 +15,10 @@ import OrderSuccess from "./pages/OrderSuccess";
 import Reservations from "./pages/Reservations";
 import EventsCatering from "./pages/EventsCatering";
 import Contact from "./pages/Contact";
+import { Gallery } from "./pages/Gallery";
+import { About } from "./pages/About";
+import { Blog } from "./pages/Blog";
+import { BlogArticle } from "./pages/BlogArticle";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CategoriesManagement from "./pages/admin/Categories";
@@ -30,6 +34,9 @@ import EmailDelivery from "./pages/admin/EmailDelivery";
 import NewsletterSubscribers from "./pages/admin/NewsletterSubscribers";
 import EmailCampaigns from "./pages/admin/EmailCampaigns";
 import SMSTemplates from "./pages/admin/SMSTemplates";
+import { ReviewsManagement } from "./pages/admin/ReviewsManagement";
+import { GalleryManagement } from "./pages/admin/GalleryManagement";
+import { BlogManagement } from "./pages/admin/BlogManagement";
 import Kitchen from "./pages/Kitchen";
 
 function Router() {
@@ -45,7 +52,10 @@ function Router() {
       <Route path={"/events-catering"} component={EventsCatering} />
       <Route path={"/events"}>{() => <Redirect to="/events-catering" />}</Route>
       <Route path={"/contact"} component={Contact} />
-      <Route path={"/admin/login"} component={AdminLogin} />
+      <Route path={"/gallery"} component={Gallery} />
+      <Route path={"/about"} component={About} />
+      <Route path={"/blog/:slug"} component={BlogArticle} />
+      <Route path={"/blog"} component={Blog} />      <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
       <Route path={"/admin/categories"} component={CategoriesManagement} />          <Route path="/admin/menu-items" component={MenuItemsManagement} />
           <Route path="/admin/bulk-operations" component={BulkOperations} />      <Route path={"/admin/orders"} component={OrdersManagement} />
@@ -55,8 +65,10 @@ function Router() {
       <Route path={"/admin/settings"} component={Settings} />
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/admin/email-delivery"} component={EmailDelivery} />
-      <Route path={"/admin/newsletter-subscribers"} component={NewsletterSubscribers} />
-      <Route path={"/admin/sms-templates"} component={SMSTemplates} />
+      <Route path={"/admin/newsletter-subscribers"} component={NewsletterSubscribers} />      <Route path={"/admin/sms-templates"} component={SMSTemplates} />
+      <Route path={"/admin/reviews"} component={ReviewsManagement} />
+      <Route path={"/admin/gallery"} component={GalleryManagement} />
+      <Route path={"/admin/blog"} component={BlogManagement} />
       <Route path={"/admin/email-campaigns"} component={EmailCampaigns} />
       <Route path={"/kitchen"} component={Kitchen} />
       <Route path={"/404"} component={NotFound} />
