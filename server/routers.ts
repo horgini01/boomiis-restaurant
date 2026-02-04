@@ -5,8 +5,8 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
-import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getChefSpecialItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts } from '../drizzle/schema';
+import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getChefSpecialItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay, getAllAboutContent, getAllAboutValues, getAllTeamMembers, getAllAwards, getLegalPageByType, getAllLegalPages } from "./db";
+import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts, aboutContent, aboutValues, teamMembers, awards, legalPages } from '../drizzle/schema';
 import { eq, sql, desc } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
@@ -2439,6 +2439,266 @@ export const appRouter = router({
         if (!db) throw new Error('Database not available');
 
         await db.delete(blogPosts).where(eq(blogPosts.id, input.id));
+
+        return { success: true };
+      }),
+  }),
+
+  // ==================== About Page Routes ====================
+  about: router({
+    content: publicProcedure.query(async () => {
+      return await getAllAboutContent();
+    }),
+    values: publicProcedure.query(async () => {
+      return await getAllAboutValues();
+    }),
+    team: publicProcedure.query(async () => {
+      return await getAllTeamMembers();
+    }),
+    awards: publicProcedure.query(async () => {
+      return await getAllAwards();
+    }),
+  }),
+
+  // ==================== Legal Pages Routes ====================
+  legal: router({
+    getByType: publicProcedure
+      .input(z.object({ pageType: z.string() }))
+      .query(async ({ input }) => {
+        return await getLegalPageByType(input.pageType);
+      }),
+  }),
+
+  // ==================== Admin: About Content Management ====================
+  adminAbout: router({
+    // About Content (Hero, Story sections)
+    getAllContent: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      return await db.select().from(aboutContent);
+    }),
+    updateContent: protectedProcedure
+      .input(z.object({
+        sectionKey: z.string(),
+        sectionValue: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Check if section exists
+        const existing = await db.select().from(aboutContent).where(eq(aboutContent.sectionKey, input.sectionKey)).limit(1);
+        
+        if (existing.length > 0) {
+          // Update existing
+          await db.update(aboutContent)
+            .set({ sectionValue: input.sectionValue })
+            .where(eq(aboutContent.sectionKey, input.sectionKey));
+        } else {
+          // Insert new
+          await db.insert(aboutContent).values({
+            sectionKey: input.sectionKey,
+            sectionValue: input.sectionValue,
+          });
+        }
+
+        return { success: true };
+      }),
+
+    // About Values
+    getAllValues: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      return await db.select().from(aboutValues);
+    }),
+    createValue: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        description: z.string(),
+        icon: z.string(),
+        displayOrder: z.number().default(0),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(aboutValues).values(input);
+        return { success: true };
+      }),
+    updateValue: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string(),
+        description: z.string(),
+        icon: z.string(),
+        displayOrder: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { id, ...data } = input;
+        await db.update(aboutValues).set(data).where(eq(aboutValues.id, id));
+        return { success: true };
+      }),
+    deleteValue: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(aboutValues).where(eq(aboutValues.id, input.id));
+        return { success: true };
+      }),
+
+    // Team Members
+    getAllTeam: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      return await db.select().from(teamMembers);
+    }),
+    createTeamMember: protectedProcedure
+      .input(z.object({
+        name: z.string(),
+        title: z.string(),
+        bio: z.string(),
+        imageUrl: z.string().optional(),
+        displayOrder: z.number().default(0),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(teamMembers).values(input);
+        return { success: true };
+      }),
+    updateTeamMember: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string(),
+        title: z.string(),
+        bio: z.string(),
+        imageUrl: z.string().optional(),
+        displayOrder: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { id, ...data } = input;
+        await db.update(teamMembers).set(data).where(eq(teamMembers.id, id));
+        return { success: true };
+      }),
+    deleteTeamMember: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(teamMembers).where(eq(teamMembers.id, input.id));
+        return { success: true };
+      }),
+
+    // Awards
+    getAllAwards: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      return await db.select().from(awards);
+    }),
+    createAward: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        description: z.string().optional(),
+        imageUrl: z.string().optional(),
+        year: z.number().optional(),
+        displayOrder: z.number().default(0),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.insert(awards).values(input);
+        return { success: true };
+      }),
+    updateAward: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string(),
+        description: z.string().optional(),
+        imageUrl: z.string().optional(),
+        year: z.number().optional(),
+        displayOrder: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { id, ...data } = input;
+        await db.update(awards).set(data).where(eq(awards.id, id));
+        return { success: true };
+      }),
+    deleteAward: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db.delete(awards).where(eq(awards.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  // ==================== Admin: Legal Pages Management ====================
+  adminLegal: router({
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      return await getAllLegalPages();
+    }),
+    update: protectedProcedure
+      .input(z.object({
+        pageType: z.string(),
+        title: z.string(),
+        content: z.string(),
+        isPublished: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Check if page exists
+        const existing = await db.select().from(legalPages).where(eq(legalPages.pageType, input.pageType)).limit(1);
+        
+        if (existing.length > 0) {
+          // Update existing
+          await db.update(legalPages)
+            .set({ 
+              title: input.title,
+              content: input.content,
+              isPublished: input.isPublished,
+            })
+            .where(eq(legalPages.pageType, input.pageType));
+        } else {
+          // Insert new
+          await db.insert(legalPages).values(input);
+        }
 
         return { success: true };
       }),

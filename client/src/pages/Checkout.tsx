@@ -492,7 +492,14 @@ export default function Checkout() {
                     </Button>
                     
                     <p className="text-xs text-muted-foreground mt-4 text-center">
-                      By placing your order, you agree to our Terms & Conditions
+                      By placing your order, you agree to our{' '}
+                      <a href="/terms-conditions" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        Terms & Conditions
+                      </a>
+                      {' '}and{' '}
+                      <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        Privacy Policy
+                      </a>
                     </p>
                   </CardContent>
                 </Card>

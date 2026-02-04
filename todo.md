@@ -1094,3 +1094,32 @@
 - [x] Add Footer component to Blog page
 - [x] Add Footer component to About page
 - [x] Verify footer displays correctly on all three pages
+
+## User Request - Feb 04 (Dynamic About Page & Legal Pages)
+
+### About Page Content Management System
+- [x] Create aboutContent database table (hero, story sections)
+- [x] Create aboutValues database table (4 values with icons, titles, descriptions)
+- [x] Create teamMembers database table (photos, names, titles, bios, display order)
+- [x] Create awards database table (images, titles, descriptions, year, display order)
+- [x] Create backend queries for About page content (getAboutContent, getValues, getTeamMembers, getAwards)
+- [x] Create tRPC endpoints for About page content (public queries + admin mutations)
+- [x] Build admin page for About Content management (hero, story sections)
+- [x] Build admin page for Values management (CRUD operations)
+- [x] Build admin page for Team Members management (CRUD with image upload)
+- [x] Build admin page for Awards management (CRUD with image upload)
+- [x] Add admin sidebar links for About Content, Team, and Awards management
+- [x] Update About page to load all content dynamically from database
+- [x] Seed initial About page content from current hardcoded data
+
+### Legal Compliance Pages
+- [x] Create legalPages database table (page_type, title, content, last_updated)
+- [x] Create backend queries and tRPC endpoints for legal pages
+- [x] Build admin page for managing legal page content (Privacy, Terms, Accessibility)
+- [x] Add admin sidebar link for Legal Pages management
+- [x] Create Privacy Policy page (/privacy-policy) with dynamic content
+- [x] Create Terms & Conditions page (/terms-conditions) with dynamic content
+- [x] Create Accessibility page (/accessibility) with dynamic content
+- [x] Update Footer component to link to legal pages
+- [x] Update Checkout page to link to Terms & Conditions
+- [x] Seed initial legal page content with standard templates

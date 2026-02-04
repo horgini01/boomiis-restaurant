@@ -349,3 +349,86 @@ export const menuItemReviews = mysqlTable("menu_item_reviews", {
 
 export type MenuItemReview = typeof menuItemReviews.$inferSelect;
 export type InsertMenuItemReview = typeof menuItemReviews.$inferInsert;
+
+/**
+ * About page content sections (hero, story, etc.)
+ */
+export const aboutContent = mysqlTable("about_content", {
+  id: int("id").autoincrement().primaryKey(),
+  sectionKey: varchar("section_key", { length: 50 }).notNull().unique(), // 'hero_title', 'hero_tagline', 'story_title', 'story_content', 'founder_story'
+  sectionValue: text("section_value").notNull(),
+  displayOrder: int("display_order").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AboutContent = typeof aboutContent.$inferSelect;
+export type InsertAboutContent = typeof aboutContent.$inferInsert;
+
+/**
+ * About page values section (4 core values with icons)
+ */
+export const aboutValues = mysqlTable("about_values", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon", { length: 50 }).notNull(), // Lucide icon name (e.g., 'Heart', 'Leaf', 'Users', 'Award')
+  displayOrder: int("display_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AboutValue = typeof aboutValues.$inferSelect;
+export type InsertAboutValue = typeof aboutValues.$inferInsert;
+
+/**
+ * Team members for About page
+ */
+export const teamMembers = mysqlTable("team_members", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  title: varchar("title", { length: 200 }).notNull(), // e.g., "Head Chef", "Restaurant Manager"
+  bio: text("bio").notNull(),
+  imageUrl: text("image_url"),
+  displayOrder: int("display_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TeamMember = typeof teamMembers.$inferSelect;
+export type InsertTeamMember = typeof teamMembers.$inferInsert;
+
+/**
+ * Awards and recognition for About page
+ */
+export const awards = mysqlTable("awards", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  year: int("year"),
+  displayOrder: int("display_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Award = typeof awards.$inferSelect;
+export type InsertAward = typeof awards.$inferInsert;
+
+/**
+ * Legal pages (Privacy Policy, Terms & Conditions, Accessibility)
+ */
+export const legalPages = mysqlTable("legal_pages", {
+  id: int("id").autoincrement().primaryKey(),
+  pageType: varchar("page_type", { length: 50 }).notNull().unique(), // 'privacy_policy', 'terms_conditions', 'accessibility'
+  title: varchar("title", { length: 200 }).notNull(),
+  content: text("content").notNull(), // HTML content
+  isPublished: boolean("is_published").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LegalPage = typeof legalPages.$inferSelect;
+export type InsertLegalPage = typeof legalPages.$inferInsert;

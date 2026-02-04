@@ -150,12 +150,12 @@ export default function Footer() {
               © {new Date().getFullYear()} {restaurantName}. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <Link href="/privacy">
+              <Link href="/privacy-policy">
                 <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                   Privacy Policy
                 </span>
               </Link>
-              <Link href="/terms">
+              <Link href="/terms-conditions">
                 <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                   Terms & Conditions
                 </span>

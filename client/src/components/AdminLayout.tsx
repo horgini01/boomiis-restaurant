@@ -23,6 +23,8 @@ import {
   Star,
   Image,
   FileText,
+  BookOpen,
+  Scale,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
@@ -55,6 +57,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/reviews', label: 'Reviews', icon: Star },
     { path: '/admin/gallery', label: 'Gallery', icon: Image },
     { path: '/admin/blog', label: 'Blog', icon: FileText },
+    { path: '/admin/about-content', label: 'About Content', icon: BookOpen },
+    { path: '/admin/legal-pages', label: 'Legal Pages', icon: Scale },
     { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail },
     { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users },

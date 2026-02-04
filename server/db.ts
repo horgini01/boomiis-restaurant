@@ -1,6 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, menuCategories, menuItems, orders, orderItems, reservations, smsTemplates, openingHours } from "../drizzle/schema";
+import { InsertUser, users, menuCategories, menuItems, orders, orderItems, reservations, smsTemplates, openingHours, aboutContent, aboutValues, teamMembers, awards, legalPages } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -197,4 +197,64 @@ export async function getOpeningHoursById(id: number) {
   
   const result = await db.select().from(openingHours).where(eq(openingHours.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
+}
+
+// ==================== About Page Functions ====================
+
+export async function getAllAboutContent() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(aboutContent).orderBy(aboutContent.displayOrder);
+  return result;
+}
+
+export async function getAboutContentByKey(key: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(aboutContent).where(eq(aboutContent.sectionKey, key)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getAllAboutValues() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(aboutValues).where(eq(aboutValues.isActive, true)).orderBy(aboutValues.displayOrder);
+  return result;
+}
+
+export async function getAllTeamMembers() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(teamMembers).where(eq(teamMembers.isActive, true)).orderBy(teamMembers.displayOrder);
+  return result;
+}
+
+export async function getAllAwards() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(awards).where(eq(awards.isActive, true)).orderBy(awards.displayOrder);
+  return result;
+}
+
+// ==================== Legal Pages Functions ====================
+
+export async function getLegalPageByType(pageType: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(legalPages).where(and(eq(legalPages.pageType, pageType), eq(legalPages.isPublished, true))).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getAllLegalPages() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const result = await db.select().from(legalPages);
+  return result;
 }
