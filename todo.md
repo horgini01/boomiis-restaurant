@@ -904,3 +904,7 @@
 - [x] Update all navigation links from /events to /events-catering
 - [x] Add "Events & Catering" link to admin sidebar in AdminLayout
 - [x] Verify all navigation works correctly
+
+## Bug Fixes (User Report - Feb 4 - /events Route Still 404)
+- [x] Add redirect route from /events to /events-catering in App.tsx
+- [x] Test /events route redirects correctly

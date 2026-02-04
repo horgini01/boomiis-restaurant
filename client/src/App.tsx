@@ -3,7 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useSettings } from "@/hooks/useSettings";
 import { useEffect } from "react";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
@@ -43,6 +43,7 @@ function Router() {
       <Route path={"/order-success"} component={OrderSuccess} />
       <Route path={"/reservations"} component={Reservations} />
       <Route path={"/events-catering"} component={EventsCatering} />
+      <Route path={"/events"}>{() => <Redirect to="/events-catering" />}</Route>
       <Route path={"/contact"} component={Contact} />
       <Route path={"/admin/login"} component={AdminLogin} />
       <Route path={"/admin/dashboard"} component={AdminDashboard} />
