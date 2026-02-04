@@ -908,3 +908,8 @@
 ## Bug Fixes (User Report - Feb 4 - /events Route Still 404)
 - [x] Add redirect route from /events to /events-catering in App.tsx
 - [x] Test /events route redirects correctly
+
+## Bug Fixes (User Report - Feb 4 - Broken Menu Item Images)
+- [x] Query database to find menu items with local file paths in imageUrl
+- [x] Update imageUrl fields to use CDN URLs from S3 upload (Jollof Rice, Egusi Soup, Suya Skewers, Puff Puff, Plantain Chips)
+- [x] Verify all menu item images display correctly on homepage and menu page

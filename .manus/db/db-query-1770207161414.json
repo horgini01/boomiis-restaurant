@@ -1,0 +1,110 @@
+{
+  "query": "SELECT id, name, image_url FROM menu_items WHERE image_url LIKE '/menu-images/%' OR image_url LIKE '/food-images/%' OR image_url IS NULL ORDER BY id LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, name, image_url FROM menu_items WHERE image_url LIKE '/menu-images/%' OR image_url LIKE '/food-images/%' OR image_url IS NULL ORDER BY id LIMIT 20;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Puff Puff",
+      "image_url": "/menu-images/puff-puff.png"
+    },
+    {
+      "id": "2",
+      "name": "Plantain Chips",
+      "image_url": "/menu-images/plantain-chips.png"
+    },
+    {
+      "id": "3",
+      "name": "Suya Skewers",
+      "image_url": "/menu-images/suya-skewers.png"
+    },
+    {
+      "id": "4",
+      "name": "Jollof Rice with Chicken",
+      "image_url": "/menu-images/jollof-rice-chicken.png"
+    },
+    {
+      "id": "5",
+      "name": "Egusi Soup with Fufu",
+      "image_url": "/menu-images/egusi-soup-fufu.png"
+    },
+    {
+      "id": "14",
+      "name": "Chapman",
+      "image_url": "NULL"
+    },
+    {
+      "id": "270001",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "270003",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300001",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300003",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300005",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300007",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300009",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300011",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300013",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300015",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300017",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300019",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300021",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    },
+    {
+      "id": "300023",
+      "name": "Test Dish for Payment",
+      "image_url": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\timage_url\n1\tPuff Puff\t/menu-images/puff-puff.png\n2\tPlantain Chips\t/menu-images/plantain-chips.png\n3\tSuya Skewers\t/menu-images/suya-skewers.png\n4\tJollof Rice with Chicken\t/menu-images/jollof-rice-chicken.png\n5\tEgusi Soup with Fufu\t/menu-images/egusi-soup-fufu.png\n14\tChapman\tNULL\n270001\tTest Dish for Payment\tNULL\n270003\tTest Dish for Payment\tNULL\n300001\tTest Dish for Payment\tNULL\n300003\tTest Dish for Payment\tNULL\n300005\tTest Dish for Payment\tNULL\n300007\tTest Dish for Payment\tNULL\n300009\tTest Dish for Payment\tNULL\n300011\tTest Dish for Payment\tNULL\n300013\tTest Dish for Payment\tNULL\n300015\tTest Dish for Payment\tNULL\n300017\tTest Dish for Payment\tNULL\n300019\tTest Dish for Payment\tNULL\n300021\tTest Dish for Payment\tNULL\n300023\tTest Dish for Payment\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

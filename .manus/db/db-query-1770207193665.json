@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE menu_items SET image_url = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663223027880/eVHDWPoXttfqbJIx.png' WHERE name = 'Jollof Rice with Chicken';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute UPDATE menu_items SET image_url = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663223027880/eVHDWPoXttfqbJIx.png' WHERE name = 'Jollof Rice with Chicken';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 65
+}

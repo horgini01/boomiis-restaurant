@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, name, imageUrl FROM menu_items WHERE imageUrl LIKE '/menu-images/%' OR imageUrl LIKE '/food-images/%' OR imageUrl IS NULL ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, name, imageUrl FROM menu_items WHERE imageUrl LIKE '/menu-images/%' OR imageUrl LIKE '/food-images/%' OR imageUrl IS NULL ORDER BY id;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'imageurl' in 'where clause'"
+  ]
+}
