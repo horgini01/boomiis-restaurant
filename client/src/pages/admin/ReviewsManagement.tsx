@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import AdminLayout from '@/components/AdminLayout';
+import AdminGuard from '@/components/AdminGuard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -58,7 +60,9 @@ export function ReviewsManagement() {
   };
 
   return (
-    <div className="p-6">
+    <AdminGuard>
+      <AdminLayout>
+        <div className="p-6">
       <Card>
         <CardHeader>
           <CardTitle>Customer Reviews Management</CardTitle>
@@ -159,5 +163,7 @@ export function ReviewsManagement() {
         </CardContent>
       </Card>
     </div>
+      </AdminLayout>
+    </AdminGuard>
   );
 }

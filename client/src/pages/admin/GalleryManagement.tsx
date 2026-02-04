@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import AdminLayout from '@/components/AdminLayout';
+import AdminGuard from '@/components/AdminGuard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -98,7 +100,9 @@ export function GalleryManagement() {
   };
 
   return (
-    <div className="p-6">
+    <AdminGuard>
+      <AdminLayout>
+        <div className="p-6">
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -211,5 +215,7 @@ export function GalleryManagement() {
         </CardContent>
       </Card>
     </div>
+      </AdminLayout>
+    </AdminGuard>
   );
 }

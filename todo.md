@@ -1061,3 +1061,9 @@
 - [x] Update ChefsSpecials component to use new chefSpecials endpoint
 - [x] Keep Featured Dishes section using existing isFeatured field
 - [x] Test both sections work independently
+
+## User Request - Feb 04 (Admin Sidebar Visibility)
+- [x] Check Blog admin page (/admin/blog) and ensure AdminLayout is used
+- [x] Check Reviews admin page (/admin/reviews) and ensure AdminLayout is used
+- [x] Check Gallery admin page (/admin/gallery) and ensure AdminLayout is used
+- [x] Test all three pages to confirm sidebar is visible and functional
