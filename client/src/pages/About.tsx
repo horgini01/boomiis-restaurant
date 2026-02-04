@@ -50,15 +50,12 @@ export function About() {
     <div className="min-h-screen bg-background">
       <Header />
       {/* Hero Section */}
-      <div className="relative h-[400px] bg-gradient-to-r from-orange-900 to-orange-800">
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="relative container mx-auto px-4 h-full flex items-center">
-          <div className="text-white max-w-3xl">
-            <h1 className="text-5xl font-bold mb-4">Our Story</h1>
-            <p className="text-xl text-gray-200">
-              Bringing the vibrant flavors and warm hospitality of West Africa to your neighborhood since 2015
-            </p>
-          </div>
+      <div className="bg-black text-white py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-5xl font-bold mb-4">Our Story</h1>
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+            Bringing the vibrant flavors and warm hospitality of West Africa to your neighborhood since 2015
+          </p>
         </div>
       </div>
 
