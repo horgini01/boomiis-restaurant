@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { Button } from '@/components/ui/button';
@@ -107,6 +108,7 @@ export function Gallery() {
         slides={slides}
         index={lightboxIndex}
       />
+      <Footer />
     </div>
   );
 }

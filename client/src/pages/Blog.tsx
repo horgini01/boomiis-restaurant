@@ -1,6 +1,7 @@
 import { trpc } from '@/lib/trpc';
 import { Link } from 'wouter';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Calendar, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -74,6 +75,7 @@ export function Blog() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

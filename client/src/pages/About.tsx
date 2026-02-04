@@ -1,5 +1,6 @@
 import { Heart, Leaf, Users, Award } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 export function About() {
   const values = [
@@ -159,6 +160,7 @@ export function About() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
