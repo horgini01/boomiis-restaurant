@@ -49,6 +49,7 @@ export default function MenuItemsManagement() {
     allergens: '',
     isAvailable: true,
     isFeatured: false,
+    isChefSpecial: false,
     prepTimeMinutes: 15,
     displayOrder: 0,
   });
@@ -129,6 +130,7 @@ export default function MenuItemsManagement() {
       allergens: '',
       isAvailable: true,
       isFeatured: false,
+      isChefSpecial: false,
       prepTimeMinutes: 15,
       displayOrder: 0,
     });
@@ -150,6 +152,7 @@ export default function MenuItemsManagement() {
       allergens: item.allergens || '',
       isAvailable: item.isAvailable,
       isFeatured: item.isFeatured,
+      isChefSpecial: item.isChefSpecial || false,
       prepTimeMinutes: item.prepTimeMinutes || 15,
       displayOrder: item.displayOrder,
     });
@@ -474,7 +477,15 @@ export default function MenuItemsManagement() {
                           checked={formData.isFeatured}
                           onCheckedChange={(checked) => setFormData({ ...formData, isFeatured: !!checked })}
                         />
-                        <Label htmlFor="isFeatured" className="cursor-pointer">Featured on Homepage</Label>
+                        <Label htmlFor="isFeatured" className="cursor-pointer">Featured Dishes Section</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="isChefSpecial"
+                          checked={formData.isChefSpecial}
+                          onCheckedChange={(checked) => setFormData({ ...formData, isChefSpecial: !!checked })}
+                        />
+                        <Label htmlFor="isChefSpecial" className="cursor-pointer">Chef's Special Banner</Label>
                       </div>
                     </div>
                   </div>

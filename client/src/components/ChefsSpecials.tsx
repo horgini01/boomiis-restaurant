@@ -6,7 +6,7 @@ import { useLocation } from 'wouter';
 
 export function ChefsSpecials() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { data: featuredItems } = trpc.menu.featured.useQuery();
+  const { data: featuredItems } = trpc.menu.chefSpecials.useQuery();
   const [, setLocation] = useLocation();
 
   // Auto-advance every 5 seconds

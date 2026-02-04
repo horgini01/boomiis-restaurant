@@ -1047,3 +1047,17 @@
 - [x] Make menu item cards clickable to navigate to detail pages (both Home and Menu pages)
 - [x] Update Contact page to use dynamic restaurant settings from database
 - [x] Test all integrations and verify functionality
+
+## User Request - Feb 04 (Chef's Specials Management)
+- [x] Document how to manage Chef's Specials banner items (images & taglines)
+- [x] Verify admin sidebar links (Reviews, Gallery, Blog) are persistent and working
+- [x] Create user guide for managing featured menu items that appear in Chef's Specials
+
+## User Request - Feb 04 (Separate Chef's Special from Featured Dishes)
+- [x] Add isChefSpecial boolean field to menuItems database schema
+- [x] Create getChefSpecialItems database query function
+- [x] Add menu.chefSpecials tRPC endpoint
+- [x] Update admin menu item form with separate "Chef's Special" checkbox
+- [x] Update ChefsSpecials component to use new chefSpecials endpoint
+- [x] Keep Featured Dishes section using existing isFeatured field
+- [x] Test both sections work independently

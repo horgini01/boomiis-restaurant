@@ -121,6 +121,16 @@ export async function getFeaturedMenuItems() {
     .limit(6);
 }
 
+export async function getChefSpecialItems() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(menuItems)
+    .where(and(eq(menuItems.isChefSpecial, true), eq(menuItems.isAvailable, true)))
+    .orderBy(menuItems.displayOrder)
+    .limit(10);
+}
+
 export async function getMenuItemById(id: number) {
   const db = await getDb();
   if (!db) return null;

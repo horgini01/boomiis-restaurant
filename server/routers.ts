@@ -5,7 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
-import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
+import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getChefSpecialItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
 import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts } from '../drizzle/schema';
 import { eq, sql, desc } from "drizzle-orm";
 import { stripe } from "./stripe";
@@ -140,6 +140,9 @@ export const appRouter = router({
       }),
     featured: publicProcedure.query(async () => {
       return await getFeaturedMenuItems();
+    }),
+    chefSpecials: publicProcedure.query(async () => {
+      return await getChefSpecialItems();
     }),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
@@ -560,6 +563,7 @@ export const appRouter = router({
         allergens: z.string().optional(),
         isAvailable: z.boolean(),
         isFeatured: z.boolean(),
+        isChefSpecial: z.boolean(),
         displayOrder: z.number(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -592,6 +596,7 @@ export const appRouter = router({
         allergens: z.string().optional(),
         isAvailable: z.boolean(),
         isFeatured: z.boolean(),
+        isChefSpecial: z.boolean(),
         displayOrder: z.number(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -713,6 +718,7 @@ export const appRouter = router({
           allergens: item.allergens,
           isAvailable: false, // Start as unavailable
           isFeatured: false,
+          isChefSpecial: false,
           displayOrder: item.displayOrder,
         });
 
