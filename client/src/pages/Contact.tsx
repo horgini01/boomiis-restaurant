@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function Contact() {
+  const { contactPhone, contactEmail, contactAddress, openingHoursDisplay } = useSettings();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -88,8 +90,8 @@ export default function Contact() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Phone</h3>
                 <p className="text-muted-foreground mb-2">Give us a call</p>
-                <a href="tel:+447911123456" className="text-primary hover:underline font-medium">
-                  +44 7911 123456
+                <a href={`tel:${contactPhone}`} className="text-primary hover:underline font-medium">
+                  {contactPhone}
                 </a>
               </CardContent>
             </Card>
@@ -101,8 +103,8 @@ export default function Contact() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Email</h3>
                 <p className="text-muted-foreground mb-2">Send us an email</p>
-                <a href="mailto:info@boomiis.uk" className="text-primary hover:underline font-medium">
-                  info@boomiis.uk
+                <a href={`mailto:${contactEmail}`} className="text-primary hover:underline font-medium">
+                  {contactEmail}
                 </a>
               </CardContent>
             </Card>
@@ -114,9 +116,8 @@ export default function Contact() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Location</h3>
                 <p className="text-muted-foreground mb-2">Visit our restaurant</p>
-                <p className="text-foreground font-medium">
-                  123 High Street<br />
-                  London, UK
+                <p className="text-foreground font-medium" style={{ whiteSpace: 'pre-line' }}>
+                  {contactAddress}
                 </p>
               </CardContent>
             </Card>
@@ -236,18 +237,14 @@ export default function Contact() {
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold mb-4">Visit Us</h3>
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="font-medium">Monday - Thursday</span>
-                          <span className="text-muted-foreground">11:00 AM - 10:00 PM</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2 border-b border-border/50">
-                          <span className="font-medium">Friday - Saturday</span>
-                          <span className="text-muted-foreground">11:00 AM - 11:00 PM</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2">
-                          <span className="font-medium">Sunday</span>
-                          <span className="text-muted-foreground">12:00 PM - 9:00 PM</span>
-                        </div>
+                        {openingHoursDisplay.map((hours, index) => (
+                          <div 
+                            key={index} 
+                            className={`flex justify-between items-center py-2 ${index < openingHoursDisplay.length - 1 ? 'border-b border-border/50' : ''}`}
+                          >
+                            <span className="text-foreground">{hours}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

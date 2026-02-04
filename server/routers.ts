@@ -5,7 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
-import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
+import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay } from "./db";
 import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts } from '../drizzle/schema';
 import { eq, sql, desc } from "drizzle-orm";
 import { stripe } from "./stripe";
@@ -141,6 +141,11 @@ export const appRouter = router({
     featured: publicProcedure.query(async () => {
       return await getFeaturedMenuItems();
     }),
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await getMenuItemById(input.id);
+      }),
   }),
 
   orders: router({

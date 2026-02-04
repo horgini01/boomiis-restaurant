@@ -1028,3 +1028,22 @@
 - [x] Add Blog routes to App.tsx
 - [x] Add Blog admin link to sidebar navigation
 - [ ] Write vitest tests for blog endpoints (manual testing first)
+
+## Bug Fixes (User Report - Feb 4 - Incomplete Feature Integration)
+- [ ] Verify admin sidebar links for Reviews, Gallery, and Blog are visible and working
+- [ ] Add Chef's Specials banner component to homepage (above featured dishes)
+- [ ] Create menu item detail page with reviews section integration
+- [ ] Integrate ImageLightbox into Menu page menu item images
+- [ ] Integrate ImageLightbox into Home page featured dishes
+- [ ] Verify Contact page phone, email, location, and hours load from Restaurant Settings
+- [ ] Test all feature integrations end-to-end
+
+## Feature Integration (User Request - Feb 04)
+- [x] Add admin sidebar links for Reviews, Gallery, and Blog management
+- [x] Integrate Chef's Specials banner into homepage
+- [x] Create menu item detail page with full information
+- [x] Integrate ReviewsSection component into menu item detail pages
+- [x] Add image lightbox to menu item detail pages
+- [x] Make menu item cards clickable to navigate to detail pages (both Home and Menu pages)
+- [x] Update Contact page to use dynamic restaurant settings from database
+- [x] Test all integrations and verify functionality

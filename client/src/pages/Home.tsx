@@ -9,6 +9,7 @@ import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
+import { ChefsSpecials } from '@/components/ChefsSpecials';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -108,6 +109,9 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Chef's Specials Banner */}
+        <ChefsSpecials />
+
         {/* Featured Dishes */}
         <section className="py-16">
           <div className="container">
@@ -137,16 +141,18 @@ export default function Home() {
               ) : featuredItems.length > 0 ? (
                 featuredItems.slice(0, 3).map((item) => (
                   <Card key={item.id} className="overflow-hidden border-border/50">
-                    <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                      <img 
-                        src={item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop'} 
-                        alt={item.name} 
-                        className="w-full h-full object-cover" 
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop';
-                        }}
-                      />
-                    </div>
+                    <Link href={`/menu/${item.id}`}>
+                      <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center cursor-pointer">
+                        <img 
+                          src={item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop'} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop';
+                          }}
+                        />
+                      </div>
+                    </Link>
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold mb-2">{item.name}</h3>
                       <p className="text-muted-foreground mb-4">{item.description}</p>
