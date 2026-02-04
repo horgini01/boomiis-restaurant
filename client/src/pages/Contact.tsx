@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,29 +40,7 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-black/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <a href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🍲</span>
-              </div>
-              <span className="text-2xl font-bold text-primary">Boomiis</span>
-            </a>
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="/" className="text-muted-foreground hover:text-foreground transition-colors">Home</a>
-              <a href="/menu" className="text-muted-foreground hover:text-foreground transition-colors">Menu</a>
-              <a href="/reservations" className="text-muted-foreground hover:text-foreground transition-colors">Reservations</a>
-              <a href="/events-catering" className="text-muted-foreground hover:text-foreground transition-colors">Events & Catering</a>
-              <a href="/gallery" className="text-muted-foreground hover:text-foreground transition-colors">Gallery</a>
-              <a href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a>
-              <a href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
-              <a href="/contact" className="text-primary font-medium">Contact</a>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-br from-black via-gray-900 to-black">
