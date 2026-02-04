@@ -197,11 +197,14 @@ export default function Menu() {
                           </Badge>
                         </div>
                       )}
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="text-primary/40 text-6xl">🍽️</div>
-                      )}
+                      <img 
+                        src={item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop'} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop';
+                        }}
+                      />
                       <div className="absolute top-2 right-2 flex flex-col gap-1">
                         {!item.isAvailable && (
                           <Badge variant="destructive" className="gap-1 font-semibold">

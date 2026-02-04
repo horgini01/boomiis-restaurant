@@ -352,14 +352,14 @@ export default function MenuItemsManagement() {
                               reader.onload = async (event) => {
                                 try {
                                   const base64 = event.target?.result as string;
-                                  const response = await fetch('/api/trpc/admin.uploadImage', {
+                                  const response = await fetch('/api/trpc/admin.uploadOptimizedImage', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
                                       json: {
-                                        file: base64,
-                                        fileName: file.name,
-                                        mimeType: file.type || 'image/jpeg',
+                                        imageBase64: base64,
+                                        filename: file.name,
+                                        quality: 80,
                                       },
                                     }),
                                   });
@@ -373,7 +373,7 @@ export default function MenuItemsManagement() {
                                   
                                   if (data.result?.data?.json?.url) {
                                     setFormData((prev) => ({ ...prev, imageUrl: data.result.data.json.url }));
-                                    toast.success('Image uploaded successfully');
+                                    toast.success('Image optimized and uploaded successfully (WebP format)');
                                   } else {
                                     throw new Error('Invalid response format');
                                   }

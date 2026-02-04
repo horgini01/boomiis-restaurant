@@ -138,11 +138,14 @@ export default function Home() {
                 featuredItems.slice(0, 3).map((item) => (
                   <Card key={item.id} className="overflow-hidden border-border/50">
                     <div className="h-48 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                      {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <UtensilsCrossed className="h-16 w-16 text-primary/40" />
-                      )}
+                      <img 
+                        src={item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop'} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop';
+                        }}
+                      />
                     </div>
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold mb-2">{item.name}</h3>

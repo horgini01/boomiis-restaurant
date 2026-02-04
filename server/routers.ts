@@ -12,6 +12,7 @@ import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
 import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, sendOrderStatusSMS, formatPhoneNumberE164 } from "./services/sms.service";
 import { storagePut, storageGet } from "./storage";
+import { optimizeAndUploadImage } from "./imageOptimization";
 
 export const appRouter = router({
   system: systemRouter,
@@ -508,6 +509,36 @@ export const appRouter = router({
 
         await db.update(menuCategories).set({ isActive: input.isActive }).where(eq(menuCategories.id, input.id));
         return { success: true };
+      }),
+
+    uploadOptimizedImage: protectedProcedure
+      .input(z.object({
+        imageBase64: z.string(),
+        filename: z.string(),
+        quality: z.number().min(1).max(100).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        try {
+          // Convert base64 to buffer
+          const base64Data = input.imageBase64.replace(/^data:image\/\w+;base64,/, '');
+          const imageBuffer = Buffer.from(base64Data, 'base64');
+          
+          // Optimize and upload
+          const { url, key } = await optimizeAndUploadImage(
+            imageBuffer,
+            input.filename,
+            input.quality || 80
+          );
+          
+          return { success: true, url, key };
+        } catch (error: any) {
+          console.error('[Upload Error]', error);
+          throw new Error(error.message || 'Failed to upload image');
+        }
       }),
 
     createMenuItem: protectedProcedure

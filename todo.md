@@ -913,3 +913,14 @@
 - [x] Query database to find menu items with local file paths in imageUrl
 - [x] Update imageUrl fields to use CDN URLs from S3 upload (Jollof Rice, Egusi Soup, Suya Skewers, Puff Puff, Plantain Chips)
 - [x] Verify all menu item images display correctly on homepage and menu page
+
+## New Features (User Request - Feb 4 - Image Optimization & Placeholders)
+- [x] Install sharp library for image processing
+- [x] Create image optimization utility (compress and convert to WebP)
+- [x] Generate/add placeholder images for menu categories (Unsplash food images)
+- [x] Update Menu and Home page components to show placeholders when imageUrl is null
+- [x] Image upload functionality already exists in Menu Items admin page
+- [x] Integrate image optimization into upload workflow (uploadOptimizedImage endpoint)
+- [x] Image compression and WebP conversion ready for testing
+- [x] Placeholder images display correctly with fallback on error
+- [ ] Write vitest tests for image optimization utility (manual testing first)
