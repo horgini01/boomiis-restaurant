@@ -11,10 +11,10 @@ import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
 
 export default function Contact() {
-  // Restaurant location coordinates (London - example coordinates, update with actual location)
+  // Restaurant location coordinates (Torquay, Devon TQ2 5FA)
   const restaurantLocation = {
-    lat: 51.5074, // Update with actual latitude
-    lng: -0.1278  // Update with actual longitude
+    lat: 50.470180, // Torquay, Devon latitude
+    lng: -3.537695  // Torquay, Devon longitude
   };
 
   const { contactPhone, contactEmail, contactAddress, openingHoursDisplay } = useSettings();

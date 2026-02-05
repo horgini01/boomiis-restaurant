@@ -1162,3 +1162,7 @@
 - [x] Replace map placeholder on Contact page with interactive Google Map
 - [x] Add restaurant location marker with info window
 - [x] Configure map center and zoom level
+
+## Google Maps Coordinate Fix
+- [x] Update Contact page map coordinates from London (51.5074, -0.1278) to Torquay location
+- [x] Test map to verify correct Torquay location is displayed
