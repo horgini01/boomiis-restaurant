@@ -7,7 +7,7 @@ import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getChefSpecialItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay, getAllAboutContent, getAllAboutValues, getAllTeamMembers, getAllAwards, getLegalPageByType, getAllLegalPages } from "./db";
 import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts, aboutContent, aboutValues, teamMembers, awards, legalPages } from '../drizzle/schema';
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, and } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
 import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, sendOrderStatusSMS, formatPhoneNumberE164 } from "./services/sms.service";
@@ -2203,7 +2203,7 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        let conditions = [eq(galleryImages.isActive, true)];
+        const conditions = [eq(galleryImages.isActive, true)];
 
         if (input.category) {
           conditions.push(eq(galleryImages.category, input.category));
@@ -2212,7 +2212,7 @@ export const appRouter = router({
         const results = await db
           .select()
           .from(galleryImages)
-          .where(sql`${conditions.map((c, i) => i === 0 ? c : sql` AND ${c}`).join('')}`)
+          .where(and(...conditions))
           .orderBy(galleryImages.displayOrder, desc(galleryImages.createdAt));
         return results;
       }),
@@ -2253,6 +2253,7 @@ export const appRouter = router({
           imageUrl: input.imageUrl,
           category: input.category,
           displayOrder: input.displayOrder || 0,
+          isActive: true,
         });
 
         return { success: true };
@@ -2297,6 +2298,28 @@ export const appRouter = router({
         if (!db) throw new Error('Database not available');
 
         await db.delete(galleryImages).where(eq(galleryImages.id, input.id));
+
+        return { success: true };
+      }),
+
+    // Admin: Toggle gallery image active status
+    toggleActive: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        await db
+          .update(galleryImages)
+          .set({ isActive: input.isActive })
+          .where(eq(galleryImages.id, input.id));
 
         return { success: true };
       }),

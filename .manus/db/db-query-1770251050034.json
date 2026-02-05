@@ -1,0 +1,22 @@
+{
+  "query": "SELECT * FROM gallery_images;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM gallery_images;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "our traditional meal",
+      "description": "very hummy",
+      "image_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663223027880/6g8xxhsNMKiXF83cS8YGfP/menu-images/egusi-soup-fufu-1770250566989-gaj8b5yu.webp",
+      "thumbnail_url": "NULL",
+      "category": "dishes",
+      "display_order": "0",
+      "is_active": "1",
+      "created_at": "2026-02-05 00:16:07",
+      "updated_at": "2026-02-05 00:16:07"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tdescription\timage_url\tthumbnail_url\tcategory\tdisplay_order\tis_active\tcreated_at\tupdated_at\n1\tour traditional meal\tvery hummy\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663223027880/6g8xxhsNMKiXF83cS8YGfP/menu-images/egusi-soup-fufu-1770250566989-gaj8b5yu.webp\tNULL\tdishes\t0\t1\t2026-02-05 00:16:07\t2026-02-05 00:16:07\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

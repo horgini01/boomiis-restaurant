@@ -37,6 +37,7 @@ export function GalleryManagement() {
   const { data: images, refetch } = trpc.gallery.listAll.useQuery();
   const createImage = trpc.gallery.create.useMutation();
   const deleteImage = trpc.gallery.delete.useMutation();
+  const toggleActive = trpc.gallery.toggleActive.useMutation();
   const uploadOptimized = trpc.admin.uploadOptimizedImage.useMutation();
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,15 +199,38 @@ export function GalleryManagement() {
                     <div className="text-white text-sm">
                       <div className="font-semibold">{image.title}</div>
                       <div className="text-xs text-gray-300">{image.category}</div>
+                      <div className="text-xs mt-1">
+                        <span className={`px-2 py-0.5 rounded ${image.isActive ? 'bg-green-500' : 'bg-gray-500'}`}>
+                          {image.isActive ? 'Visible' : 'Hidden'}
+                        </span>
+                      </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(image.id)}
-                      disabled={deleteImage.isPending}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant={image.isActive ? 'secondary' : 'default'}
+                        onClick={async () => {
+                          try {
+                            await toggleActive.mutateAsync({ id: image.id, isActive: !image.isActive });
+                            toast.success(image.isActive ? 'Image hidden from public gallery' : 'Image now visible in public gallery');
+                            refetch();
+                          } catch (error: any) {
+                            toast.error(error.message || 'Failed to toggle visibility');
+                          }
+                        }}
+                        disabled={toggleActive.isPending}
+                      >
+                        {image.isActive ? 'Hide' : 'Show'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(image.id)}
+                        disabled={deleteImage.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

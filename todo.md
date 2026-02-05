@@ -1126,3 +1126,9 @@
 
 ## Bug Fixes
 - [x] Fix route paths with extra spaces causing 404 errors on legal pages and other routes
+
+## Gallery Bug Fix
+- [x] Investigate why uploaded images in admin gallery don't appear on public gallery page
+- [x] Fix gallery display logic and data fetching (set isActive: true by default)
+- [x] Add toggle button in admin UI to control image visibility
+- [x] Test that uploaded images appear correctly in public gallery

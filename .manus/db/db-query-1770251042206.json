@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, title, category, is_active, created_at FROM gallery_images ORDER BY created_at DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, title, category, is_active, created_at FROM gallery_images ORDER BY created_at DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "our traditional meal",
+      "category": "dishes",
+      "is_active": "1",
+      "created_at": "2026-02-05 00:16:07"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcategory\tis_active\tcreated_at\n1\tour traditional meal\tdishes\t1\t2026-02-05 00:16:07\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}
