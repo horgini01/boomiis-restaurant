@@ -61,32 +61,32 @@ function Router() {
       <Route path={"/contact"} component={Contact} />
       <Route path={"/gallery"} component={Gallery} />
       <Route path={"/about"} component={About} />
-      <Route path={" /blog/:slug"} component={BlogArticle} />
-      <Route path={" /blog"} component={Blog} />
-      <Route path={" /privacy-policy"} component={PrivacyPolicy} />
-      <Route path={" /terms-conditions"} component={TermsConditions} />
-      <Route path={" /accessibility"} component={Accessibility} />
-      <Route path={" /admin/login"} component={AdminLogin} />
-      <Route path={" /admin/dashboard"} component={AdminDashboard} />
-      <Route path={" /admin/categories"} component={CategoriesManagement} />
-      <Route path=" /admin/menu-items" component={MenuItemsManagement} />
-      <Route path=" /admin/bulk-operations" component={BulkOperations} />
-      <Route path={" /admin/orders"} component={OrdersManagement} />
-      <Route path={" /admin/reservations"} component={ReservationsManagement} />
-      <Route path={" /admin/events"} component={EventsManagement} />
+      <Route path="/blog/:slug" component={BlogArticle} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-conditions" component={TermsConditions} />
+      <Route path="/accessibility" component={Accessibility} />
+      <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/categories" component={CategoriesManagement} />
+      <Route path="/admin/menu-items" component={MenuItemsManagement} />
+      <Route path="/admin/bulk-operations" component={BulkOperations} />
+      <Route path="/admin/orders" component={OrdersManagement} />
+      <Route path="/admin/reservations" component={ReservationsManagement} />
+      <Route path="/admin/events" component={EventsManagement} />
       <Route path={"/admin/analytics"} component={Analytics} />
       <Route path={"/admin/settings"} component={Settings} />
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/admin/email-delivery"} component={EmailDelivery} />
-      <Route path={" /admin/newsletter-subscribers"} component={NewsletterSubscribers} />
-      <Route path={" /admin/sms-templates"} component={SMSTemplates} />
-      <Route path={" /admin/reviews"} component={ReviewsManagement} />
-      <Route path={" /admin/gallery"} component={GalleryManagement} />
-      <Route path={" /admin/blog"} component={BlogManagement} />
-      <Route path={" /admin/about-content"} component={AboutContentManagement} />
-      <Route path={" /admin/legal-pages"} component={LegalPagesManagement} />
-      <Route path={" /admin/email-campaigns"} component={EmailCampaigns} />
-      <Route path={" /kitchen"} component={Kitchen} />
+      <Route path="/admin/newsletter-subscribers" component={NewsletterSubscribers} />
+      <Route path="/admin/sms-templates" component={SMSTemplates} />
+      <Route path="/admin/reviews" component={ReviewsManagement} />
+      <Route path="/admin/gallery" component={GalleryManagement} />
+      <Route path="/admin/blog" component={BlogManagement} />
+      <Route path="/admin/about-content" component={AboutContentManagement} />
+      <Route path="/admin/legal-pages" component={LegalPagesManagement} />
+      <Route path="/admin/email-campaigns" component={EmailCampaigns} />
+      <Route path="/kitchen" component={Kitchen} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

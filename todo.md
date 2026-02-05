@@ -1123,3 +1123,6 @@
 - [x] Update Footer component to link to legal pages
 - [x] Update Checkout page to link to Terms & Conditions
 - [x] Seed initial legal page content with standard templates
+
+## Bug Fixes
+- [x] Fix route paths with extra spaces causing 404 errors on legal pages and other routes
