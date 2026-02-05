@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { SEO } from '@/components/SEO';
+import { MapView } from '@/components/Map';
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -9,6 +11,12 @@ import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
 
 export default function Contact() {
+  // Restaurant location coordinates (London - example coordinates, update with actual location)
+  const restaurantLocation = {
+    lat: 51.5074, // Update with actual latitude
+    lng: -0.1278  // Update with actual longitude
+  };
+
   const { contactPhone, contactEmail, contactAddress, openingHoursDisplay } = useSettings();
   const [formData, setFormData] = useState({
     name: '',
@@ -39,8 +47,15 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
+      <SEO 
+        title="Contact Us"
+        description="Get in touch with Boomiis Restaurant. Visit us in London, call us, or send us a message. We're here to answer your questions about our authentic West African cuisine."
+        image="https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=1200&h=630&fit=crop"
+        url="/contact"
+      />
+      <div className="min-h-screen bg-background">
+        <Header />
 
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-br from-black via-gray-900 to-black">
@@ -236,12 +251,37 @@ export default function Contact() {
                 </CardContent>
               </Card>
 
-              {/* Map Placeholder */}
-              <div className="mt-6 bg-muted/30 rounded-lg h-64 flex items-center justify-center border border-border/50">
-                <div className="text-center">
-                  <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground">Map integration available</p>
-                </div>
+              {/* Google Maps */}
+              <div className="mt-6 rounded-lg overflow-hidden border border-border/50" style={{ height: '400px' }}>
+                <MapView
+                  initialCenter={restaurantLocation}
+                  initialZoom={15}
+                  onMapReady={(map) => {
+                    // Add marker for restaurant location
+                    const marker = new google.maps.Marker({
+                      position: restaurantLocation,
+                      map: map,
+                      title: 'Boomiis Restaurant',
+                      animation: google.maps.Animation.DROP,
+                    });
+
+                    // Add info window
+                    const infoWindow = new google.maps.InfoWindow({
+                      content: `
+                        <div style="padding: 10px; max-width: 250px;">
+                          <h3 style="font-weight: bold; margin-bottom: 8px; color: #f59e0b;">Boomiis Restaurant</h3>
+                          <p style="margin-bottom: 4px; color: #374151;">${contactAddress.replace(/\n/g, '<br>')}</p>
+                          <p style="margin-top: 8px; color: #6b7280; font-size: 14px;">Authentic West African Cuisine</p>
+                        </div>
+                      `,
+                    });
+
+                    // Show info window on marker click
+                    marker.addListener('click', () => {
+                      infoWindow.open(map, marker);
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -256,6 +296,7 @@ export default function Contact() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

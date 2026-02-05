@@ -1,4 +1,5 @@
 import { Link } from 'wouter';
+import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -35,6 +36,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Home"
+        description="Experience authentic West African cuisine at Boomiis Restaurant in London. Enjoy traditional dishes like Jollof Rice, Egusi Soup, and Suya in a warm, welcoming atmosphere. Book your table today!"
+        image="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200&h=630&fit=crop"
+        url="/"
+      />
       <Header />
       
       <main className="flex-1">

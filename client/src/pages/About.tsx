@@ -1,4 +1,5 @@
 import { Heart, Leaf, Users, Award } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { trpc } from '@/lib/trpc';
@@ -28,13 +29,21 @@ export function About() {
   // Loading state
   if (loadingContent || loadingValues || loadingTeam || loadingAwards) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex items-center justify-center h-96">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      <>
+        <SEO 
+          title="About Us"
+          description="Learn about Boomiis Restaurant's mission to bring authentic West African cuisine to London. Meet our team, discover our values, and explore our journey celebrating African culinary heritage."
+          image="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&h=630&fit=crop"
+          url="/about"
+        />
+        <div className="min-h-screen bg-background">
+          <Header />
+          <div className="flex items-center justify-center h-96">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
+      </>
     );
   }
 
@@ -44,8 +53,15 @@ export function About() {
   const activeAwards = awardsData.filter((a: any) => a.isActive).sort((a: any, b: any) => a.displayOrder - b.displayOrder);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
+      <SEO 
+        title="About Us"
+        description="Learn about Boomiis Restaurant's mission to bring authentic West African cuisine to London. Meet our team, discover our values, and explore our journey celebrating African culinary heritage."
+        image="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&h=630&fit=crop"
+        url="/about"
+      />
+      <div className="min-h-screen bg-background">
+        <Header />
       {/* Hero Section */}
       <div className="bg-black text-white py-20">
         <div className="container mx-auto px-4 text-center">
@@ -177,7 +193,8 @@ export function About() {
           </div>
         </div>
       )}
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }

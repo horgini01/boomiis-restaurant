@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SEO } from '@/components/SEO';
 import { Link } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -11,6 +12,8 @@ import { toast } from 'sonner';
 import { Loader2, ShoppingCart, Leaf, Wheat, Moon } from 'lucide-react';
 
 export default function Menu() {
+  const seoDescription = "Browse our authentic West African menu featuring Jollof Rice, Egusi Soup, Suya, Pounded Yam, and more traditional dishes. Fresh ingredients, bold flavors, and recipes passed down through generations.";
+
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [dietaryFilter, setDietaryFilter] = useState<'all' | 'vegan' | 'glutenFree' | 'halal'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,6 +61,12 @@ export default function Menu() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Our Menu"
+        description={seoDescription}
+        image="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200&h=630&fit=crop"
+        url="/menu"
+      />
       <Header />
       
       <main className="flex-1">

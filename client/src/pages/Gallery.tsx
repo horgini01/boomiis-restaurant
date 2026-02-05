@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SEO } from '@/components/SEO';
 import { trpc } from '@/lib/trpc';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,6 +8,7 @@ import 'yet-another-react-lightbox/styles.css';
 import { Button } from '@/components/ui/button';
 
 export function Gallery() {
+  const seoDescription = "Browse our photo gallery showcasing authentic West African dishes, restaurant ambiance, events, and our team. See the vibrant colors and rich flavors of Boomiis Restaurant in London.";
   const [selectedCategory, setSelectedCategory] = useState<'ambiance' | 'dishes' | 'events' | 'team' | undefined>();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -33,8 +35,15 @@ export function Gallery() {
   })) || [];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
+      <SEO 
+        title="Gallery"
+        description={seoDescription}
+        image="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200&h=630&fit=crop"
+        url="/gallery"
+      />
+      <div className="min-h-screen bg-background">
+        <Header />
       {/* Page Header */}
       <div className="bg-black text-white py-20">
         <div className="container mx-auto px-4 text-center">
@@ -108,7 +117,8 @@ export function Gallery() {
         slides={slides}
         index={lightboxIndex}
       />
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }

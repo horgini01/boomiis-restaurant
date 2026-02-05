@@ -1132,3 +1132,33 @@
 - [x] Fix gallery display logic and data fetching (set isActive: true by default)
 - [x] Add toggle button in admin UI to control image visibility
 - [x] Test that uploaded images appear correctly in public gallery
+
+## Blog Content Population
+- [x] Create blog post 1: "The Rich History of Jollof Rice: West Africa's Beloved Dish"
+- [x] Create blog post 2: "5 Essential Spices in West African Cooking"
+- [x] Create blog post 3: "How to Make Authentic Egusi Soup at Home"
+- [x] Create blog post 4: "Celebrating African Heritage Month at Boomiis"
+- [x] Create blog post 5: "The Art of Suya: Nigeria's Favorite Street Food"
+
+## SEO Optimization
+- [x] Create SEO meta tags component with Open Graph support
+- [x] Add SEO meta tags to Home page
+- [x] Add SEO meta tags to Menu page
+- [x] Add SEO meta tags to About page
+- [x] Add SEO meta tags to Gallery page
+- [ ] Add SEO meta tags to Blog page and individual blog posts
+- [ ] Add SEO meta tags to Contact page
+- [ ] Add SEO meta tags to Reservations page
+- [ ] Add SEO meta tags to Events & Catering page
+- [ ] Add SEO meta tags to legal pages (Privacy, Terms, Accessibility)
+
+## Google Maps Integration
+- [ ] Integrate Google Maps on Contact page using built-in Maps component
+- [ ] Configure map with restaurant location coordinates
+- [ ] Add marker and info window for restaurant
+- [ ] Test map interactivity and responsiveness
+
+## Google Maps Integration
+- [x] Replace map placeholder on Contact page with interactive Google Map
+- [x] Add restaurant location marker with info window
+- [x] Configure map center and zoom level
