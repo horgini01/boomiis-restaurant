@@ -1173,3 +1173,8 @@
 - [x] Update Contact page to use coordinates from settings instead of hardcoded values
 - [x] Set default coordinates to current Torquay location
 - [x] Test coordinate updates from admin panel
+
+## Get Directions Button
+- [x] Add "Get Directions" button below Google Maps on Contact page
+- [x] Button opens Google Maps with directions to restaurant location
+- [x] Test button functionality
