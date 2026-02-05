@@ -1166,3 +1166,10 @@
 ## Google Maps Coordinate Fix
 - [x] Update Contact page map coordinates from London (51.5074, -0.1278) to Torquay location
 - [x] Test map to verify correct Torquay location is displayed
+
+## Flexible Map Coordinates
+- [x] Add latitude and longitude fields to restaurant_settings database schema
+- [x] Update admin Restaurant Info page to include coordinate input fields
+- [x] Update Contact page to use coordinates from settings instead of hardcoded values
+- [x] Set default coordinates to current Torquay location
+- [x] Test coordinate updates from admin panel

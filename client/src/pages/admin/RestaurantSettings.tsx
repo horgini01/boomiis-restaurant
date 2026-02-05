@@ -405,6 +405,41 @@ export default function RestaurantSettings() {
                       placeholder="hello@boomiis.uk"
                     />
                   </div>
+
+                  <div className="space-y-4 pt-4 border-t">
+                    <div>
+                      <h4 className="font-medium mb-2">Map Coordinates</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Set your restaurant location for Google Maps on the Contact page. You can find coordinates by searching your address on <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Maps</a>, right-clicking the location, and selecting the coordinates.
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="restaurant_latitude">Latitude</Label>
+                        <Input
+                          id="restaurant_latitude"
+                          type="number"
+                          step="any"
+                          value={formData.restaurant_latitude || ""}
+                          onChange={(e) => handleInputChange("restaurant_latitude", e.target.value)}
+                          placeholder="50.470180"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="restaurant_longitude">Longitude</Label>
+                        <Input
+                          id="restaurant_longitude"
+                          type="number"
+                          step="any"
+                          value={formData.restaurant_longitude || ""}
+                          onChange={(e) => handleInputChange("restaurant_longitude", e.target.value)}
+                          placeholder="-3.537695"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

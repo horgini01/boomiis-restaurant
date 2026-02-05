@@ -65,6 +65,8 @@ export function useSettings() {
     contactAddress: settings?.contact_address || "",
     contactPhone: settings?.contact_phone || "",
     contactEmail: settings?.contact_email || "",
+    restaurantLatitude: parseFloat(settings?.restaurant_latitude || "50.470180"),
+    restaurantLongitude: parseFloat(settings?.restaurant_longitude || "-3.537695"),
     socialFacebook: settings?.social_facebook || "",
     socialInstagram: settings?.social_instagram || "",
     socialTwitter: settings?.social_twitter || "",
