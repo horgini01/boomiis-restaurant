@@ -15,7 +15,7 @@ export function DeliveryAreasSettings() {
     onSuccess: () => {
       utils.admin.getDeliveryAreas.invalidate();
       toast.success('Delivery area saved successfully');
-      setNewArea({ areaName: '', postcodesPrefixes: '', deliveryFee: '3.99' });
+      setNewArea({ areaName: '', postcodesPrefixes: '', deliveryFee: '3.99', latitude: '', longitude: '', radiusMeters: '3000' });
     },
     onError: (error) => {
       toast.error(`Failed: ${error.message}`);
@@ -36,6 +36,9 @@ export function DeliveryAreasSettings() {
     areaName: '',
     postcodesPrefixes: '',
     deliveryFee: '3.99',
+    latitude: '',
+    longitude: '',
+    radiusMeters: '3000',
   });
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -43,6 +46,9 @@ export function DeliveryAreasSettings() {
     areaName: '',
     postcodesPrefixes: '',
     deliveryFee: '3.99',
+    latitude: '',
+    longitude: '',
+    radiusMeters: '3000',
   });
 
   const handleAddArea = () => {
@@ -55,6 +61,9 @@ export function DeliveryAreasSettings() {
       areaName: newArea.areaName.trim(),
       postcodesPrefixes: newArea.postcodesPrefixes.trim(),
       deliveryFee: parseFloat(newArea.deliveryFee),
+      latitude: newArea.latitude ? parseFloat(newArea.latitude) : undefined,
+      longitude: newArea.longitude ? parseFloat(newArea.longitude) : undefined,
+      radiusMeters: newArea.radiusMeters ? parseInt(newArea.radiusMeters) : 3000,
       displayOrder: areas.length,
     });
   };
@@ -73,6 +82,9 @@ export function DeliveryAreasSettings() {
       areaName: editingArea.areaName.trim(),
       postcodesPrefixes: editingArea.postcodesPrefixes.trim(),
       deliveryFee: parseFloat(editingArea.deliveryFee),
+      latitude: editingArea.latitude ? parseFloat(editingArea.latitude) : undefined,
+      longitude: editingArea.longitude ? parseFloat(editingArea.longitude) : undefined,
+      radiusMeters: editingArea.radiusMeters ? parseInt(editingArea.radiusMeters) : 3000,
       displayOrder: area.displayOrder,
     });
     setEditingId(null);
@@ -116,10 +128,13 @@ export function DeliveryAreasSettings() {
 
   const startEditing = (area: typeof areas[0]) => {
     setEditingId(area.id);
-    setEditingArea({
-      areaName: area.areaName,
-      postcodesPrefixes: area.postcodesPrefixes,
-      deliveryFee: area.deliveryFee,
+    setEditingArea({ 
+      areaName: area.areaName, 
+      postcodesPrefixes: area.postcodesPrefixes, 
+      deliveryFee: area.deliveryFee, 
+      latitude: area.latitude || '', 
+      longitude: area.longitude || '', 
+      radiusMeters: area.radiusMeters?.toString() || '3000' 
     });
   };
 
@@ -175,6 +190,42 @@ export function DeliveryAreasSettings() {
                 />
               </div>
             </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="new-latitude">Latitude (for map)</Label>
+                <Input
+                  id="new-latitude"
+                  type="number"
+                  step="0.0000001"
+                  placeholder="e.g., 50.4619"
+                  value={newArea.latitude}
+                  onChange={(e) => setNewArea({ ...newArea, latitude: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-longitude">Longitude (for map)</Label>
+                <Input
+                  id="new-longitude"
+                  type="number"
+                  step="0.0000001"
+                  placeholder="e.g., -3.5253"
+                  value={newArea.longitude}
+                  onChange={(e) => setNewArea({ ...newArea, longitude: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-radius">Radius (meters)</Label>
+                <Input
+                  id="new-radius"
+                  type="number"
+                  step="100"
+                  min="0"
+                  placeholder="3000"
+                  value={newArea.radiusMeters}
+                  onChange={(e) => setNewArea({ ...newArea, radiusMeters: e.target.value })}
+                />
+              </div>
+            </div>
             <Button
               onClick={handleAddArea}
               disabled={saveAreaMutation.isPending}
@@ -220,6 +271,42 @@ export function DeliveryAreasSettings() {
                               min="0"
                               value={editingArea.deliveryFee}
                               onChange={(e) => setEditingArea({ ...editingArea, deliveryFee: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-3">
+                          <div className="space-y-1">
+                            <Label htmlFor={`edit-latitude-${area.id}`}>Latitude</Label>
+                            <Input
+                              id={`edit-latitude-${area.id}`}
+                              type="number"
+                              step="0.0000001"
+                              placeholder="e.g., 50.4619"
+                              value={editingArea.latitude}
+                              onChange={(e) => setEditingArea({ ...editingArea, latitude: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor={`edit-longitude-${area.id}`}>Longitude</Label>
+                            <Input
+                              id={`edit-longitude-${area.id}`}
+                              type="number"
+                              step="0.0000001"
+                              placeholder="e.g., -3.5253"
+                              value={editingArea.longitude}
+                              onChange={(e) => setEditingArea({ ...editingArea, longitude: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor={`edit-radius-${area.id}`}>Radius (m)</Label>
+                            <Input
+                              id={`edit-radius-${area.id}`}
+                              type="number"
+                              step="100"
+                              min="0"
+                              placeholder="3000"
+                              value={editingArea.radiusMeters}
+                              onChange={(e) => setEditingArea({ ...editingArea, radiusMeters: e.target.value })}
                             />
                           </div>
                         </div>

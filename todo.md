@@ -1217,3 +1217,17 @@
 - [x] Add clear button to reset postcode checker
 - [x] Style postcode checker to match site design
 - [x] Test postcode checker with various UK postcodes
+
+## Bug Fixes (Critical - User Reported - Feb 6, 2026 - Hardcoded Delivery Zones)
+- [x] Add latitude, longitude, radiusMeters fields to delivery_areas table schema
+- [x] Push database schema changes (migration 0017_harsh_romulus.sql)
+- [x] tRPC endpoint already exists (admin.getDeliveryAreas)
+- [x] Update saveDeliveryArea mutation to accept lat/lng/radius fields
+- [x] Update admin delivery areas form to include lat/lng/radius fields
+- [x] Update Contact page to dynamically load zones from API
+- [x] Update postcode checker to use dynamic delivery areas
+- [x] Update existing delivery areas in database with lat/lng/radius values
+- [x] Test that admin delivery area changes reflect on Contact page map
+- [x] Test that postcode checker validates against admin-configured areas
+- [x] Verify map zones update when admin adds/edits/deletes delivery areas
+- [x] Remove debug console.log statements (kept for now for troubleshooting)

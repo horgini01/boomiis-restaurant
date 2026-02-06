@@ -1,0 +1,9 @@
+{
+  "query": "\n-- Update Torquay with coordinates\nUPDATE delivery_areas \nSET latitude = '50.4619', longitude = '-3.5253', radius_meters = 3000 \nWHERE area_name = 'Torquay';\n\n-- Update Paignton with coordinates  \nUPDATE delivery_areas \nSET latitude = '50.4356', longitude = '-3.5606', radius_meters = 2500 \nWHERE area_name = 'Paignton';\n\n-- Update Newton Abbot with coordinates\nUPDATE delivery_areas \nSET latitude = '50.5308', longitude = '-3.6079', radius_meters = 2500 \nWHERE area_name = 'Newton Abbot';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute \n-- Update Torquay with coordinates\nUPDATE delivery_areas \nSET latitude = '50.4619', longitude = '-3.5253', radius_meters = 3000 \nWHERE area_name = 'Torquay';\n\n-- Update Paignton with coordinates  \nUPDATE delivery_areas \nSET latitude = '50.4356', longitude = '-3.5606', radius_meters = 2500 \nWHERE area_name = 'Paignton';\n\n-- Update Newton Abbot with coordinates\nUPDATE delivery_areas \nSET latitude = '50.5308', longitude = '-3.6079', radius_meters = 2500 \nWHERE area_name = 'Newton Abbot';\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 160
+}

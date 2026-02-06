@@ -270,6 +270,9 @@ export const deliveryAreas = mysqlTable("delivery_areas", {
   areaName: varchar("area_name", { length: 100 }).notNull(),
   postcodesPrefixes: text("postcodes_prefixes").notNull(), // Comma-separated postcode prefixes (e.g., "SW1, SW7, SW10")
   deliveryFee: decimal("delivery_fee", { precision: 10, scale: 2 }).notNull(), // Zone-specific delivery fee
+  latitude: decimal("latitude", { precision: 10, scale: 7 }), // Center latitude for map visualization
+  longitude: decimal("longitude", { precision: 10, scale: 7 }), // Center longitude for map visualization
+  radiusMeters: int("radius_meters").default(3000), // Radius in meters for map circle overlay
   displayOrder: int("display_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

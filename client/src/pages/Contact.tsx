@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SEO } from '@/components/SEO';
 import { MapView } from '@/components/Map';
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
@@ -9,9 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
+import { trpc } from '@/lib/trpc';
 
 export default function Contact() {
   const { contactPhone, contactEmail, contactAddress, openingHoursDisplay, restaurantLatitude, restaurantLongitude } = useSettings();
+  
+  // Fetch delivery areas from database
+  const { data: deliveryAreas = [], isLoading: isLoadingAreas } = trpc.admin.getDeliveryAreas.useQuery();
   
   // Restaurant location coordinates from admin settings
   const restaurantLocation = {
@@ -33,6 +37,82 @@ export default function Contact() {
     message: string;
     zone?: string;
   } | null>(null);
+  
+  // Store map and circles references
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const circlesRef = useRef<google.maps.Circle[]>([]);
+
+  // Create or update delivery zones when data or visibility changes
+  useEffect(() => {
+    console.log('[DeliveryZones] useEffect triggered', { 
+      hasMap: !!mapRef.current, 
+      areasCount: deliveryAreas.length,
+      showZones: showDeliveryZones 
+    });
+    
+    const map = mapRef.current;
+    if (!map || deliveryAreas.length === 0) {
+      console.log('[DeliveryZones] Skipping zone creation:', { hasMap: !!map, areasCount: deliveryAreas.length });
+      return;
+    }
+
+    // Clear existing circles
+    circlesRef.current.forEach(circle => circle.setMap(null));
+    circlesRef.current = [];
+
+    // Create zones from database
+    const zones = deliveryAreas
+      .filter(area => area.latitude && area.longitude && area.radiusMeters)
+      .map(area => ({
+        name: area.areaName,
+        postcodes: area.postcodesPrefixes.split(',').map(p => p.trim().toUpperCase()),
+        color: '#f59e0b',
+        opacity: 0.2,
+        center: { lat: parseFloat(area.latitude!), lng: parseFloat(area.longitude!) },
+        radius: area.radiusMeters!
+      }));
+
+    // Create circle overlays
+    zones.forEach(zone => {
+      const circle = new google.maps.Circle({
+        strokeColor: zone.color,
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: zone.color,
+        fillOpacity: zone.opacity,
+        map: showDeliveryZones ? map : null,
+        center: zone.center,
+        radius: zone.radius,
+      });
+
+      circle.set('originalOpacity', zone.opacity);
+
+      // Add info window
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="padding: 8px;">
+            <h4 style="font-weight: bold; margin-bottom: 4px; color: #f59e0b;">${zone.name}</h4>
+            <p style="margin: 0; color: #374151; font-size: 14px;">Postcodes: ${zone.postcodes.join(', ')}</p>
+          </div>
+        `,
+      });
+
+      circle.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+          infoWindow.setPosition(e.latLng);
+          infoWindow.open(map);
+        }
+      });
+
+      circlesRef.current.push(circle);
+    });
+
+    // Store for window access (for toggle and highlighting)
+    (window as any).deliveryZoneCircles = circlesRef.current;
+    (window as any).deliveryZoneData = zones;
+    
+    console.log('[DeliveryZones] Created zones:', { count: circlesRef.current.length, zones });
+  }, [deliveryAreas, showDeliveryZones]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,29 +143,11 @@ export default function Contact() {
       return;
     }
 
-    // Define delivery zones with their postcode prefixes
-    const deliveryZones = [
-      {
-        name: 'Torquay Area',
-        postcodes: ['TQ1', 'TQ2', 'TQ3', 'TQ4'],
-      },
-      {
-        name: 'Newton Abbot Area',
-        postcodes: ['TQ12'],
-      },
-      {
-        name: 'Teignmouth Area',
-        postcodes: ['TQ14'],
-      },
-      {
-        name: 'Exeter City',
-        postcodes: ['EX1', 'EX2', 'EX3', 'EX4'],
-      },
-      {
-        name: 'Dawlish Area',
-        postcodes: ['EX7'],
-      },
-    ];
+    // Use delivery areas from database
+    const deliveryZones = deliveryAreas.map(area => ({
+      name: area.areaName,
+      postcodes: area.postcodesPrefixes.split(',').map(p => p.trim().toUpperCase()),
+    }));
 
     // Extract postcode prefix (e.g., "TQ1" from "TQ1 2AB")
     const postcodePrefix = postcodeInput.trim().split(' ')[0].toUpperCase();
@@ -448,6 +510,10 @@ export default function Contact() {
                   initialCenter={restaurantLocation}
                   initialZoom={15}
                   onMapReady={(map) => {
+                    // Store map reference for useEffect
+                    mapRef.current = map;
+                    (window as any).mapInstance = map;
+                    
                     // Add marker for restaurant location using AdvancedMarkerElement
                     const marker = new google.maps.marker.AdvancedMarkerElement({
                       position: restaurantLocation,
@@ -470,93 +536,8 @@ export default function Contact() {
                     marker.addListener('click', () => {
                       infoWindow.open(map, marker);
                     });
-
-                    // Define delivery zones with postcode areas
-                    const deliveryZones = [
-                      {
-                        name: 'Torquay Area',
-                        postcodes: ['TQ1', 'TQ2', 'TQ3', 'TQ4'],
-                        color: '#f59e0b',
-                        opacity: 0.2,
-                        center: { lat: 50.4619, lng: -3.5253 },
-                        radius: 3000 // 3km radius
-                      },
-                      {
-                        name: 'Newton Abbot Area',
-                        postcodes: ['TQ12'],
-                        color: '#f59e0b',
-                        opacity: 0.15,
-                        center: { lat: 50.5308, lng: -3.6079 },
-                        radius: 2500
-                      },
-                      {
-                        name: 'Teignmouth Area',
-                        postcodes: ['TQ14'],
-                        color: '#f59e0b',
-                        opacity: 0.15,
-                        center: { lat: 50.5467, lng: -3.4967 },
-                        radius: 2000
-                      },
-                      {
-                        name: 'Exeter City',
-                        postcodes: ['EX1', 'EX2', 'EX3', 'EX4'],
-                        color: '#f59e0b',
-                        opacity: 0.2,
-                        center: { lat: 50.7184, lng: -3.5339 },
-                        radius: 4000
-                      },
-                      {
-                        name: 'Dawlish Area',
-                        postcodes: ['EX7'],
-                        color: '#f59e0b',
-                        opacity: 0.15,
-                        center: { lat: 50.5810, lng: -3.4653 },
-                        radius: 2000
-                      }
-                    ];
-
-                    // Create circle overlays for delivery zones
-                    const circles: google.maps.Circle[] = [];
-                    deliveryZones.forEach(zone => {
-                      const circle = new google.maps.Circle({
-                        strokeColor: zone.color,
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        fillColor: zone.color,
-                        fillOpacity: zone.opacity,
-                        map: showDeliveryZones ? map : null,
-                        center: zone.center,
-                        radius: zone.radius,
-                      });
-
-                      // Store original opacity for reset functionality
-                      circle.set('originalOpacity', zone.opacity);
-
-                      // Add info window for zone
-                      const zoneInfoWindow = new google.maps.InfoWindow({
-                        content: `
-                          <div style="padding: 8px;">
-                            <h4 style="font-weight: bold; margin-bottom: 4px; color: #f59e0b;">${zone.name}</h4>
-                            <p style="margin: 0; color: #374151; font-size: 14px;">Postcodes: ${zone.postcodes.join(', ')}</p>
-                          </div>
-                        `,
-                      });
-
-                      // Show zone info on click
-                      circle.addListener('click', (e: google.maps.MapMouseEvent) => {
-                        if (e.latLng) {
-                          zoneInfoWindow.setPosition(e.latLng);
-                          zoneInfoWindow.open(map);
-                        }
-                      });
-
-                      circles.push(circle);
-                    });
-
-                    // Store circles, zone data, and map reference for toggle and highlighting functionality
-                    (window as any).deliveryZoneCircles = circles;
-                    (window as any).deliveryZoneData = deliveryZones;
-                    (window as any).mapInstance = map;
+                    
+                    // Zones will be created by useEffect when deliveryAreas data loads
                   }}
                 />
               </div>

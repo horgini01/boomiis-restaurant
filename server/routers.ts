@@ -1277,6 +1277,9 @@ export const appRouter = router({
         areaName: z.string().min(1),
         postcodesPrefixes: z.string().min(1),
         deliveryFee: z.number().min(0),
+        latitude: z.number().optional(),
+        longitude: z.number().optional(),
+        radiusMeters: z.number().optional(),
         displayOrder: z.number().default(0),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -1294,6 +1297,9 @@ export const appRouter = router({
               areaName: input.areaName,
               postcodesPrefixes: input.postcodesPrefixes,
               deliveryFee: input.deliveryFee.toString(),
+              latitude: input.latitude?.toString(),
+              longitude: input.longitude?.toString(),
+              radiusMeters: input.radiusMeters,
               displayOrder: input.displayOrder,
               updatedAt: new Date(),
             })
@@ -1304,6 +1310,9 @@ export const appRouter = router({
             areaName: input.areaName,
             postcodesPrefixes: input.postcodesPrefixes,
             deliveryFee: input.deliveryFee.toString(),
+            latitude: input.latitude?.toString(),
+            longitude: input.longitude?.toString(),
+            radiusMeters: input.radiusMeters,
             displayOrder: input.displayOrder,
           });
         }
