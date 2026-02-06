@@ -105,7 +105,9 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary" />
-                <span className="text-sm text-muted-foreground">{contactPhone}</span>
+                <a href={`tel:${contactPhone}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  {contactPhone}
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />

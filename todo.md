@@ -1195,3 +1195,15 @@
 - [x] Verify info window still works with new marker type
 - [x] Test marker displays correctly and info window opens on click
 - [x] Verify no deprecation warnings appear in console
+
+## New Features (User Request - Feb 6, 2026)
+- [x] Add delivery zone visualization map overlay on Contact page showing covered postcodes
+- [x] Display color-coded zones for TQ1-TQ4, TQ12, TQ14, EX1-EX4, EX7
+- [x] Add interactive toggle to show/hide delivery zones on map
+- [x] Implement click-to-call functionality for phone numbers in Contact page (already implemented)
+- [x] Implement click-to-call functionality for phone numbers in Footer
+- [x] Test delivery zone visualization on Contact page
+- [x] Test click-to-call functionality (tel: links working correctly)
+- [x] Test delivery zone toggle button (show/hide functionality)
+- [x] Verify delivery zones display correctly with proper colors and transparency
+- [x] Verify phone numbers are clickable in Contact page and Footer

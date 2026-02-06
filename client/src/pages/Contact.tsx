@@ -26,6 +26,7 @@ export default function Contact() {
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeliveryZones, setShowDeliveryZones] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -279,12 +280,115 @@ export default function Contact() {
                     marker.addListener('click', () => {
                       infoWindow.open(map, marker);
                     });
+
+                    // Define delivery zones with postcode areas
+                    const deliveryZones = [
+                      {
+                        name: 'Torquay Area',
+                        postcodes: ['TQ1', 'TQ2', 'TQ3', 'TQ4'],
+                        color: '#f59e0b',
+                        opacity: 0.2,
+                        center: { lat: 50.4619, lng: -3.5253 },
+                        radius: 3000 // 3km radius
+                      },
+                      {
+                        name: 'Newton Abbot Area',
+                        postcodes: ['TQ12'],
+                        color: '#f59e0b',
+                        opacity: 0.15,
+                        center: { lat: 50.5308, lng: -3.6079 },
+                        radius: 2500
+                      },
+                      {
+                        name: 'Teignmouth Area',
+                        postcodes: ['TQ14'],
+                        color: '#f59e0b',
+                        opacity: 0.15,
+                        center: { lat: 50.5467, lng: -3.4967 },
+                        radius: 2000
+                      },
+                      {
+                        name: 'Exeter City',
+                        postcodes: ['EX1', 'EX2', 'EX3', 'EX4'],
+                        color: '#f59e0b',
+                        opacity: 0.2,
+                        center: { lat: 50.7184, lng: -3.5339 },
+                        radius: 4000
+                      },
+                      {
+                        name: 'Dawlish Area',
+                        postcodes: ['EX7'],
+                        color: '#f59e0b',
+                        opacity: 0.15,
+                        center: { lat: 50.5810, lng: -3.4653 },
+                        radius: 2000
+                      }
+                    ];
+
+                    // Create circle overlays for delivery zones
+                    const circles: google.maps.Circle[] = [];
+                    deliveryZones.forEach(zone => {
+                      const circle = new google.maps.Circle({
+                        strokeColor: zone.color,
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: zone.color,
+                        fillOpacity: zone.opacity,
+                        map: showDeliveryZones ? map : null,
+                        center: zone.center,
+                        radius: zone.radius,
+                      });
+
+                      // Add info window for zone
+                      const zoneInfoWindow = new google.maps.InfoWindow({
+                        content: `
+                          <div style="padding: 8px;">
+                            <h4 style="font-weight: bold; margin-bottom: 4px; color: #f59e0b;">${zone.name}</h4>
+                            <p style="margin: 0; color: #374151; font-size: 14px;">Postcodes: ${zone.postcodes.join(', ')}</p>
+                          </div>
+                        `,
+                      });
+
+                      // Show zone info on click
+                      circle.addListener('click', (e: google.maps.MapMouseEvent) => {
+                        if (e.latLng) {
+                          zoneInfoWindow.setPosition(e.latLng);
+                          zoneInfoWindow.open(map);
+                        }
+                      });
+
+                      circles.push(circle);
+                    });
+
+                    // Store circles and map reference for toggle functionality
+                    (window as any).deliveryZoneCircles = circles;
+                    (window as any).mapInstance = map;
                   }}
                 />
               </div>
               
-              {/* Get Directions Button */}
-              <div className="mt-4 flex justify-center">
+              {/* Delivery Zone Toggle and Get Directions */}
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeliveryZones(!showDeliveryZones);
+                    const circles = (window as any).deliveryZoneCircles;
+                    const mapInstance = (window as any).mapInstance;
+                    if (circles && mapInstance) {
+                      circles.forEach((circle: google.maps.Circle) => {
+                        circle.setMap(!showDeliveryZones ? mapInstance : null);
+                      });
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  {showDeliveryZones ? 'Hide' : 'Show'} Delivery Zones
+                </Button>
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${restaurantLatitude},${restaurantLongitude}`}
                   target="_blank"
