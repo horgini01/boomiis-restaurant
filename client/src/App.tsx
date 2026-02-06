@@ -24,7 +24,7 @@ import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CategoriesManagement from "./pages/admin/Categories";
 import MenuItemsManagement from './pages/admin/MenuItems';
-import BulkOperations from './pages/admin/BulkOperations';
+
 import OrdersManagement from "./pages/admin/Orders";
 import ReservationsManagement from "./pages/admin/ReservationsManagement";
 import EventsManagement from "./pages/admin/EventsManagement";
@@ -37,6 +37,7 @@ import EmailCampaigns from "./pages/admin/EmailCampaigns";
 import SMSTemplates from "./pages/admin/SMSTemplates";
 import { ReviewsManagement } from "./pages/admin/ReviewsManagement";
 import TestimonialsManagement from "./pages/admin/Testimonials";
+import SubmitTestimonial from "./pages/SubmitTestimonial";
 import { GalleryManagement } from "./pages/admin/GalleryManagement";
 import { BlogManagement } from "./pages/admin/BlogManagement";
 import AboutContentManagement from "./pages/admin/AboutContentManagement";
@@ -67,11 +68,12 @@ function Router() {
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-conditions" component={TermsConditions} />
       <Route path="/accessibility" component={Accessibility} />
+      <Route path="/submit-testimonial" component={SubmitTestimonial} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/categories" component={CategoriesManagement} />
       <Route path="/admin/menu-items" component={MenuItemsManagement} />
-      <Route path="/admin/bulk-operations" component={BulkOperations} />
+
       <Route path="/admin/orders" component={OrdersManagement} />
       <Route path="/admin/reservations" component={ReservationsManagement} />
       <Route path="/admin/events" component={EventsManagement} />

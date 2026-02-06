@@ -2832,6 +2832,30 @@ export const appRouter = router({
       return await db.select().from(testimonials).where(eq(testimonials.isApproved, true)).orderBy(testimonials.displayOrder, testimonials.createdAt);
     }),
 
+    // Public submission endpoint for customers
+    submit: publicProcedure
+      .input(z.object({
+        customerName: z.string().min(2, 'Name must be at least 2 characters'),
+        customerEmail: z.string().email('Invalid email address').optional(),
+        content: z.string().min(10, 'Testimonial must be at least 10 characters'),
+        rating: z.number().min(1).max(5),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        
+        // Insert with isApproved = false (pending admin approval)
+        await db.insert(testimonials).values({
+          ...input,
+          isApproved: false,
+          isFeatured: false,
+          displayOrder: 0,
+        });
+        
+        return { success: true, message: 'Thank you for your testimonial! It will be reviewed by our team.' };
+      }),
+
     getFeatured: publicProcedure.query(async () => {
       const db = await getDb();
       if (!db) throw new Error('Database not available');

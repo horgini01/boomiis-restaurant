@@ -50,7 +50,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/categories', label: 'Categories', icon: FolderTree },
     { path: '/admin/menu-items', label: 'Menu Items', icon: UtensilsCrossed },
-    { path: '/admin/bulk-operations', label: 'Bulk Operations', icon: FolderTree },
+
     { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
     { path: '/admin/events', label: 'Events & Catering', icon: Calendar },

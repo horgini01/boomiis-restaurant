@@ -377,7 +377,7 @@ export default function CategoriesManagement() {
                 </Table>
               </CardContent>
             </Card>
-            </>
+          </>
           )}
         </div>
       </AdminLayout>

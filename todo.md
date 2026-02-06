@@ -1294,3 +1294,16 @@
 - [x] Show error message when trying to delete items with orders
 - [x] Allow updates to menu items even if they have orders
 - [x] Create comprehensive vitest tests for bulk operations (4 tests passing)
+
+## UI Cleanup & Customer Features (User Request - Feb 6, 2026)
+- [x] Remove standalone Bulk Operations page from admin navigation
+- [x] Remove Bulk Operations route from App.tsx
+- [x] Delete BulkOperations.tsx component file
+- [x] Create public testimonial submission form page
+- [x] Add testimonial submission tRPC endpoint
+- [x] Add form validation for testimonial submissions
+- [x] Set submitted testimonials to pending approval by default
+- [x] Add link to testimonial form in footer or appropriate location
+- [x] Test complete testimonial submission and approval workflow
+- [x] Create vitest tests for testimonial submission (3 tests passing)
+- [x] Verify testimonials appear in admin panel for approval

@@ -85,6 +85,13 @@ export default function Footer() {
                   </span>
                 </Link>
               </li>
+              <li>
+                <Link href="/submit-testimonial">
+                  <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
+                    Share Your Experience
+                  </span>
+                </Link>
+              </li>
             </ul>
           </div>
 
