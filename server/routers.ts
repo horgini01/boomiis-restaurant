@@ -800,7 +800,7 @@ export const appRouter = router({
     bulkUpdateMenuItems: protectedProcedure
       .input(z.object({
         itemIds: z.array(z.number()),
-        operation: z.enum(['priceChange', 'makeAvailable', 'makeUnavailable', 'markInStock', 'markOutOfStock', 'delete']),
+        operation: z.enum(['priceChange', 'makeAvailable', 'makeUnavailable', 'markInStock', 'markOutOfStock', 'delete', 'duplicate']),
         priceChangePercent: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -844,7 +844,47 @@ export const appRouter = router({
             await db.update(menuItems).set({ outOfStock: true }).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
             break;
           case 'delete':
+            // Check if any items have associated order items
+            const itemsWithOrders = await db.select({ menuItemId: orderItemsTable.menuItemId })
+              .from(orderItemsTable)
+              .where(sql`${orderItemsTable.menuItemId} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`)
+              .groupBy(orderItemsTable.menuItemId);
+            
+            if (itemsWithOrders.length > 0) {
+              const itemsWithOrdersIds = itemsWithOrders.map(item => item.menuItemId);
+              throw new Error(`Cannot delete menu items that have been ordered. ${itemsWithOrdersIds.length} item(s) have existing orders.`);
+            }
+            
             await db.delete(menuItems).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
+            break;
+          case 'duplicate':
+            // Get items to duplicate
+            const itemsToDuplicate = await db.select().from(menuItems).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
+            
+            // Create duplicates with " (Copy)" suffix
+            for (const item of itemsToDuplicate) {
+              // Generate unique slug by appending timestamp
+              const uniqueSlug = `${item.slug}-copy-${Date.now()}`;
+              
+              await db.insert(menuItems).values({
+                name: `${item.name} (Copy)`,
+                slug: uniqueSlug,
+                description: item.description,
+                price: item.price,
+                categoryId: item.categoryId,
+                imageUrl: item.imageUrl,
+                isAvailable: item.isAvailable,
+                isFeatured: false, // Don't duplicate featured status
+                isChefSpecial: false, // Don't duplicate chef special status
+                isVegan: item.isVegan,
+                isGlutenFree: item.isGlutenFree,
+                isHalal: item.isHalal,
+                allergens: item.allergens,
+                prepTimeMinutes: item.prepTimeMinutes,
+                outOfStock: item.outOfStock,
+                displayOrder: item.displayOrder,
+              });
+            }
             break;
         }
 

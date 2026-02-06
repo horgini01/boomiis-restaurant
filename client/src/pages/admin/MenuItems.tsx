@@ -628,6 +628,25 @@ export default function MenuItemsManagement() {
                           </CardContent>
                         </Card>
 
+                        {/* Bulk Duplicate */}
+                        <Card className="bg-blue-500/10 border-blue-500/20">
+                          <CardContent className="p-4">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (confirm(`Duplicate ${selectedItems.length} menu item${selectedItems.length > 1 ? 's' : ''}? Copies will be created with "(Copy)" suffix.`)) {
+                                  bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'duplicate' });
+                                }
+                              }}
+                              disabled={bulkUpdateMutation.isPending}
+                              className="w-full border-blue-500/30 hover:bg-blue-500/20"
+                            >
+                              Duplicate {selectedItems.length} Item{selectedItems.length > 1 ? 's' : ''}
+                            </Button>
+                          </CardContent>
+                        </Card>
+
                         {/* Bulk Delete */}
                         <Card className="bg-destructive/10 border-destructive/20">
                           <CardContent className="p-4">

@@ -1283,3 +1283,14 @@
 - [x] Add bulk delete button to Menu Items bulk operations toolbar
 - [x] Add confirmation dialog before bulk delete
 - [ ] Test bulk delete with multiple selected items
+
+## Bulk Operations Enhancement (User Request - Feb 6, 2026)
+- [x] Add bulk duplicate functionality to Menu Items page
+- [x] Create "Duplicate" button in bulk operations toolbar
+- [x] Clone selected menu items with " (Copy)" suffix
+- [x] Preserve all properties (price, category, dietary info, description, image)
+- [x] Prevent deletion of menu items that are mapped to paid orders
+- [x] Add backend validation to check if menu item has associated order items
+- [x] Show error message when trying to delete items with orders
+- [x] Allow updates to menu items even if they have orders
+- [x] Create comprehensive vitest tests for bulk operations (4 tests passing)
