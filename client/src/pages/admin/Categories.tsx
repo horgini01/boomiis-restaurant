@@ -24,10 +24,12 @@ import {
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function CategoriesManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -80,6 +82,17 @@ export default function CategoriesManagement() {
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to update category');
+    },
+  });
+
+  const bulkUpdateMutation = trpc.admin.bulkUpdateCategories.useMutation({
+    onSuccess: () => {
+      toast.success('Bulk update completed successfully');
+      utils.menu.categories.invalidate();
+      setSelectedCategories([]);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to perform bulk update');
     },
   });
 
@@ -219,12 +232,76 @@ export default function CategoriesManagement() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <Card className="border-border/50">
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
+            <>
+              {selectedCategories.length > 0 && (
+                <Card className="border-primary/20 mb-6 bg-primary/10">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">
+                          Bulk Operations - {selectedCategories.length} categor{selectedCategories.length > 1 ? 'ies' : 'y'} selected
+                        </h3>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setSelectedCategories([])}
+                        >
+                          Clear Selection
+                        </Button>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => bulkUpdateMutation.mutate({ categoryIds: selectedCategories, operation: 'activate' })}
+                          disabled={bulkUpdateMutation.isPending}
+                        >
+                          Activate Selected
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => bulkUpdateMutation.mutate({ categoryIds: selectedCategories, operation: 'deactivate' })}
+                          disabled={bulkUpdateMutation.isPending}
+                        >
+                          Deactivate Selected
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete ${selectedCategories.length} categor${selectedCategories.length > 1 ? 'ies' : 'y'}?`)) {
+                              bulkUpdateMutation.mutate({ categoryIds: selectedCategories, operation: 'delete' });
+                            }
+                          }}
+                          disabled={bulkUpdateMutation.isPending}
+                        >
+                          Delete Selected
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              <Card className="border-border/50">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={(categories?.length ?? 0) > 0 && selectedCategories.length === (categories?.length ?? 0)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedCategories(categories?.map((cat: any) => cat.id) ?? []);
+                              } else {
+                                setSelectedCategories([]);
+                              }
+                            }}
+                          />
+                        </TableHead>
+                        <TableHead>Name</TableHead>
                       <TableHead>Slug</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Order</TableHead>
@@ -235,6 +312,18 @@ export default function CategoriesManagement() {
                   <TableBody>
                     {categories?.map((category: any) => (
                       <TableRow key={category.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedCategories.includes(category.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedCategories([...selectedCategories, category.id]);
+                              } else {
+                                setSelectedCategories(selectedCategories.filter(id => id !== category.id));
+                              }
+                            }}
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">{category.name}</TableCell>
                         <TableCell className="text-muted-foreground">{category.slug}</TableCell>
                         <TableCell className="text-muted-foreground max-w-xs truncate">
@@ -288,6 +377,7 @@ export default function CategoriesManagement() {
                 </Table>
               </CardContent>
             </Card>
+            </>
           )}
         </div>
       </AdminLayout>

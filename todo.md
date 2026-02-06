@@ -1267,3 +1267,14 @@
 - [ ] Test testimonial approval workflow
 - [x] Test testimonial display on homepage (John Smith testimonial displaying correctly)
 - [ ] Keep existing menu item reviews separate from general testimonials
+
+## UI Improvements (User Request - Feb 6, 2026 - Bulk Operations Enhancement)
+- [x] Improve Menu Items bulk price update UI visibility and usability
+- [x] Make bulk price input field larger and more prominent
+- [x] Add visual feedback when items are selected for bulk operations
+- [x] Show selected item count in bulk toolbar
+- [x] Reorganize bulk operations into two sections (Price Update and Status Updates)
+- [x] Add bulk operations to Categories page (checkboxes, bulk activate/deactivate)
+- [x] Create bulkUpdateCategories tRPC mutation (activate, deactivate, delete)
+- [ ] Test Menu Items bulk price update workflow
+- [ ] Test Categories bulk operations workflow

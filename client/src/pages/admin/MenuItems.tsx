@@ -530,78 +530,104 @@ export default function MenuItemsManagement() {
           ) : (
             <>
               {selectedItems.length > 0 && (
-                <Card className="border-border/50 mb-4 bg-primary/5">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <span className="text-sm font-medium">
-                        {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''} selected
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          placeholder="% change (e.g., 10 or -5)"
-                          value={bulkPriceChange}
-                          onChange={(e) => setBulkPriceChange(e.target.value)}
-                          className="w-48"
-                        />
+                <Card className="border-primary/20 mb-6 bg-primary/10">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">
+                          Bulk Operations - {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''} selected
+                        </h3>
                         <Button
                           size="sm"
-                          onClick={() => {
-                            const percent = parseFloat(bulkPriceChange);
-                            if (isNaN(percent)) {
-                              toast.error('Please enter a valid percentage');
-                              return;
-                            }
-                            bulkUpdateMutation.mutate({
-                              itemIds: selectedItems,
-                              operation: 'priceChange',
-                              priceChangePercent: percent,
-                            });
-                          }}
-                          disabled={bulkUpdateMutation.isPending || !bulkPriceChange}
+                          variant="ghost"
+                          onClick={() => setSelectedItems([])}
                         >
-                          Update Prices
+                          Clear Selection
                         </Button>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'makeAvailable' })}
-                        disabled={bulkUpdateMutation.isPending}
-                      >
-                        Make Available
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'makeUnavailable' })}
-                        disabled={bulkUpdateMutation.isPending}
-                      >
-                        Make Unavailable
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'markInStock' })}
-                        disabled={bulkUpdateMutation.isPending}
-                      >
-                        Mark In Stock
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'markOutOfStock' })}
-                        disabled={bulkUpdateMutation.isPending}
-                      >
-                        Mark Out of Stock
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setSelectedItems([])}
-                      >
-                        Clear Selection
-                      </Button>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Bulk Price Update */}
+                        <Card className="bg-background/50">
+                          <CardContent className="p-4">
+                            <Label className="text-sm font-medium mb-2 block">Bulk Price Update</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="number"
+                                placeholder="e.g., 10 for 10% increase, -5 for 5% decrease"
+                                value={bulkPriceChange}
+                                onChange={(e) => setBulkPriceChange(e.target.value)}
+                                className="flex-1"
+                              />
+                              <Button
+                                onClick={() => {
+                                  const percent = parseFloat(bulkPriceChange);
+                                  if (isNaN(percent)) {
+                                    toast.error('Please enter a valid percentage');
+                                    return;
+                                  }
+                                  bulkUpdateMutation.mutate({
+                                    itemIds: selectedItems,
+                                    operation: 'priceChange',
+                                    priceChangePercent: percent,
+                                  });
+                                }}
+                                disabled={bulkUpdateMutation.isPending || !bulkPriceChange}
+                              >
+                                Update {selectedItems.length} Item{selectedItems.length > 1 ? 's' : ''}
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Selected {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''}. Enter a positive number to increase prices or negative to decrease.
+                            </p>
+                          </CardContent>
+                        </Card>
+
+                        {/* Bulk Status Updates */}
+                        <Card className="bg-background/50">
+                          <CardContent className="p-4">
+                            <Label className="text-sm font-medium mb-2 block">Bulk Status Updates</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'makeAvailable' })}
+                                disabled={bulkUpdateMutation.isPending}
+                                className="w-full"
+                              >
+                                Make Available
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'makeUnavailable' })}
+                                disabled={bulkUpdateMutation.isPending}
+                                className="w-full"
+                              >
+                                Make Unavailable
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'markInStock' })}
+                                disabled={bulkUpdateMutation.isPending}
+                                className="w-full"
+                              >
+                                Mark In Stock
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'markOutOfStock' })}
+                                disabled={bulkUpdateMutation.isPending}
+                                className="w-full"
+                              >
+                                Mark Out of Stock
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

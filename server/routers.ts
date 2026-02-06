@@ -519,6 +519,38 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    bulkUpdateCategories: protectedProcedure
+      .input(z.object({
+        categoryIds: z.array(z.number()),
+        operation: z.enum(['activate', 'deactivate', 'delete']),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { categoryIds, operation } = input;
+
+        if (operation === 'activate') {
+          for (const id of categoryIds) {
+            await db.update(menuCategories).set({ isActive: true }).where(eq(menuCategories.id, id));
+          }
+        } else if (operation === 'deactivate') {
+          for (const id of categoryIds) {
+            await db.update(menuCategories).set({ isActive: false }).where(eq(menuCategories.id, id));
+          }
+        } else if (operation === 'delete') {
+          for (const id of categoryIds) {
+            await db.delete(menuCategories).where(eq(menuCategories.id, id));
+          }
+        }
+
+        return { success: true };
+      }),
+
     uploadOptimizedImage: protectedProcedure
       .input(z.object({
         imageBase64: z.string(),
