@@ -1231,3 +1231,39 @@
 - [x] Test that postcode checker validates against admin-configured areas
 - [x] Verify map zones update when admin adds/edits/deletes delivery areas
 - [x] Remove debug console.log statements (kept for now for troubleshooting)
+
+## Admin Interface Refactoring (User Request - Feb 6, 2026)
+- [ ] Remove separate Bulk Operations page from admin navigation (will do after testing)
+- [x] Add checkbox selection column to Menu Items table
+- [x] Add "Select All" checkbox to Menu Items table header
+- [x] Add bulk actions toolbar to Menu Items page (appears when items selected)
+- [x] Implement bulk price update functionality in Menu Items page
+- [x] Implement bulk availability toggle in Menu Items page
+- [x] Implement bulk out-of-stock toggle in Menu Items page
+- [x] Add clear selection button to bulk actions toolbar
+- [x] Create bulkUpdateMenuItems tRPC mutation
+- [x] Fix Categories page active toggle (already correctly implemented)
+- [x] Proper active/inactive toggle for categories already exists (eye icon)
+- [x] Category toggle already matches Menu Items pattern with Status column
+- [ ] Test category visibility toggle functionality
+
+## General Testimonials System (User Request - Feb 6, 2026)
+- [x] Create testimonials table in database schema (separate from menu item reviews)
+- [x] Add fields: customerName, customerEmail, content, rating, isApproved, isFeatured, displayOrder
+- [x] Push database schema changes for testimonials table (migration 0018)
+- [x] Create admin Testimonials management page
+- [x] Add tRPC procedures for testimonials CRUD operations
+- [x] Implement testimonials list view in admin with approve/reject actions
+- [x] Add ability for admin to manually create testimonials
+- [x] Add ability for admin to edit existing testimonials
+- [x] Add ability for admin to delete testimonials
+- [x] Add ability for admin to reorder testimonials (display order field)
+- [x] Add featured toggle for highlighting testimonials on homepage
+- [x] Update homepage "What Our Customers Say" section to load from database
+- [x] Replace hardcoded testimonials with dynamic data from admin
+- [x] Add fallback to hardcoded testimonials if no featured testimonials exist
+- [ ] Add public form for customers to submit general testimonials
+- [ ] Implement testimonial submission with pending approval status
+- [ ] Test testimonial approval workflow
+- [x] Test testimonial display on homepage (John Smith testimonial displaying correctly)
+- [ ] Keep existing menu item reviews separate from general testimonials

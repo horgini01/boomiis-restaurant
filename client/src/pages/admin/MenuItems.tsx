@@ -54,8 +54,22 @@ export default function MenuItemsManagement() {
     displayOrder: 0,
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [bulkPriceChange, setBulkPriceChange] = useState('');
 
   const utils = trpc.useUtils();
+  
+  const bulkUpdateMutation = trpc.admin.bulkUpdateMenuItems.useMutation({
+    onSuccess: () => {
+      toast.success('Bulk update completed successfully');
+      utils.admin.getMenuItems.invalidate();
+      setSelectedItems([]);
+      setBulkPriceChange('');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to perform bulk update');
+    },
+  });
   const { data: categories } = trpc.menu.categories.useQuery();
   const { data: menuItems, isLoading } = trpc.admin.getMenuItems.useQuery();
 
@@ -514,11 +528,101 @@ export default function MenuItemsManagement() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <Card className="border-border/50">
+            <>
+              {selectedItems.length > 0 && (
+                <Card className="border-border/50 mb-4 bg-primary/5">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <span className="text-sm font-medium">
+                        {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''} selected
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          placeholder="% change (e.g., 10 or -5)"
+                          value={bulkPriceChange}
+                          onChange={(e) => setBulkPriceChange(e.target.value)}
+                          className="w-48"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            const percent = parseFloat(bulkPriceChange);
+                            if (isNaN(percent)) {
+                              toast.error('Please enter a valid percentage');
+                              return;
+                            }
+                            bulkUpdateMutation.mutate({
+                              itemIds: selectedItems,
+                              operation: 'priceChange',
+                              priceChangePercent: percent,
+                            });
+                          }}
+                          disabled={bulkUpdateMutation.isPending || !bulkPriceChange}
+                        >
+                          Update Prices
+                        </Button>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'makeAvailable' })}
+                        disabled={bulkUpdateMutation.isPending}
+                      >
+                        Make Available
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'makeUnavailable' })}
+                        disabled={bulkUpdateMutation.isPending}
+                      >
+                        Make Unavailable
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'markInStock' })}
+                        disabled={bulkUpdateMutation.isPending}
+                      >
+                        Mark In Stock
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'markOutOfStock' })}
+                        disabled={bulkUpdateMutation.isPending}
+                      >
+                        Mark Out of Stock
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setSelectedItems([])}
+                      >
+                        Clear Selection
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              <Card className="border-border/50">
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={(menuItems?.length ?? 0) > 0 && selectedItems.length === (menuItems?.length ?? 0)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedItems(menuItems?.map((item: any) => item.id) ?? []);
+                            } else {
+                              setSelectedItems([]);
+                            }
+                          }}
+                        />
+                      </TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Price</TableHead>
@@ -530,6 +634,18 @@ export default function MenuItemsManagement() {
                   <TableBody>
                     {menuItems?.map((item: any) => (
                       <TableRow key={item.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedItems.includes(item.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedItems([...selectedItems, item.id]);
+                              } else {
+                                setSelectedItems(selectedItems.filter(id => id !== item.id));
+                              }
+                            }}
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {item.isFeatured && <Star className="h-4 w-4 text-primary fill-primary" />}
@@ -614,6 +730,7 @@ export default function MenuItemsManagement() {
                 </Table>
               </CardContent>
             </Card>
+            </>
           )}
         </div>
       </AdminLayout>

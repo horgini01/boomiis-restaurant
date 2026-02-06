@@ -15,6 +15,7 @@ import { ChefsSpecials } from '@/components/ChefsSpecials';
 export default function Home() {
   const [email, setEmail] = useState('');
   const { data: featuredItems = [], isLoading: isFeaturedLoading } = trpc.menu.featured.useQuery();
+  const { data: featuredTestimonials = [] } = trpc.testimonials.getFeatured.useQuery();
   const { restaurantName, restaurantTagline } = useSettings();
   
   const subscribeMutation = trpc.newsletter.subscribe.useMutation({
@@ -203,35 +204,52 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  name: 'Sarah Johnson',
-                  review: 'The best African food I\'ve had in London! The jollof rice is absolutely incredible.',
-                  rating: 5,
-                },
-                {
-                  name: 'Michael Chen',
-                  review: 'Amazing flavors and generous portions. The staff are so friendly and welcoming.',
-                  rating: 5,
-                },
-                {
-                  name: 'Aisha Mohammed',
-                  review: 'Reminds me of home! Authentic taste and beautiful presentation. Highly recommend!',
-                  rating: 5,
-                },
-              ].map((testimonial, index) => (
-                <Card key={index} className="border-border/50 bg-background/50">
-                  <CardContent className="pt-6">
-                    <div className="flex gap-1 mb-4">
-                      {Array.from({ length: testimonial.rating }).map((_, i) => (
-                        <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground mb-4 italic">"{testimonial.review}"</p>
-                    <p className="font-semibold">{testimonial.name}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {featuredTestimonials && featuredTestimonials.length > 0 ? (
+                featuredTestimonials.map((testimonial: any) => (
+                  <Card key={testimonial.id} className="border-border/50 bg-background/50">
+                    <CardContent className="pt-6">
+                      <div className="flex gap-1 mb-4">
+                        {Array.from({ length: testimonial.rating }).map((_, i) => (
+                          <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                        ))}
+                      </div>
+                      <p className="text-muted-foreground mb-4 italic">"{testimonial.content}"</p>
+                      <p className="font-semibold">{testimonial.customerName}</p>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                // Fallback testimonials if none are featured in database
+                [
+                  {
+                    name: 'Sarah Johnson',
+                    review: 'The best African food I\'ve had in London! The jollof rice is absolutely incredible.',
+                    rating: 5,
+                  },
+                  {
+                    name: 'Michael Chen',
+                    review: 'Amazing flavors and generous portions. The staff are so friendly and welcoming.',
+                    rating: 5,
+                  },
+                  {
+                    name: 'Aisha Mohammed',
+                    review: 'Reminds me of home! Authentic taste and beautiful presentation. Highly recommend!',
+                    rating: 5,
+                  },
+                ].map((testimonial, index) => (
+                  <Card key={index} className="border-border/50 bg-background/50">
+                    <CardContent className="pt-6">
+                      <div className="flex gap-1 mb-4">
+                        {Array.from({ length: testimonial.rating }).map((_, i) => (
+                          <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                        ))}
+                      </div>
+                      <p className="text-muted-foreground mb-4 italic">"{testimonial.review}"</p>
+                      <p className="font-semibold">{testimonial.name}</p>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </section>

@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, customer_name, is_approved, is_featured, display_order FROM testimonials;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, customer_name, is_approved, is_featured, display_order FROM testimonials;",
+  "rows": [
+    {
+      "id": "1",
+      "customer_name": "John Smith",
+      "is_approved": "0",
+      "is_featured": "0",
+      "display_order": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcustomer_name\tis_approved\tis_featured\tdisplay_order\n1\tJohn Smith\t0\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

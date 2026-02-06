@@ -55,6 +55,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
     { path: '/admin/events', label: 'Events & Catering', icon: Calendar },
     { path: '/admin/reviews', label: 'Reviews', icon: Star },
+    { path: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
     { path: '/admin/gallery', label: 'Gallery', icon: Image },
     { path: '/admin/blog', label: 'Blog', icon: FileText },
     { path: '/admin/about-content', label: 'About Content', icon: BookOpen },

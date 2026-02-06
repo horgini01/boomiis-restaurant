@@ -765,6 +765,57 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    bulkUpdateMenuItems: protectedProcedure
+      .input(z.object({
+        itemIds: z.array(z.number()),
+        operation: z.enum(['priceChange', 'makeAvailable', 'makeUnavailable', 'markInStock', 'markOutOfStock']),
+        priceChangePercent: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { itemIds, operation, priceChangePercent } = input;
+
+        if (itemIds.length === 0) {
+          throw new Error('No items selected');
+        }
+
+        // Perform bulk operation based on type
+        switch (operation) {
+          case 'priceChange':
+            if (priceChangePercent === undefined) {
+              throw new Error('Price change percent is required');
+            }
+            // Get current items and update prices
+            const items = await db.select().from(menuItems).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`); 
+            for (const item of items) {
+              const currentPrice = parseFloat(item.price);
+              const newPrice = (currentPrice * (1 + priceChangePercent / 100)).toFixed(2);
+              await db.update(menuItems).set({ price: newPrice }).where(eq(menuItems.id, item.id));
+            }
+            break;
+          case 'makeAvailable':
+            await db.update(menuItems).set({ isAvailable: true }).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
+            break;
+          case 'makeUnavailable':
+            await db.update(menuItems).set({ isAvailable: false }).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
+            break;
+          case 'markInStock':
+            await db.update(menuItems).set({ outOfStock: false }).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
+            break;
+          case 'markOutOfStock':
+            await db.update(menuItems).set({ outOfStock: true }).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
+            break;
+        }
+
+        return { success: true, updatedCount: itemIds.length };
+      }),
+
     getOrders: protectedProcedure.query(async ({ ctx }) => {
       if (ctx.user.role !== 'admin') {
         throw new Error('Unauthorized');
@@ -2693,6 +2744,107 @@ export const appRouter = router({
         if (!db) throw new Error('Database not available');
 
         await db.delete(awards).where(eq(awards.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  // ==================== Testimonials Management ====================
+  testimonials: router({
+    getAll: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      const { testimonials } = await import('../drizzle/schema');
+      return await db.select().from(testimonials).where(eq(testimonials.isApproved, true)).orderBy(testimonials.displayOrder, testimonials.createdAt);
+    }),
+
+    getFeatured: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      const { testimonials } = await import('../drizzle/schema');
+      return await db.select().from(testimonials)
+        .where(sql`${testimonials.isApproved} = true AND ${testimonials.isFeatured} = true`)
+        .orderBy(testimonials.displayOrder, testimonials.createdAt)
+        .limit(6);
+    }),
+
+    getAllAdmin: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      const { testimonials } = await import('../drizzle/schema');
+      return await db.select().from(testimonials).orderBy(testimonials.createdAt);
+    }),
+
+    create: protectedProcedure
+      .input(z.object({
+        customerName: z.string(),
+        customerEmail: z.string().email().optional(),
+        content: z.string(),
+        rating: z.number().min(1).max(5),
+        isApproved: z.boolean().optional(),
+        isFeatured: z.boolean().optional(),
+        displayOrder: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        await db.insert(testimonials).values(input);
+        return { success: true };
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        customerName: z.string(),
+        customerEmail: z.string().email().optional(),
+        content: z.string(),
+        rating: z.number().min(1).max(5),
+        isApproved: z.boolean(),
+        isFeatured: z.boolean(),
+        displayOrder: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        const { id, ...data } = input;
+        await db.update(testimonials).set(data).where(eq(testimonials.id, id));
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        await db.delete(testimonials).where(eq(testimonials.id, input.id));
+        return { success: true };
+      }),
+
+    toggleApproval: protectedProcedure
+      .input(z.object({ id: z.number(), isApproved: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        await db.update(testimonials).set({ isApproved: input.isApproved }).where(eq(testimonials.id, input.id));
+        return { success: true };
+      }),
+
+    toggleFeatured: protectedProcedure
+      .input(z.object({ id: z.number(), isFeatured: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        await db.update(testimonials).set({ isFeatured: input.isFeatured }).where(eq(testimonials.id, input.id));
         return { success: true };
       }),
   }),

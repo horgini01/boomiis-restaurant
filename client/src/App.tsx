@@ -36,6 +36,7 @@ import NewsletterSubscribers from "./pages/admin/NewsletterSubscribers";
 import EmailCampaigns from "./pages/admin/EmailCampaigns";
 import SMSTemplates from "./pages/admin/SMSTemplates";
 import { ReviewsManagement } from "./pages/admin/ReviewsManagement";
+import TestimonialsManagement from "./pages/admin/Testimonials";
 import { GalleryManagement } from "./pages/admin/GalleryManagement";
 import { BlogManagement } from "./pages/admin/BlogManagement";
 import AboutContentManagement from "./pages/admin/AboutContentManagement";
@@ -81,6 +82,7 @@ function Router() {
       <Route path="/admin/newsletter-subscribers" component={NewsletterSubscribers} />
       <Route path="/admin/sms-templates" component={SMSTemplates} />
       <Route path="/admin/reviews" component={ReviewsManagement} />
+      <Route path="/admin/testimonials" component={TestimonialsManagement} />
       <Route path="/admin/gallery" component={GalleryManagement} />
       <Route path="/admin/blog" component={BlogManagement} />
       <Route path="/admin/about-content" component={AboutContentManagement} />

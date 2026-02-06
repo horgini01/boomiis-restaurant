@@ -354,6 +354,25 @@ export type MenuItemReview = typeof menuItemReviews.$inferSelect;
 export type InsertMenuItemReview = typeof menuItemReviews.$inferInsert;
 
 /**
+ * General restaurant testimonials (not tied to specific menu items)
+ */
+export const testimonials = mysqlTable("testimonials", {
+  id: int("id").autoincrement().primaryKey(),
+  customerName: varchar("customer_name", { length: 100 }).notNull(),
+  customerEmail: varchar("customer_email", { length: 320 }),
+  content: text("content").notNull(),
+  rating: int("rating").notNull(), // 1-5 stars
+  isApproved: boolean("is_approved").default(false).notNull(),
+  isFeatured: boolean("is_featured").default(false).notNull(), // Show on homepage
+  displayOrder: int("display_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Testimonial = typeof testimonials.$inferSelect;
+export type InsertTestimonial = typeof testimonials.$inferInsert;
+
+/**
  * About page content sections (hero, story, etc.)
  */
 export const aboutContent = mysqlTable("about_content", {
