@@ -229,6 +229,19 @@ export default function Home() {
                   ]
               } 
             />
+            
+            {/* Share Your Experience CTA */}
+            <div className="text-center mt-12">
+              <Link href="/submit-testimonial">
+                <Button size="lg" className="text-lg px-8 py-6">
+                  <Star className="mr-2 h-5 w-5" />
+                  Share Your Experience
+                </Button>
+              </Link>
+              <p className="text-sm text-muted-foreground mt-3">
+                We'd love to hear about your visit!
+              </p>
+            </div>
           </div>
         </section>
 

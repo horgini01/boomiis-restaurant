@@ -1354,3 +1354,9 @@
 ## Bug Fixes (User Report - Feb 6, 2026)
 - [x] Fix React key prop error in testimonials table
 - [x] Add unique key to fragment wrapper containing testimonial and response rows
+
+## Navigation Improvements (User Report - Feb 6, 2026)
+- [x] Verify testimonial submission page exists at /submit-testimonial
+- [x] Add testimonial submission link to main header navigation (as "Reviews")
+- [x] Add prominent "Share Your Experience" CTA on homepage after testimonials carousel
+- [x] Ensure testimonial form is easily discoverable for customers
