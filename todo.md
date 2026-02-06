@@ -1350,3 +1350,7 @@
 - [x] Test template creation and usage workflow
 - [x] Test email notifications with real testimonial responses
 - [x] Create vitest tests for templates and notifications (8 tests passing)
+
+## Bug Fixes (User Report - Feb 6, 2026)
+- [x] Fix React key prop error in testimonials table
+- [x] Add unique key to fragment wrapper containing testimonial and response rows

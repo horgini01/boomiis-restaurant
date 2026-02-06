@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -463,8 +463,8 @@ export default function TestimonialsManagement() {
                   </TableHeader>
                   <TableBody>
                     {testimonials?.map((testimonial: any) => (
-                      <>
-                      <TableRow key={testimonial.id}>
+                      <Fragment key={testimonial.id}>
+                      <TableRow>
                         <TableCell>
                           <button
                             onClick={() => handleToggleSelection(testimonial.id)}
@@ -652,7 +652,7 @@ export default function TestimonialsManagement() {
                           </div>
                         </TableCell>
                       </TableRow>
-                      </>
+                      </Fragment>
                     ))}
                   </TableBody>
                 </Table>
