@@ -1178,3 +1178,8 @@
 - [x] Add "Get Directions" button below Google Maps on Contact page
 - [x] Button opens Google Maps with directions to restaurant location
 - [x] Test button functionality
+
+## Google Maps API Duplicate Loading Bug
+- [x] Investigate why Google Maps API is being loaded multiple times on Blog page
+- [x] Fix the duplicate API loading issue
+- [x] Test to ensure error is resolved
