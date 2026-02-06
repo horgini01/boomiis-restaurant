@@ -27,6 +27,12 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeliveryZones, setShowDeliveryZones] = useState(true);
+  const [postcodeInput, setPostcodeInput] = useState('');
+  const [postcodeResult, setPostcodeResult] = useState<{
+    isValid: boolean;
+    message: string;
+    zone?: string;
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +51,106 @@ export default function Contact() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  // Postcode checker function
+  const checkPostcode = () => {
+    if (!postcodeInput.trim()) {
+      setPostcodeResult({
+        isValid: false,
+        message: 'Please enter a postcode',
+      });
+      return;
+    }
+
+    // Define delivery zones with their postcode prefixes
+    const deliveryZones = [
+      {
+        name: 'Torquay Area',
+        postcodes: ['TQ1', 'TQ2', 'TQ3', 'TQ4'],
+      },
+      {
+        name: 'Newton Abbot Area',
+        postcodes: ['TQ12'],
+      },
+      {
+        name: 'Teignmouth Area',
+        postcodes: ['TQ14'],
+      },
+      {
+        name: 'Exeter City',
+        postcodes: ['EX1', 'EX2', 'EX3', 'EX4'],
+      },
+      {
+        name: 'Dawlish Area',
+        postcodes: ['EX7'],
+      },
+    ];
+
+    // Extract postcode prefix (e.g., "TQ1" from "TQ1 2AB")
+    const postcodePrefix = postcodeInput.trim().split(' ')[0].toUpperCase();
+
+    // Find matching zone
+    const matchingZone = deliveryZones.find(zone =>
+      zone.postcodes.some(prefix => postcodePrefix.startsWith(prefix))
+    );
+
+    if (matchingZone) {
+      setPostcodeResult({
+        isValid: true,
+        message: '✓ Great news! We deliver to your area.',
+        zone: matchingZone.name,
+      });
+
+      // Highlight the matching zone on the map
+      highlightZone(matchingZone.name);
+    } else {
+      setPostcodeResult({
+        isValid: false,
+        message: 'Sorry, we don\'t currently deliver to this postcode. Please contact us for more information.',
+      });
+
+      // Reset all zone highlighting
+      resetZoneHighlighting();
+    }
+  };
+
+  // Highlight specific zone on map
+  const highlightZone = (zoneName: string) => {
+    const circles = (window as any).deliveryZoneCircles;
+    const zoneData = (window as any).deliveryZoneData;
+    
+    if (circles && zoneData) {
+      circles.forEach((circle: google.maps.Circle, index: number) => {
+        const zone = zoneData[index];
+        if (zone.name === zoneName) {
+          // Highlight matching zone
+          circle.setOptions({
+            strokeWeight: 4,
+            fillOpacity: 0.4,
+          });
+        } else {
+          // Dim other zones
+          circle.setOptions({
+            strokeWeight: 1,
+            fillOpacity: 0.1,
+          });
+        }
+      });
+    }
+  };
+
+  // Reset zone highlighting
+  const resetZoneHighlighting = () => {
+    const circles = (window as any).deliveryZoneCircles;
+    if (circles) {
+      circles.forEach((circle: google.maps.Circle) => {
+        circle.setOptions({
+          strokeWeight: 2,
+          fillOpacity: circle.get('originalOpacity') || 0.2,
+        });
+      });
+    }
   };
 
   return (
@@ -252,6 +358,90 @@ export default function Contact() {
                 </CardContent>
               </Card>
 
+              {/* Postcode Checker */}
+              <div className="mt-6 bg-card border border-border/50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  Check Delivery Availability
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Enter your postcode to see if we deliver to your area
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="e.g., TQ1 2AB or EX4 5CD"
+                    value={postcodeInput}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase();
+                      setPostcodeInput(value);
+                      if (!value) setPostcodeResult(null);
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        checkPostcode();
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button onClick={checkPostcode} className="px-6">
+                    Check
+                  </Button>
+                  {postcodeInput && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setPostcodeInput('');
+                        setPostcodeResult(null);
+                        // Reset zone highlighting
+                        const circles = (window as any).deliveryZoneCircles;
+                        if (circles) {
+                          circles.forEach((circle: google.maps.Circle) => {
+                            circle.setOptions({
+                              strokeWeight: 2,
+                              fillOpacity: circle.get('originalOpacity') || 0.2
+                            });
+                          });
+                        }
+                      }}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+                {postcodeResult && (
+                  <div className={`mt-4 p-4 rounded-lg border ${
+                    postcodeResult.isValid
+                      ? 'bg-green-500/10 border-green-500/50 text-green-600 dark:text-green-400'
+                      : 'bg-red-500/10 border-red-500/50 text-red-600 dark:text-red-400'
+                  }`}>
+                    <div className="flex items-start gap-2">
+                      {postcodeResult.isValid ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-shrink-0">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="15" y1="9" x2="9" y2="15"></line>
+                          <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                      )}
+                      <div>
+                        <p className="font-semibold">{postcodeResult.message}</p>
+                        {postcodeResult.zone && (
+                          <p className="text-sm mt-1 opacity-90">Delivery Zone: {postcodeResult.zone}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Google Maps */}
               <div className="mt-6 rounded-lg overflow-hidden border border-border/50" style={{ height: '400px' }}>
                 <MapView
@@ -339,6 +529,9 @@ export default function Contact() {
                         radius: zone.radius,
                       });
 
+                      // Store original opacity for reset functionality
+                      circle.set('originalOpacity', zone.opacity);
+
                       // Add info window for zone
                       const zoneInfoWindow = new google.maps.InfoWindow({
                         content: `
@@ -360,8 +553,9 @@ export default function Contact() {
                       circles.push(circle);
                     });
 
-                    // Store circles and map reference for toggle functionality
+                    // Store circles, zone data, and map reference for toggle and highlighting functionality
                     (window as any).deliveryZoneCircles = circles;
+                    (window as any).deliveryZoneData = deliveryZones;
                     (window as any).mapInstance = map;
                   }}
                 />

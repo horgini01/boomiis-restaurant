@@ -1207,3 +1207,13 @@
 - [x] Test delivery zone toggle button (show/hide functionality)
 - [x] Verify delivery zones display correctly with proper colors and transparency
 - [x] Verify phone numbers are clickable in Contact page and Footer
+
+## Postcode Checker Widget (User Request - Feb 6, 2026)
+- [x] Create postcode input field above map on Contact page
+- [x] Implement UK postcode format validation
+- [x] Add postcode prefix matching logic for delivery zones
+- [x] Implement visual zone highlighting when postcode matches
+- [x] Display success/error messages for delivery availability
+- [x] Add clear button to reset postcode checker
+- [x] Style postcode checker to match site design
+- [x] Test postcode checker with various UK postcodes
