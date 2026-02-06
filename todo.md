@@ -1335,3 +1335,18 @@
 - [x] Style admin responses to differentiate from customer testimonials
 - [x] Test response feature with multiple testimonials
 - [x] Create vitest tests for response functionality (5 tests passing)
+
+## Response Templates & Notifications (User Request - Feb 6, 2026)
+- [x] Create testimonial_response_templates table in schema
+- [x] Push database schema changes
+- [x] Create tRPC endpoints for response templates CRUD
+- [x] Build admin settings page for managing response templates
+- [x] Add template dropdown to testimonials response textarea
+- [x] Implement template insertion functionality
+- [x] Create email notification function for testimonial responses
+- [x] Update email templates list to include testimonial response notification
+- [x] Send email when admin adds/updates response to testimonial
+- [x] Include response text and view link in notification email
+- [x] Test template creation and usage workflow
+- [x] Test email notifications with real testimonial responses
+- [x] Create vitest tests for templates and notifications (8 tests passing)

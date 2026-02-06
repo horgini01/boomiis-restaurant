@@ -3014,6 +3014,16 @@ export const appRouter = router({
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         
+        // Get testimonial details before update
+        const testimonial = await db.select()
+          .from(testimonials)
+          .where(eq(testimonials.id, input.id))
+          .limit(1);
+        
+        if (testimonial.length === 0) {
+          throw new Error('Testimonial not found');
+        }
+        
         // Update admin response and timestamp
         await db.update(testimonials)
           .set({ 
@@ -3021,6 +3031,97 @@ export const appRouter = router({
             adminResponseDate: input.adminResponse ? new Date() : null,
           })
           .where(eq(testimonials.id, input.id));
+        
+        // Send email notification to customer if response was added/updated and customer has email
+        if (input.adminResponse && testimonial[0].customerEmail) {
+          const { sendTestimonialResponseEmail } = await import('./email');
+          await sendTestimonialResponseEmail({
+            id: testimonial[0].id,
+            customerName: testimonial[0].customerName,
+            customerEmail: testimonial[0].customerEmail,
+            content: testimonial[0].content,
+            rating: testimonial[0].rating,
+            adminResponse: input.adminResponse,
+          });
+        }
+        
+        return { success: true };
+      }),
+
+    // Response Templates Management
+    getTemplates: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      const { testimonialResponseTemplates } = await import('../drizzle/schema');
+      return await db.select()
+        .from(testimonialResponseTemplates)
+        .where(eq(testimonialResponseTemplates.isActive, true))
+        .orderBy(testimonialResponseTemplates.displayOrder);
+    }),
+
+    getAllTemplates: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+      const { testimonialResponseTemplates } = await import('../drizzle/schema');
+      return await db.select()
+        .from(testimonialResponseTemplates)
+        .orderBy(testimonialResponseTemplates.displayOrder);
+    }),
+
+    createTemplate: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1, 'Template name is required'),
+        content: z.string().min(1, 'Template content is required'),
+        displayOrder: z.number().default(0),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonialResponseTemplates } = await import('../drizzle/schema');
+        
+        await db.insert(testimonialResponseTemplates).values(input);
+        return { success: true };
+      }),
+
+    updateTemplate: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1, 'Template name is required'),
+        content: z.string().min(1, 'Template content is required'),
+        displayOrder: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonialResponseTemplates } = await import('../drizzle/schema');
+        
+        await db.update(testimonialResponseTemplates)
+          .set({
+            name: input.name,
+            content: input.content,
+            displayOrder: input.displayOrder,
+            isActive: input.isActive,
+          })
+          .where(eq(testimonialResponseTemplates.id, input.id));
+        
+        return { success: true };
+      }),
+
+    deleteTemplate: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonialResponseTemplates } = await import('../drizzle/schema');
+        
+        await db.delete(testimonialResponseTemplates)
+          .where(eq(testimonialResponseTemplates.id, input.id));
         
         return { success: true };
       }),

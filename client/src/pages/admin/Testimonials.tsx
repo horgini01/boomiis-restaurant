@@ -31,6 +31,7 @@ export default function TestimonialsManagement() {
   const [selectedTestimonials, setSelectedTestimonials] = useState<number[]>([]);
   const [respondingToId, setRespondingToId] = useState<number | null>(null);
   const [responseText, setResponseText] = useState<string>('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -43,6 +44,7 @@ export default function TestimonialsManagement() {
 
   const utils = trpc.useUtils();
   const { data: testimonials, isLoading } = trpc.testimonials.getAllAdmin.useQuery();
+  const { data: templates } = trpc.testimonials.getTemplates.useQuery();
 
   const createMutation = trpc.testimonials.create.useMutation({
     onSuccess: () => {
@@ -244,6 +246,17 @@ export default function TestimonialsManagement() {
   const handleCancelResponse = () => {
     setRespondingToId(null);
     setResponseText('');
+    setSelectedTemplate('');
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    if (templateId) {
+      const template = templates?.find(t => t.id.toString() === templateId);
+      if (template) {
+        setResponseText(template.content);
+      }
+    }
   };
 
   return (
@@ -548,6 +561,24 @@ export default function TestimonialsManagement() {
                             {respondingToId === testimonial.id ? (
                               <div className="space-y-3">
                                 <Label className="text-sm font-semibold">Admin Response</Label>
+                                {templates && templates.length > 0 && (
+                                  <div>
+                                    <Label htmlFor="template-select" className="text-xs text-muted-foreground">Quick Reply Template</Label>
+                                    <select
+                                      id="template-select"
+                                      value={selectedTemplate}
+                                      onChange={(e) => handleTemplateSelect(e.target.value)}
+                                      className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    >
+                                      <option value="">-- Select a template --</option>
+                                      {templates.map((template: any) => (
+                                        <option key={template.id} value={template.id.toString()}>
+                                          {template.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
                                 <Textarea
                                   value={responseText}
                                   onChange={(e) => setResponseText(e.target.value)}

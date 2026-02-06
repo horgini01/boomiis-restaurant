@@ -2088,3 +2088,139 @@ export async function sendTestimonialNotificationEmail(testimonial: {
     return false;
   }
 }
+
+// Send testimonial response notification to customer
+export async function sendTestimonialResponseEmail(testimonial: {
+  id: number;
+  customerName: string;
+  customerEmail: string | null;
+  content: string;
+  rating: number;
+  adminResponse: string;
+}) {
+  const resend = getResendClient();
+  if (!resend) {
+    console.warn('[Email] Resend client not available. Skipping testimonial response notification.');
+    return false;
+  }
+
+  if (!testimonial.customerEmail) {
+    console.warn('[Email] No customer email provided. Skipping testimonial response notification.');
+    return false;
+  }
+
+  try {
+    const baseUrl = ENV.baseUrl || 'http://localhost:3000';
+    const testimonialUrl = `${baseUrl}/#testimonials`;
+
+    // Generate star rating HTML
+    const stars = '★'.repeat(testimonial.rating) + '☆'.repeat(5 - testimonial.rating);
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Response to Your Testimonial</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+          <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f4f6; padding: 20px 0;">
+            <tr>
+              <td align="center">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding: 30px; background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">
+                        We've Responded to Your Testimonial!
+                      </h1>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 30px;">
+                      <p style="margin: 0 0 20px; font-size: 16px; color: #374151; line-height: 1.5;">
+                        Hi ${testimonial.customerName},
+                      </p>
+                      
+                      <p style="margin: 0 0 20px; font-size: 16px; color: #374151; line-height: 1.5;">
+                        Thank you for sharing your experience with us! We wanted to let you know that we've responded to your testimonial.
+                      </p>
+                      
+                      <!-- Original Testimonial -->
+                      <div style="background-color: #f9fafb; border-left: 4px solid #d97706; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                        <p style="margin: 0 0 10px; font-size: 14px; color: #6b7280; font-weight: 600;">Your Testimonial:</p>
+                        <p style="margin: 0 0 10px; font-size: 14px; color: #374151; font-style: italic;">
+                          "${testimonial.content}"
+                        </p>
+                        <p style="margin: 0; font-size: 18px; color: #d97706;">
+                          ${stars}
+                        </p>
+                      </div>
+                      
+                      <!-- Admin Response -->
+                      <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                        <p style="margin: 0 0 10px; font-size: 14px; color: #92400e; font-weight: 600;">Our Response:</p>
+                        <p style="margin: 0; font-size: 14px; color: #78350f; line-height: 1.6;">
+                          ${testimonial.adminResponse}
+                        </p>
+                      </div>
+                      
+                      <p style="margin: 20px 0 0; font-size: 16px; color: #374151; line-height: 1.5;">
+                        Your feedback helps us improve and serve you better. We look forward to welcoming you again soon!
+                      </p>
+                      
+                      <!-- CTA Button -->
+                      <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                        <tr>
+                          <td align="center" style="border-radius: 6px; background-color: #d97706;">
+                            <a href="${testimonialUrl}" style="display: inline-block; padding: 12px 30px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600;">
+                              View on Website
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 20px 30px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+                      <p style="margin: 0; font-size: 12px; color: #666666;">
+                        Boomiis Restaurant - Thank you for your feedback!
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const result = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: testimonial.customerEmail,
+      subject: `We've responded to your testimonial - Boomiis Restaurant`,
+      html,
+    });
+
+    await logEmail({
+      templateType: 'testimonial_response',
+      recipientEmail: testimonial.customerEmail,
+      recipientName: testimonial.customerName,
+      subject: `We've responded to your testimonial - Boomiis Restaurant`,
+      resendId: result.data?.id,
+      metadata: { testimonialId: testimonial.id },
+    });
+
+    console.log(`[Email] Testimonial response notification sent to ${testimonial.customerEmail}`);
+    return true;
+  } catch (error) {
+    console.error('[Email] Failed to send testimonial response notification:', error);
+    return false;
+  }
+}

@@ -375,6 +375,22 @@ export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = typeof testimonials.$inferInsert;
 
 /**
+ * Testimonial response templates for quick replies
+ */
+export const testimonialResponseTemplates = mysqlTable("testimonial_response_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(), // Template name (e.g., "Thank You", "Apology")
+  content: text("content").notNull(), // Template response text
+  displayOrder: int("display_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TestimonialResponseTemplate = typeof testimonialResponseTemplates.$inferSelect;
+export type InsertTestimonialResponseTemplate = typeof testimonialResponseTemplates.$inferInsert;
+
+/**
  * About page content sections (hero, story, etc.)
  */
 export const aboutContent = mysqlTable("about_content", {

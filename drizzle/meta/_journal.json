@@ -141,6 +141,13 @@
       "when": 1770413737952,
       "tag": "0019_odd_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1770414298237,
+      "tag": "0020_calm_shatterstar",
+      "breakpoints": true
     }
   ]
 }
