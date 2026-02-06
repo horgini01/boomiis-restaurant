@@ -24,6 +24,7 @@ const TEMPLATE_TYPES = [
   { value: 'order_ready_for_pickup', label: 'Order Ready for Pickup (Customer)' },
   { value: 'order_out_for_delivery', label: 'Order Out for Delivery (Customer)' },
   { value: 'order_completed', label: 'Order Completed (Customer)' },
+  { value: 'weekly_report', label: 'Weekly Report (Admin)' },
 ];
 
 const DEFAULT_TEMPLATES = {
@@ -146,6 +147,38 @@ const DEFAULT_TEMPLATES = {
 <p>We hope you enjoyed your meal! If you have any feedback or concerns, please don't hesitate to contact us.</p>
 
 <p>Thank you for your order!</p>`,
+  },
+  weekly_report: {
+    subject: '📊 Weekly Report - {startDate} to {endDate}',
+    headerColor: '#3b82f6',
+    footerText: 'Boomiis Restaurant Analytics',
+    bodyHtml: `<h2>Weekly Performance Summary</h2>
+<p><strong>Report Period:</strong> {startDate} to {endDate}</p>
+
+<h3>📈 Key Metrics</h3>
+<div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
+  <p><strong>Total Revenue:</strong> £{totalRevenue}</p>
+  <p><strong>Total Orders:</strong> {totalOrders}</p>
+  <p><strong>Average Order Value:</strong> £{avgOrderValue}</p>
+  <p><strong>Total Reservations:</strong> {totalReservations}</p>
+</div>
+
+<h3>🎯 Top Performers</h3>
+<p><strong>Best Selling Item:</strong> {topItem} ({topItemSales} sold)</p>
+<p><strong>Busiest Day:</strong> {busiestDay} ({busiestDayOrders} orders)</p>
+<p><strong>Peak Hour:</strong> {peakHour}</p>
+
+<h3>👥 Customer Insights</h3>
+<p><strong>New Customers:</strong> {newCustomers}</p>
+<p><strong>Repeat Customers:</strong> {repeatCustomers}</p>
+<p><strong>Repeat Rate:</strong> {repeatRate}</p>
+
+<h3>⚠️ Alerts</h3>
+<p><strong>Pending Testimonials:</strong> {pendingTestimonials}</p>
+<p><strong>Unconfirmed Reservations:</strong> {unconfirmedReservations}</p>
+<p><strong>Never Ordered Items:</strong> {neverOrderedCount}</p>
+
+<p style="margin-top: 20px;">View detailed analytics in the <a href="{dashboardUrl}">admin dashboard</a>.</p>`,
   },
 };
 

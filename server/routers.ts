@@ -6,7 +6,7 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getChefSpecialItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay, getAllAboutContent, getAllAboutValues, getAllTeamMembers, getAllAwards, getLegalPageByType, getAllLegalPages } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts, aboutContent, aboutValues, teamMembers, awards, legalPages } from '../drizzle/schema';
+import { orders as ordersTable, orders, orderItems as orderItemsTable, orderItems, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts, aboutContent, aboutValues, teamMembers, awards, legalPages, testimonials } from '../drizzle/schema';
 import { eq, sql, desc, and } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
@@ -873,6 +873,222 @@ export const appRouter = router({
           neverOrdered,
           avgItemsPerOrder,
           totalItemsSold: totalItems,
+        };
+      }),
+
+    reservationAnalytics: protectedProcedure
+      .input(z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get reservations in date range
+        const reservationsData = await db.select().from(reservations)
+          .where(and(
+            sql`DATE(${reservations.reservationDate}) >= ${input.startDate}`,
+            sql`DATE(${reservations.reservationDate}) <= ${input.endDate}`
+          ));
+
+        // Busiest days of week (0 = Sunday, 6 = Saturday)
+        const dayStats: Record<number, number> = {};
+        reservationsData.forEach(res => {
+          const day = new Date(res.reservationDate).getDay();
+          dayStats[day] = (dayStats[day] || 0) + 1;
+        });
+
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const busiestDays = dayNames.map((name, index) => ({
+          day: name,
+          count: dayStats[index] || 0,
+        }));
+
+        // Average party size
+        const totalGuests = reservationsData.reduce((sum, res) => sum + res.partySize, 0);
+        const avgPartySize = reservationsData.length > 0
+          ? (totalGuests / reservationsData.length).toFixed(1)
+          : '0';
+
+        // Status breakdown
+        const statusBreakdown = {
+          confirmed: reservationsData.filter(r => r.status === 'confirmed').length,
+          pending: reservationsData.filter(r => r.status === 'pending').length,
+          cancelled: reservationsData.filter(r => r.status === 'cancelled').length,
+          completed: reservationsData.filter(r => r.status === 'completed').length,
+        };
+
+        // Peak booking times (hour of day)
+        const hourStats: Record<number, number> = {};
+        reservationsData.forEach(res => {
+          const hour = new Date(res.reservationDate).getHours();
+          hourStats[hour] = (hourStats[hour] || 0) + 1;
+        });
+
+        const peakTimes = Object.entries(hourStats)
+          .map(([hour, count]) => ({
+            hour: `${hour}:00`,
+            count,
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
+
+        // Cancellation rate
+        const cancelledCount = statusBreakdown.cancelled;
+        const totalReservations = reservationsData.length;
+        const cancellationRate = totalReservations > 0
+          ? ((cancelledCount / totalReservations) * 100).toFixed(1)
+          : '0';
+
+        return {
+          busiestDays,
+          avgPartySize,
+          statusBreakdown,
+          peakTimes,
+          cancellationRate,
+          totalReservations,
+        };
+      }),
+
+    // Generate weekly report data
+    generateWeeklyReport: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Calculate date range (last 7 days)
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+
+        // Get orders
+        const ordersData = await db.select().from(orders)
+          .where(and(
+            sql`DATE(${orders.createdAt}) >= ${startDateStr}`,
+            sql`DATE(${orders.createdAt}) <= ${endDateStr}`,
+            eq(orders.paymentStatus, 'paid')
+          ));
+
+        // Calculate metrics
+        const totalRevenue = ordersData.reduce((sum, o) => sum + parseFloat(o.total), 0);
+        const totalOrders = ordersData.length;
+        const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : '0.00';
+
+        // Get reservations
+        const reservationsData = await db.select().from(reservations)
+          .where(and(
+            sql`DATE(${reservations.createdAt}) >= ${startDateStr}`,
+            sql`DATE(${reservations.createdAt}) <= ${endDateStr}`
+          ));
+
+        // Get order items for top item
+        const orderItemsData = await db.select().from(orderItems)
+          .innerJoin(orders, eq(orderItems.orderId, orders.id))
+          .innerJoin(menuItems, eq(orderItems.menuItemId, menuItems.id))
+          .where(and(
+            sql`DATE(${orders.createdAt}) >= ${startDateStr}`,
+            sql`DATE(${orders.createdAt}) <= ${endDateStr}`,
+            eq(orders.paymentStatus, 'paid')
+          ));
+
+        // Calculate top item
+        const itemSales: Record<string, { name: string; quantity: number }> = {};
+        orderItemsData.forEach(item => {
+          const itemName = item.menu_items.name;
+          if (!itemSales[itemName]) {
+            itemSales[itemName] = { name: itemName, quantity: 0 };
+          }
+          itemSales[itemName].quantity += item.order_items.quantity;
+        });
+
+        const topItemData = Object.values(itemSales).sort((a, b) => b.quantity - a.quantity)[0];
+        const topItem = topItemData ? topItemData.name : 'N/A';
+        const topItemSales = topItemData ? topItemData.quantity : 0;
+
+        // Calculate busiest day
+        const dayCounts: Record<string, number> = {};
+        ordersData.forEach(order => {
+          const day = new Date(order.createdAt).toLocaleDateString('en-US', { weekday: 'long' });
+          dayCounts[day] = (dayCounts[day] || 0) + 1;
+        });
+
+        const busiestDayData = Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0];
+        const busiestDay = busiestDayData ? busiestDayData[0] : 'N/A';
+        const busiestDayOrders = busiestDayData ? busiestDayData[1] : 0;
+
+        // Calculate peak hour
+        const hourCounts: Record<number, number> = {};
+        ordersData.forEach(order => {
+          const hour = new Date(order.createdAt).getHours();
+          hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+        });
+
+        const peakHourData = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0];
+        const peakHour = peakHourData ? `${peakHourData[0]}:00` : 'N/A';
+
+        // Get customer insights
+        const customerInsights = await db.select({
+          customerEmail: orders.customerEmail,
+          orderCount: sql<number>`COUNT(*)`,
+        })
+          .from(orders)
+          .where(and(
+            sql`DATE(${orders.createdAt}) >= ${startDateStr}`,
+            sql`DATE(${orders.createdAt}) <= ${endDateStr}`,
+            eq(orders.paymentStatus, 'paid')
+          ))
+          .groupBy(orders.customerEmail);
+
+        const newCustomers = customerInsights.filter(c => c.orderCount === 1).length;
+        const repeatCustomers = customerInsights.filter(c => c.orderCount > 1).length;
+        const repeatRate = customerInsights.length > 0 
+          ? `${((repeatCustomers / customerInsights.length) * 100).toFixed(1)}%`
+          : '0%';
+
+        // Get alerts
+        const pendingTestimonials = await db.select({ count: sql<number>`COUNT(*)` })
+          .from(testimonials)
+          .where(eq(testimonials.isApproved, false));
+
+        const unconfirmedReservations = await db.select({ count: sql<number>`COUNT(*)` })
+          .from(reservations)
+          .where(eq(reservations.status, 'pending'));
+
+        const allMenuItems = await db.select().from(menuItems);
+        const orderedItemIds = new Set(orderItemsData.map(item => item.order_items.menuItemId));
+        const neverOrderedCount = allMenuItems.filter(item => !orderedItemIds.has(item.id)).length;
+
+        return {
+          startDate: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          endDate: endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          totalRevenue: totalRevenue.toFixed(2),
+          totalOrders,
+          avgOrderValue,
+          totalReservations: reservationsData.length,
+          topItem,
+          topItemSales,
+          busiestDay,
+          busiestDayOrders,
+          peakHour,
+          newCustomers,
+          repeatCustomers,
+          repeatRate,
+          pendingTestimonials: pendingTestimonials[0]?.count || 0,
+          unconfirmedReservations: unconfirmedReservations[0]?.count || 0,
+          neverOrderedCount,
+          dashboardUrl: `${process.env.BASE_URL}/admin/dashboard`,
         };
       }),
 

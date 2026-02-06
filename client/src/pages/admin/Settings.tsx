@@ -7,12 +7,13 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Mail, Save } from 'lucide-react';
+import { Loader2, Mail, Save, Send } from 'lucide-react';
 
 export default function Settings() {
   const utils = trpc.useUtils();
   const { data: settings, isLoading } = trpc.admin.getSettings.useQuery();
   const [dailyEmailEnabled, setDailyEmailEnabled] = useState(false);
+  const [isSendingReport, setIsSendingReport] = useState(false);
 
   // Update local state when settings load
   if (settings && !isLoading) {
@@ -109,6 +110,56 @@ export default function Settings() {
                       </>
                     )}
                   </Button>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="space-y-3">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-base font-medium">
+                        Weekly Performance Report
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Send a comprehensive weekly report to your admin email with revenue, orders, customer insights, and alerts.
+                        Uses the customizable "Weekly Report" email template.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={async () => {
+                        setIsSendingReport(true);
+                        try {
+                          const response = await fetch('/api/send-weekly-report', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                          });
+                          const data = await response.json();
+                          if (response.ok) {
+                            toast.success('Weekly report sent successfully!');
+                          } else {
+                            toast.error(data.error || 'Failed to send report');
+                          }
+                        } catch (error: any) {
+                          toast.error('Failed to send report: ' + error.message);
+                        } finally {
+                          setIsSendingReport(false);
+                        }
+                      }}
+                      disabled={isSendingReport}
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
+                      {isSendingReport ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending Report...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" />
+                          Send Weekly Report Now
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

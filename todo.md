@@ -1405,3 +1405,26 @@
 - [ ] E1: Improve chart colors for dark mode
 - [ ] E2: Interactive tooltips with drill-down capability
 - [ ] E3: Dashboard widgets customization (drag-and-drop, show/hide)
+
+## Reservation Analytics & Email Reports (User Request - Feb 6, 2026)
+
+### Reservation Analytics Tab
+- [x] Create backend procedure for reservation analytics
+- [x] Calculate busiest days of week with bar chart data
+- [x] Calculate average party size
+- [x] Calculate reservation status breakdown (confirmed/pending/cancelled/completed)
+- [x] Identify peak booking times
+- [x] Calculate cancellation rate
+- [x] Add Reservation Analytics tab to Analytics page
+- [x] Create visualizations with charts (busiest days, peak times, status breakdown)
+
+### Scheduled Email Reports
+- [x] Add "Weekly Report" template type to existing email template system
+- [x] Create default weekly report template with variables (revenue, orders, customers, alerts)
+- [x] Implement backend procedure to generate report data (generateWeeklyReport)
+- [x] Create backend API endpoint /api/send-weekly-report
+- [x] Add "Send Weekly Report Now" button in Settings page
+- [x] Integrate with existing email template editor for customization
+- [ ] Create cron job to send weekly reports every Monday (future enhancement)
+- [x] Manual trigger implemented (Option A - MVP approach)
+- [x] Create vitest tests for both features (10 tests passing: 5 for reservation analytics, 5 for weekly report generation)
