@@ -3,6 +3,7 @@ import { SEO } from '@/components/SEO';
 import { MapView } from '@/components/Map';
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -582,14 +583,7 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-black/95 border-t border-border/50 py-12">
-        <div className="container">
-          <div className="text-center text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Boomiis Restaurant. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
       </div>
     </>
   );

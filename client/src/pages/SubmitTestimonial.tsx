@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSettings } from '@/hooks/useSettings';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { SEO } from '@/components/SEO';
 
 export default function SubmitTestimonial() {
   const { restaurantName } = useSettings();
@@ -45,29 +48,16 @@ export default function SubmitTestimonial() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container flex h-16 items-center justify-between">
-          <a href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-primary">{restaurantName}</span>
-          </a>
-          <nav className="flex gap-6">
-            <a href="/" className="text-sm font-medium hover:text-primary transition-colors">
-              Home
-            </a>
-            <a href="/menu" className="text-sm font-medium hover:text-primary transition-colors">
-              Menu
-            </a>
-            <a href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
-              Contact
-            </a>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Share Your Experience"
+        description={`Share your dining experience at ${restaurantName}. Your feedback helps us improve and lets others know what to expect.`}
+        url="/submit-testimonial"
+      />
+      <Header />
 
       {/* Main Content */}
-      <main className="container py-12">
+      <main className="flex-1 container py-12">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4">Share Your Experience</h1>
@@ -207,12 +197,7 @@ export default function SubmitTestimonial() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-12 py-8">
-        <div className="container text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} {restaurantName}. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

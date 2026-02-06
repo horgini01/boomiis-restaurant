@@ -1360,3 +1360,10 @@
 - [x] Add testimonial submission link to main header navigation (as "Reviews")
 - [x] Add prominent "Share Your Experience" CTA on homepage after testimonials carousel
 - [x] Ensure testimonial form is easily discoverable for customers
+
+## Header/Footer Consistency (User Report - Feb 6, 2026)
+- [x] Audit reviews (testimonial submission) page for header/footer consistency
+- [x] Ensure reviews page uses standard Header and Footer components
+- [x] Audit contact page for footer links alignment
+- [x] Fix contact page footer to match other pages
+- [x] Verify all navigation links work properly across all pages
