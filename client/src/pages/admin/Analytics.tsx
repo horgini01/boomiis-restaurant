@@ -443,7 +443,7 @@ export default function Analytics() {
                         <ResponsiveContainer width="100%" height={300}>
                           <BarChart data={menuPerformance.categoryRevenue}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                            <XAxis dataKey="category" stroke="#888" />
+                            <XAxis dataKey="name" stroke="#888" />
                             <YAxis stroke="#888" />
                             <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
                             <Bar dataKey="revenue" fill="#10b981" name="Revenue (£)" />

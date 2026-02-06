@@ -1428,3 +1428,7 @@
 - [ ] Create cron job to send weekly reports every Monday (future enhancement)
 - [x] Manual trigger implemented (Option A - MVP approach)
 - [x] Create vitest tests for both features (10 tests passing: 5 for reservation analytics, 5 for weekly report generation)
+
+## Bug Fixes (User Report - Feb 6 - Analytics Chart Labels)
+- [x] Fix missing category names on Revenue by Category chart X-axis in Menu Performance tab (changed dataKey from 'category' to 'name')
+- [x] Verify all chart labels display correctly
