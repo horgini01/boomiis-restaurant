@@ -3002,6 +3002,28 @@ export const appRouter = router({
         
         return { success: true, count: input.ids.length };
       }),
+
+    updateResponse: protectedProcedure
+      .input(z.object({ 
+        id: z.number(),
+        adminResponse: z.string().min(1, 'Response cannot be empty').optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        
+        // Update admin response and timestamp
+        await db.update(testimonials)
+          .set({ 
+            adminResponse: input.adminResponse || null,
+            adminResponseDate: input.adminResponse ? new Date() : null,
+          })
+          .where(eq(testimonials.id, input.id));
+        
+        return { success: true };
+      }),
   }),
 
   // ==================== Admin: Legal Pages Management ====================

@@ -29,6 +29,8 @@ export default function TestimonialsManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<any>(null);
   const [selectedTestimonials, setSelectedTestimonials] = useState<number[]>([]);
+  const [respondingToId, setRespondingToId] = useState<number | null>(null);
+  const [responseText, setResponseText] = useState<string>('');
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -131,6 +133,20 @@ export default function TestimonialsManagement() {
     },
   });
 
+  const updateResponseMutation = trpc.testimonials.updateResponse.useMutation({
+    onSuccess: () => {
+      toast.success('Response updated successfully');
+      utils.testimonials.getAllAdmin.invalidate();
+      utils.testimonials.getAll.invalidate();
+      utils.testimonials.getFeatured.invalidate();
+      setRespondingToId(null);
+      setResponseText('');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to update response');
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       customerName: '',
@@ -211,6 +227,23 @@ export default function TestimonialsManagement() {
     if (confirm(`Are you sure you want to reject and delete ${selectedTestimonials.length} testimonial(s)?`)) {
       bulkRejectMutation.mutate({ ids: selectedTestimonials });
     }
+  };
+
+  const handleStartResponse = (testimonial: any) => {
+    setRespondingToId(testimonial.id);
+    setResponseText(testimonial.adminResponse || '');
+  };
+
+  const handleSaveResponse = (id: number) => {
+    updateResponseMutation.mutate({ 
+      id, 
+      adminResponse: responseText.trim() || undefined 
+    });
+  };
+
+  const handleCancelResponse = () => {
+    setRespondingToId(null);
+    setResponseText('');
   };
 
   return (
@@ -417,6 +450,7 @@ export default function TestimonialsManagement() {
                   </TableHeader>
                   <TableBody>
                     {testimonials?.map((testimonial: any) => (
+                      <>
                       <TableRow key={testimonial.id}>
                         <TableCell>
                           <button
@@ -507,6 +541,87 @@ export default function TestimonialsManagement() {
                           </div>
                         </TableCell>
                       </TableRow>
+                      {/* Admin Response Row */}
+                      <TableRow key={`${testimonial.id}-response`} className="bg-muted/30">
+                        <TableCell colSpan={8}>
+                          <div className="py-2 px-4">
+                            {respondingToId === testimonial.id ? (
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold">Admin Response</Label>
+                                <Textarea
+                                  value={responseText}
+                                  onChange={(e) => setResponseText(e.target.value)}
+                                  placeholder="Write your response to this testimonial..."
+                                  rows={3}
+                                  className="w-full"
+                                />
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSaveResponse(testimonial.id)}
+                                    disabled={updateResponseMutation.isPending}
+                                  >
+                                    {updateResponseMutation.isPending ? (
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : null}
+                                    Save Response
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCancelResponse}
+                                    disabled={updateResponseMutation.isPending}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  {testimonial.adminResponse && (
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        if (confirm('Remove this response?')) {
+                                          updateResponseMutation.mutate({ id: testimonial.id, adminResponse: undefined });
+                                        }
+                                      }}
+                                      disabled={updateResponseMutation.isPending}
+                                    >
+                                      Remove Response
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  {testimonial.adminResponse ? (
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-semibold text-primary">Admin Response:</span>
+                                        {testimonial.adminResponseDate && (
+                                          <span className="text-xs text-muted-foreground">
+                                            {new Date(testimonial.adminResponseDate).toLocaleDateString()}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-sm text-muted-foreground italic">{testimonial.adminResponse}</p>
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground italic">No response yet</p>
+                                  )}
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleStartResponse(testimonial)}
+                                >
+                                  {testimonial.adminResponse ? 'Edit Response' : 'Add Response'}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      </>
                     ))}
                   </TableBody>
                 </Table>

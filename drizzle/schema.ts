@@ -365,6 +365,8 @@ export const testimonials = mysqlTable("testimonials", {
   isApproved: boolean("is_approved").default(false).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(), // Show on homepage
   displayOrder: int("display_order").default(0).notNull(),
+  adminResponse: text("admin_response"), // Admin's public reply to testimonial
+  adminResponseDate: timestamp("admin_response_date"), // When admin responded
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

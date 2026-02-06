@@ -10,6 +10,8 @@ interface Testimonial {
   content: string;
   rating: number;
   customerPhoto?: string | null;
+  adminResponse?: string | null;
+  adminResponseDate?: Date | null;
 }
 
 interface TestimonialsCarouselProps {
@@ -82,6 +84,28 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
                   <p className="text-muted-foreground mb-6 italic flex-1 line-clamp-4">
                     "{testimonial.content}"
                   </p>
+                  
+                  {/* Admin Response */}
+                  {testimonial.adminResponse && (
+                    <div className="mt-4 pt-4 border-t border-border/50">
+                      <div className="flex items-start gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary font-bold text-sm">A</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-primary mb-1">Restaurant Response</p>
+                          <p className="text-sm text-muted-foreground italic">
+                            {testimonial.adminResponse}
+                          </p>
+                          {testimonial.adminResponseDate && (
+                            <p className="text-xs text-muted-foreground/70 mt-1">
+                              {new Date(testimonial.adminResponseDate).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Customer Info */}
                   <div className="flex items-center gap-3 mt-auto">
