@@ -449,6 +449,433 @@ export const appRouter = router({
       };
     }),
 
+    todaySnapshot: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterdayStart = new Date(todayStart);
+      yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+      // Today's paid orders
+      const todayOrders = await db.select().from(orders)
+        .where(and(
+          eq(orders.paymentStatus, 'paid'),
+          sql`${orders.createdAt} >= ${todayStart.toISOString()}`
+        ));
+
+      // Yesterday's paid orders
+      const yesterdayOrders = await db.select().from(orders)
+        .where(and(
+          eq(orders.paymentStatus, 'paid'),
+          sql`${orders.createdAt} >= ${yesterdayStart.toISOString()} AND ${orders.createdAt} < ${todayStart.toISOString()}`
+        ));
+
+      // Today's reservations
+      const todayReservations = await db.select().from(reservations)
+        .where(sql`${reservations.reservationDate} >= ${todayStart.toISOString()}`);
+
+      // Yesterday's reservations
+      const yesterdayReservations = await db.select().from(reservations)
+        .where(sql`${reservations.reservationDate} >= ${yesterdayStart.toISOString()} AND ${reservations.reservationDate} < ${todayStart.toISOString()}`);
+
+      const todayRevenue = todayOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+      const yesterdayRevenue = yesterdayOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+
+      // Calculate percentage changes
+      const revenueChange = yesterdayRevenue > 0 
+        ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(1)
+        : todayRevenue > 0 ? '100' : '0';
+      
+      const ordersChange = yesterdayOrders.length > 0
+        ? ((todayOrders.length - yesterdayOrders.length) / yesterdayOrders.length * 100).toFixed(1)
+        : todayOrders.length > 0 ? '100' : '0';
+
+      const reservationsChange = yesterdayReservations.length > 0
+        ? ((todayReservations.length - yesterdayReservations.length) / yesterdayReservations.length * 100).toFixed(1)
+        : todayReservations.length > 0 ? '100' : '0';
+
+      // Upcoming reservations (next 2 hours)
+      const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      const upcomingReservations = await db.select().from(reservations)
+        .where(and(
+          sql`${reservations.reservationDate} >= ${now.toISOString()}`,
+          sql`${reservations.reservationDate} <= ${twoHoursFromNow.toISOString()}`,
+          eq(reservations.status, 'confirmed')
+        ))
+        .limit(5);
+
+      return {
+        today: {
+          revenue: todayRevenue.toFixed(2),
+          orders: todayOrders.length,
+          reservations: todayReservations.length,
+        },
+        yesterday: {
+          revenue: yesterdayRevenue.toFixed(2),
+          orders: yesterdayOrders.length,
+          reservations: yesterdayReservations.length,
+        },
+        changes: {
+          revenue: revenueChange,
+          orders: ordersChange,
+          reservations: reservationsChange,
+        },
+        upcomingReservations: upcomingReservations.map(r => ({
+          id: r.id,
+          customerName: r.customerName,
+          partySize: r.partySize,
+          reservationDate: r.reservationDate,
+        })),
+      };
+    }),
+
+    alerts: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      // Import testimonials table
+      const { testimonials } = await import('../drizzle/schema');
+
+      // Pending testimonials
+      const pendingTestimonials = await db.select().from(testimonials)
+        .where(eq(testimonials.isApproved, false));
+
+      // Unconfirmed reservations from last 24 hours
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const unconfirmedReservations = await db.select().from(reservations)
+        .where(and(
+          eq(reservations.status, 'pending'),
+          sql`${reservations.createdAt} >= ${yesterday.toISOString()}`
+        ));
+
+      return {
+        pendingTestimonials: pendingTestimonials.length,
+        unconfirmedReservations: unconfirmedReservations.length,
+      };
+    }),
+
+    recentActivity: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const { testimonials } = await import('../drizzle/schema');
+
+      // Get recent orders (last 10)
+      const recentOrders = await db.select({
+        id: orders.id,
+        type: sql<string>`'order'`,
+        description: sql<string>`CONCAT('New order #', ${orders.id})`,
+        createdAt: orders.createdAt,
+      }).from(orders)
+        .orderBy(desc(orders.createdAt))
+        .limit(5);
+
+      // Get recent reservations (last 5)
+      const recentReservations = await db.select({
+        id: reservations.id,
+        type: sql<string>`'reservation'`,
+        description: sql<string>`CONCAT('Reservation for ', ${reservations.customerName})`,
+        createdAt: reservations.createdAt,
+      }).from(reservations)
+        .orderBy(desc(reservations.createdAt))
+        .limit(5);
+
+      // Get recent testimonials (last 5)
+      const recentTestimonials = await db.select({
+        id: testimonials.id,
+        type: sql<string>`'testimonial'`,
+        description: sql<string>`CONCAT('Testimonial from ', ${testimonials.customerName})`,
+        createdAt: testimonials.createdAt,
+      }).from(testimonials)
+        .orderBy(desc(testimonials.createdAt))
+        .limit(5);
+
+      // Combine and sort all activities
+      const allActivities = [...recentOrders, ...recentReservations, ...recentTestimonials]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 10);
+
+      return allActivities;
+    }),
+
+    statsWithTrends: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') {
+        throw new Error('Unauthorized');
+      }
+
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+      // Current week stats
+      const thisWeekOrders = await db.select().from(orders)
+        .where(and(
+          eq(orders.paymentStatus, 'paid'),
+          sql`${orders.createdAt} >= ${weekAgo.toISOString()}`
+        ));
+
+      // Previous week stats
+      const lastWeekOrders = await db.select().from(orders)
+        .where(and(
+          eq(orders.paymentStatus, 'paid'),
+          sql`${orders.createdAt} >= ${twoWeeksAgo.toISOString()} AND ${orders.createdAt} < ${weekAgo.toISOString()}`
+        ));
+
+      const thisWeekRevenue = thisWeekOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+      const lastWeekRevenue = lastWeekOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+
+      // Calculate trends
+      const revenueTrend = lastWeekRevenue > 0
+        ? ((thisWeekRevenue - lastWeekRevenue) / lastWeekRevenue * 100).toFixed(1)
+        : thisWeekRevenue > 0 ? '100' : '0';
+
+      const ordersTrend = lastWeekOrders.length > 0
+        ? ((thisWeekOrders.length - lastWeekOrders.length) / lastWeekOrders.length * 100).toFixed(1)
+        : thisWeekOrders.length > 0 ? '100' : '0';
+
+      // Current counts
+      const menuItemsResult = await db.select().from(menuItems);
+      const pendingOrdersResult = await db.select().from(orders).where(eq(orders.status, 'pending'));
+      const pendingReservationsResult = await db.select().from(reservations).where(eq(reservations.status, 'pending'));
+      const completedOrders = await db.select().from(orders).where(eq(orders.status, 'completed'));
+      const totalRevenue = completedOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+
+      return {
+        menuItemsCount: menuItemsResult.length,
+        pendingOrdersCount: pendingOrdersResult.length,
+        pendingReservationsCount: pendingReservationsResult.length,
+        totalRevenue: totalRevenue.toFixed(2),
+        trends: {
+          revenue: revenueTrend,
+          orders: ordersTrend,
+        },
+      };
+    }),
+
+    customerInsights: protectedProcedure
+      .input(z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get paid orders in date range
+        const paidOrders = await db.select().from(orders)
+          .where(and(
+            eq(orders.paymentStatus, 'paid'),
+            sql`${orders.createdAt} >= ${input.startDate}`,
+            sql`${orders.createdAt} <= ${input.endDate}`
+          ));
+
+        // Calculate unique customers
+        const uniqueCustomers = new Set(paidOrders.map(o => o.customerEmail?.toLowerCase()).filter(Boolean));
+
+        // Calculate repeat customers
+        const customerOrderCounts: Record<string, number> = {};
+        paidOrders.forEach(order => {
+          const email = order.customerEmail?.toLowerCase();
+          if (email) {
+            customerOrderCounts[email] = (customerOrderCounts[email] || 0) + 1;
+          }
+        });
+
+        const repeatCustomers = Object.values(customerOrderCounts).filter(count => count > 1).length;
+        const repeatRate = uniqueCustomers.size > 0 
+          ? (repeatCustomers / uniqueCustomers.size * 100).toFixed(1)
+          : '0';
+
+        // Calculate total revenue and average customer lifetime value
+        const totalRevenue = paidOrders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+        const avgLifetimeValue = uniqueCustomers.size > 0
+          ? (totalRevenue / uniqueCustomers.size).toFixed(2)
+          : '0.00';
+
+        // Top 10 customers by total spend
+        const customerSpending: Record<string, { email: string; name: string; total: number; orders: number }> = {};
+        paidOrders.forEach(order => {
+          const email = order.customerEmail?.toLowerCase();
+          if (email) {
+            if (!customerSpending[email]) {
+              customerSpending[email] = {
+                email: order.customerEmail || '',
+                name: order.customerName || 'Unknown',
+                total: 0,
+                orders: 0,
+              };
+            }
+            customerSpending[email].total += parseFloat(order.total);
+            customerSpending[email].orders += 1;
+          }
+        });
+
+        const topCustomers = Object.values(customerSpending)
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 10)
+          .map(c => ({
+            ...c,
+            total: c.total.toFixed(2),
+          }));
+
+        // New vs returning customer ratio
+        const newCustomers = uniqueCustomers.size - repeatCustomers;
+
+        return {
+          totalCustomers: uniqueCustomers.size,
+          repeatCustomers,
+          repeatRate,
+          avgLifetimeValue,
+          topCustomers,
+          newCustomers,
+          totalOrders: paidOrders.length,
+          totalRevenue: totalRevenue.toFixed(2),
+        };
+      }),
+
+    menuPerformance: protectedProcedure
+      .input(z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get paid orders in date range
+        const paidOrders = await db.select().from(orders)
+          .where(and(
+            eq(orders.paymentStatus, 'paid'),
+            sql`${orders.createdAt} >= ${input.startDate}`,
+            sql`${orders.createdAt} <= ${input.endDate}`
+          ));
+
+        // Import orderItems table
+        const { orderItems: orderItemsTable } = await import('../drizzle/schema');
+
+        // Get all menu items with categories
+        const allMenuItems = await db.select({
+          id: menuItems.id,
+          name: menuItems.name,
+          price: menuItems.price,
+          categoryId: menuItems.categoryId,
+          categoryName: menuCategories.name,
+        })
+        .from(menuItems)
+        .leftJoin(menuCategories, eq(menuItems.categoryId, menuCategories.id));
+
+        // Get order items for these orders
+        const orderIds = paidOrders.map(o => o.id);
+        const orderItemsData = orderIds.length > 0
+          ? await db.select().from(orderItemsTable)
+              .where(sql`${orderItemsTable.orderId} IN (${sql.join(orderIds.map(id => sql`${id}`), sql`, `)})`)
+          : [];
+
+        // Calculate item performance
+        const itemStats: Record<number, { name: string; category: string; quantity: number; revenue: number }> = {};
+        
+        orderItemsData.forEach(item => {
+          const menuItem = allMenuItems.find(mi => mi.id === item.menuItemId);
+          if (menuItem) {
+            if (!itemStats[item.menuItemId]) {
+              itemStats[item.menuItemId] = {
+                name: menuItem.name,
+                category: menuItem.categoryName || 'Uncategorized',
+                quantity: 0,
+                revenue: 0,
+              };
+            }
+            itemStats[item.menuItemId].quantity += item.quantity;
+            itemStats[item.menuItemId].revenue += parseFloat(item.price.toString()) * item.quantity;
+          }
+        });
+
+        // Calculate category revenue
+        const categoryRevenue: Record<string, number> = {};
+        Object.values(itemStats).forEach(item => {
+          categoryRevenue[item.category] = (categoryRevenue[item.category] || 0) + item.revenue;
+        });
+
+        const categoryData = Object.entries(categoryRevenue)
+          .map(([name, revenue]) => ({
+            name,
+            revenue: parseFloat(revenue.toFixed(2)),
+          }))
+          .sort((a, b) => b.revenue - a.revenue);
+
+        // Top 10 items by revenue
+        const topItems = Object.entries(itemStats)
+          .map(([id, data]) => ({
+            id: parseInt(id),
+            ...data,
+            revenue: parseFloat(data.revenue.toFixed(2)),
+          }))
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 10);
+
+        // Bottom 10 items by revenue (that were ordered at least once)
+        const bottomItems = Object.entries(itemStats)
+          .map(([id, data]) => ({
+            id: parseInt(id),
+            ...data,
+            revenue: parseFloat(data.revenue.toFixed(2)),
+          }))
+          .sort((a, b) => a.revenue - b.revenue)
+          .slice(0, 10);
+
+        // Items never ordered
+        const orderedItemIds = new Set(Object.keys(itemStats).map(Number));
+        const neverOrdered = allMenuItems
+          .filter(item => !orderedItemIds.has(item.id))
+          .map(item => ({
+            id: item.id,
+            name: item.name,
+            category: item.categoryName || 'Uncategorized',
+          }))
+          .slice(0, 20);
+
+        // Average items per order
+        const totalItems = orderItemsData.reduce((sum, item) => sum + item.quantity, 0);
+        const avgItemsPerOrder = paidOrders.length > 0
+          ? (totalItems / paidOrders.length).toFixed(1)
+          : '0';
+
+        return {
+          categoryRevenue: categoryData,
+          topItems,
+          bottomItems,
+          neverOrdered,
+          avgItemsPerOrder,
+          totalItemsSold: totalItems,
+        };
+      }),
+
     createCategory: protectedProcedure
       .input(z.object({
         name: z.string(),

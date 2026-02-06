@@ -1367,3 +1367,41 @@
 - [x] Audit contact page for footer links alignment
 - [x] Fix contact page footer to match other pages
 - [x] Verify all navigation links work properly across all pages
+
+## Dashboard & Analytics Overhaul (User Request - Feb 6, 2026) - Priority 1-3 Complete
+
+### A. Enhanced Dashboard ✅
+- [x] A1: Today's Snapshot Card (today's revenue, orders, reservations with yesterday comparison)
+- [x] A2: Alerts & Action Items Card (pending testimonials, unconfirmed reservations)
+- [x] A3: Recent Activity Feed with auto-refresh every 30 seconds
+- [x] A4: Add trend comparison percentages to existing 4 stat cards
+- [x] Backend procedures: todaySnapshot, alerts, recentActivity, statsWithTrends
+- [x] Frontend: Complete Dashboard page with all features
+
+### B. Advanced Analytics ✅
+- [x] B1: Date Range Selector (Last 7/30/90 days, This/Last Month)
+- [x] B3: Customer Insights Card (repeat customers, lifetime value, top customers)
+- [x] B4: Menu Performance Card (category breakdown, top items by revenue, never ordered items)
+- [x] Backend procedures: customerInsights, menuPerformance
+- [x] Frontend: Enhanced Analytics page with date range and new cards
+- [ ] B2: Reservation Analytics Tab (busiest days, party sizes, cancellation rates, peak times) - Future enhancement
+- [ ] B5: Testimonial Analytics Tab (approval rates, average ratings, trends) - Future enhancement
+- [ ] B6: Financial Deep Dive (revenue breakdown, profit margins) - Future enhancement
+- [ ] B7: Operational Metrics (prep times, delivery times, staff performance) - Future enhancement
+
+### C. Export & Reporting ✅
+- [x] C1: Export to CSV buttons on analytics sections (Customer Insights, Menu Performance, Daily Sales)
+- [x] Frontend: Export functionality with automatic filename generation
+- [x] Comprehensive vitest tests (9 tests passing)
+- [ ] C2: Scheduled Email Reports (weekly/monthly summaries)
+- [ ] C3: Print-Friendly PDF Report generation
+
+### D. Predictive & AI Features
+- [ ] D1: Sales Forecasting (predict tomorrow's revenue, busiest day)
+- [ ] D2: Smart Recommendations (promote items, staffing suggestions)
+- [ ] D3: Anomaly Detection (alert on unusual order volumes, cancellation spikes)
+
+### E. Visual & UX Improvements
+- [ ] E1: Improve chart colors for dark mode
+- [ ] E2: Interactive tooltips with drill-down capability
+- [ ] E3: Dashboard widgets customization (drag-and-drop, show/hide)
