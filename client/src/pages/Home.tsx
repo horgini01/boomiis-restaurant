@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { ChefsSpecials } from '@/components/ChefsSpecials';
+import { TestimonialsCarousel } from '@/components/TestimonialsCarousel';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -203,54 +204,31 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredTestimonials && featuredTestimonials.length > 0 ? (
-                featuredTestimonials.map((testimonial: any) => (
-                  <Card key={testimonial.id} className="border-border/50 bg-background/50">
-                    <CardContent className="pt-6">
-                      <div className="flex gap-1 mb-4">
-                        {Array.from({ length: testimonial.rating }).map((_, i) => (
-                          <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                        ))}
-                      </div>
-                      <p className="text-muted-foreground mb-4 italic">"{testimonial.content}"</p>
-                      <p className="font-semibold">{testimonial.customerName}</p>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                // Fallback testimonials if none are featured in database
-                [
-                  {
-                    name: 'Sarah Johnson',
-                    review: 'The best African food I\'ve had in London! The jollof rice is absolutely incredible.',
-                    rating: 5,
-                  },
-                  {
-                    name: 'Michael Chen',
-                    review: 'Amazing flavors and generous portions. The staff are so friendly and welcoming.',
-                    rating: 5,
-                  },
-                  {
-                    name: 'Aisha Mohammed',
-                    review: 'Reminds me of home! Authentic taste and beautiful presentation. Highly recommend!',
-                    rating: 5,
-                  },
-                ].map((testimonial, index) => (
-                  <Card key={index} className="border-border/50 bg-background/50">
-                    <CardContent className="pt-6">
-                      <div className="flex gap-1 mb-4">
-                        {Array.from({ length: testimonial.rating }).map((_, i) => (
-                          <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                        ))}
-                      </div>
-                      <p className="text-muted-foreground mb-4 italic">"{testimonial.review}"</p>
-                      <p className="font-semibold">{testimonial.name}</p>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+            <TestimonialsCarousel 
+              testimonials={featuredTestimonials && featuredTestimonials.length > 0 
+                ? featuredTestimonials 
+                : [
+                    {
+                      id: 1,
+                      customerName: 'Sarah Johnson',
+                      content: 'The best African food I\'ve had in London! The jollof rice is absolutely incredible.',
+                      rating: 5,
+                    },
+                    {
+                      id: 2,
+                      customerName: 'Michael Chen',
+                      content: 'Amazing flavors and generous portions. The staff are so friendly and welcoming.',
+                      rating: 5,
+                    },
+                    {
+                      id: 3,
+                      customerName: 'Aisha Mohammed',
+                      content: 'Reminds me of home! Authentic taste and beautiful presentation. Highly recommend!',
+                      rating: 5,
+                    },
+                  ]
+              } 
+            />
           </div>
         </section>
 

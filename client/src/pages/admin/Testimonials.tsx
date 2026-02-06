@@ -23,11 +23,12 @@ import {
 } from '@/components/ui/table';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, Trash2, Check, X, Star } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Check, X, Star, CheckSquare, Square } from 'lucide-react';
 
 export default function TestimonialsManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<any>(null);
+  const [selectedTestimonials, setSelectedTestimonials] = useState<number[]>([]);
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -93,6 +94,32 @@ export default function TestimonialsManagement() {
     },
   });
 
+  const bulkApproveMutation = trpc.testimonials.bulkApprove.useMutation({
+    onSuccess: () => {
+      toast.success('Testimonials approved successfully');
+      utils.testimonials.getAllAdmin.invalidate();
+      utils.testimonials.getAll.invalidate();
+      utils.testimonials.getFeatured.invalidate();
+      setSelectedTestimonials([]);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to approve testimonials');
+    },
+  });
+
+  const bulkRejectMutation = trpc.testimonials.bulkReject.useMutation({
+    onSuccess: () => {
+      toast.success('Testimonials rejected successfully');
+      utils.testimonials.getAllAdmin.invalidate();
+      utils.testimonials.getAll.invalidate();
+      utils.testimonials.getFeatured.invalidate();
+      setSelectedTestimonials([]);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to reject testimonials');
+    },
+  });
+
   const toggleFeaturedMutation = trpc.testimonials.toggleFeatured.useMutation({
     onSuccess: () => {
       toast.success('Featured status updated');
@@ -152,6 +179,38 @@ export default function TestimonialsManagement() {
 
   const handleToggleFeatured = (id: number, currentStatus: boolean) => {
     toggleFeaturedMutation.mutate({ id, isFeatured: !currentStatus });
+  };
+
+  const handleToggleSelection = (id: number) => {
+    setSelectedTestimonials(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedTestimonials.length === testimonials?.length) {
+      setSelectedTestimonials([]);
+    } else {
+      setSelectedTestimonials(testimonials?.map((t: any) => t.id) || []);
+    }
+  };
+
+  const handleBulkApprove = () => {
+    if (selectedTestimonials.length === 0) {
+      toast.error('Please select testimonials to approve');
+      return;
+    }
+    bulkApproveMutation.mutate({ ids: selectedTestimonials });
+  };
+
+  const handleBulkReject = () => {
+    if (selectedTestimonials.length === 0) {
+      toast.error('Please select testimonials to reject');
+      return;
+    }
+    if (confirm(`Are you sure you want to reject and delete ${selectedTestimonials.length} testimonial(s)?`)) {
+      bulkRejectMutation.mutate({ ids: selectedTestimonials });
+    }
   };
 
   return (
@@ -282,12 +341,72 @@ export default function TestimonialsManagement() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <Card className="border-border/50">
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer</TableHead>
+            <>
+              {selectedTestimonials.length > 0 && (
+                <Card className="border-primary/20 mb-6 bg-primary/10">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold">
+                          Bulk Operations - {selectedTestimonials.length} testimonial{selectedTestimonials.length > 1 ? 's' : ''} selected
+                        </h3>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedTestimonials([])}
+                        >
+                          Clear Selection
+                        </Button>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={handleBulkApprove}
+                          disabled={bulkApproveMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {bulkApproveMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="mr-2 h-4 w-4" />
+                          )}
+                          Approve Selected
+                        </Button>
+                        <Button
+                          onClick={handleBulkReject}
+                          disabled={bulkRejectMutation.isPending}
+                          variant="destructive"
+                        >
+                          {bulkRejectMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <X className="mr-2 h-4 w-4" />
+                          )}
+                          Reject Selected
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className="border-border/50">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <button
+                            onClick={handleSelectAll}
+                            className="flex items-center justify-center"
+                          >
+                            {selectedTestimonials.length === testimonials?.length ? (
+                              <CheckSquare className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Square className="h-5 w-5" />
+                            )}
+                          </button>
+                        </TableHead>
+                        <TableHead>Customer</TableHead>
                       <TableHead>Content</TableHead>
                       <TableHead>Rating</TableHead>
                       <TableHead>Status</TableHead>
@@ -299,6 +418,18 @@ export default function TestimonialsManagement() {
                   <TableBody>
                     {testimonials?.map((testimonial: any) => (
                       <TableRow key={testimonial.id}>
+                        <TableCell>
+                          <button
+                            onClick={() => handleToggleSelection(testimonial.id)}
+                            className="flex items-center justify-center"
+                          >
+                            {selectedTestimonials.includes(testimonial.id) ? (
+                              <CheckSquare className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Square className="h-5 w-5" />
+                            )}
+                          </button>
+                        </TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">{testimonial.customerName}</div>
@@ -381,6 +512,7 @@ export default function TestimonialsManagement() {
                 </Table>
               </CardContent>
             </Card>
+            </>
           )}
         </div>
       </AdminLayout>

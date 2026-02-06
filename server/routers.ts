@@ -2853,6 +2853,30 @@ export const appRouter = router({
           displayOrder: 0,
         });
         
+        // Get the last inserted testimonial
+        const inserted = await db.select()
+          .from(testimonials)
+          .where(eq(testimonials.customerName, input.customerName))
+          .orderBy(desc(testimonials.createdAt))
+          .limit(1);
+        
+        const insertedId = inserted[0]?.id;
+        
+        // Send email notification to admin
+        try {
+          const { sendTestimonialNotificationEmail } = await import('./email');
+          await sendTestimonialNotificationEmail({
+            id: Number(insertedId),
+            customerName: input.customerName,
+            customerEmail: input.customerEmail || null,
+            content: input.content,
+            rating: input.rating,
+          });
+        } catch (emailError) {
+          console.error('[Testimonial] Failed to send notification email:', emailError);
+          // Don't fail the submission if email fails
+        }
+        
         return { success: true, message: 'Thank you for your testimonial! It will be reviewed by our team.' };
       }),
 
@@ -2945,6 +2969,38 @@ export const appRouter = router({
         const { testimonials } = await import('../drizzle/schema');
         await db.update(testimonials).set({ isFeatured: input.isFeatured }).where(eq(testimonials.id, input.id));
         return { success: true };
+      }),
+
+    bulkApprove: protectedProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        const { inArray } = await import('drizzle-orm');
+        
+        await db.update(testimonials)
+          .set({ isApproved: true })
+          .where(inArray(testimonials.id, input.ids));
+        
+        return { success: true, count: input.ids.length };
+      }),
+
+    bulkReject: protectedProcedure
+      .input(z.object({ ids: z.array(z.number()) }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        const { testimonials } = await import('../drizzle/schema');
+        const { inArray } = await import('drizzle-orm');
+        
+        // Delete rejected testimonials
+        await db.delete(testimonials)
+          .where(inArray(testimonials.id, input.ids));
+        
+        return { success: true, count: input.ids.length };
       }),
   }),
 

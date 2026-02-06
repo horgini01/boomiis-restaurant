@@ -1945,3 +1945,146 @@ export async function sendCampaignEmail(
     return { success: false, error: error.message || 'Unknown error' };
   }
 }
+
+// Send testimonial notification to admin
+export async function sendTestimonialNotificationEmail(testimonial: {
+  id: number;
+  customerName: string;
+  customerEmail: string | null;
+  content: string;
+  rating: number;
+}) {
+  const resend = getResendClient();
+  if (!resend) {
+    console.warn('[Email] Resend client not available. Skipping testimonial notification.');
+    return false;
+  }
+
+  try {
+    const adminEmails = await getAdminEmails();
+    const baseUrl = ENV.baseUrl || 'http://localhost:3000';
+    
+    // Generate quick action links with tokens
+    const approveToken = Buffer.from(JSON.stringify({ id: testimonial.id, action: 'approve', timestamp: Date.now() })).toString('base64url');
+    const rejectToken = Buffer.from(JSON.stringify({ id: testimonial.id, action: 'reject', timestamp: Date.now() })).toString('base64url');
+    
+    const approveUrl = `${baseUrl}/api/testimonial-action?token=${approveToken}`;
+    const rejectUrl = `${baseUrl}/api/testimonial-action?token=${rejectToken}`;
+    const adminUrl = `${baseUrl}/admin/testimonials`;
+
+    // Generate star rating HTML
+    const stars = '★'.repeat(testimonial.rating) + '☆'.repeat(5 - testimonial.rating);
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Testimonial Submission</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding: 30px; background-color: #d97706; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 24px;">New Testimonial Received</h1>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.5; color: #333333;">
+                        A new testimonial has been submitted and is awaiting your review.
+                      </p>
+                      
+                      <div style="background-color: #f9fafb; border-left: 4px solid #d97706; padding: 20px; margin: 20px 0;">
+                        <p style="margin: 0 0 10px; font-size: 14px; color: #666666;">
+                          <strong>Customer:</strong> ${testimonial.customerName}
+                        </p>
+                        ${testimonial.customerEmail ? `
+                        <p style="margin: 0 0 10px; font-size: 14px; color: #666666;">
+                          <strong>Email:</strong> ${testimonial.customerEmail}
+                        </p>
+                        ` : ''}
+                        <p style="margin: 0 0 10px; font-size: 14px; color: #666666;">
+                          <strong>Rating:</strong> <span style="color: #d97706; font-size: 18px;">${stars}</span> (${testimonial.rating}/5)
+                        </p>
+                        <p style="margin: 10px 0 0; font-size: 14px; color: #333333; line-height: 1.6;">
+                          <strong>Testimonial:</strong><br>
+                          "${testimonial.content}"
+                        </p>
+                      </div>
+                      
+                      <p style="margin: 30px 0 20px; font-size: 16px; color: #333333;">
+                        <strong>Quick Actions:</strong>
+                      </p>
+                      
+                      <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr>
+                          <td style="padding: 0 10px 0 0;">
+                            <a href="${approveUrl}" style="display: inline-block; padding: 12px 30px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; text-align: center; width: 100%; box-sizing: border-box;">
+                              ✓ Approve
+                            </a>
+                          </td>
+                          <td style="padding: 0 0 0 10px;">
+                            <a href="${rejectUrl}" style="display: inline-block; padding: 12px 30px; background-color: #ef4444; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; text-align: center; width: 100%; box-sizing: border-box;">
+                              ✗ Reject
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <p style="margin: 20px 0 0; font-size: 14px; color: #666666; text-align: center;">
+                        Or <a href="${adminUrl}" style="color: #d97706; text-decoration: none;">manage in admin panel</a>
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 20px 30px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+                      <p style="margin: 0; font-size: 12px; color: #666666;">
+                        Boomiis Restaurant - Admin Notification
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+
+    // Send to all admin emails
+    for (const adminEmail of adminEmails) {
+      const result = await resend.emails.send({
+        from: FROM_EMAIL,
+        to: adminEmail,
+        subject: `New Testimonial: ${testimonial.rating}★ from ${testimonial.customerName}`,
+        html,
+      });
+
+      await logEmail({
+        templateType: 'testimonial_notification',
+        recipientEmail: adminEmail,
+        recipientName: 'Admin',
+        subject: `New Testimonial: ${testimonial.rating}★ from ${testimonial.customerName}`,
+        resendId: result.data?.id,
+        metadata: { testimonialId: testimonial.id },
+      });
+
+      console.log(`[Email] Testimonial notification sent to ${adminEmail}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[Email] Failed to send testimonial notification:', error);
+    return false;
+  }
+}
