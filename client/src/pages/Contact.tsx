@@ -257,12 +257,11 @@ export default function Contact() {
                   initialCenter={restaurantLocation}
                   initialZoom={15}
                   onMapReady={(map) => {
-                    // Add marker for restaurant location
-                    const marker = new google.maps.Marker({
+                    // Add marker for restaurant location using AdvancedMarkerElement
+                    const marker = new google.maps.marker.AdvancedMarkerElement({
                       position: restaurantLocation,
                       map: map,
                       title: 'Boomiis Restaurant',
-                      animation: google.maps.Animation.DROP,
                     });
 
                     // Add info window

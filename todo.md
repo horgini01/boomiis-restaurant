@@ -1183,3 +1183,15 @@
 - [x] Investigate why Google Maps API is being loaded multiple times on Blog page
 - [x] Fix the duplicate API loading issue
 - [x] Test to ensure error is resolved
+
+## Upgrade to AdvancedMarkerElement
+- [x] Update Contact page map marker to use google.maps.marker.AdvancedMarkerElement
+- [x] Remove deprecated google.maps.Marker usage
+- [ ] Test marker functionality and verify deprecation warning is eliminated
+
+## Google Maps Upgrade (User Request - Feb 6, 2026)
+- [x] Upgrade Contact page map marker from deprecated google.maps.Marker to google.maps.marker.AdvancedMarkerElement
+- [x] Update marker creation code to use new API syntax
+- [x] Verify info window still works with new marker type
+- [x] Test marker displays correctly and info window opens on click
+- [x] Verify no deprecation warnings appear in console
