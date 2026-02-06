@@ -627,6 +627,25 @@ export default function MenuItemsManagement() {
                             </div>
                           </CardContent>
                         </Card>
+
+                        {/* Bulk Delete */}
+                        <Card className="bg-destructive/10 border-destructive/20">
+                          <CardContent className="p-4">
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete ${selectedItems.length} menu item${selectedItems.length > 1 ? 's' : ''}? This action cannot be undone.`)) {
+                                  bulkUpdateMutation.mutate({ itemIds: selectedItems, operation: 'delete' });
+                                }
+                              }}
+                              disabled={bulkUpdateMutation.isPending}
+                              className="w-full"
+                            >
+                              Delete {selectedItems.length} Item{selectedItems.length > 1 ? 's' : ''}
+                            </Button>
+                          </CardContent>
+                        </Card>
                       </div>
                     </div>
                   </CardContent>

@@ -800,7 +800,7 @@ export const appRouter = router({
     bulkUpdateMenuItems: protectedProcedure
       .input(z.object({
         itemIds: z.array(z.number()),
-        operation: z.enum(['priceChange', 'makeAvailable', 'makeUnavailable', 'markInStock', 'markOutOfStock']),
+        operation: z.enum(['priceChange', 'makeAvailable', 'makeUnavailable', 'markInStock', 'markOutOfStock', 'delete']),
         priceChangePercent: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -842,6 +842,9 @@ export const appRouter = router({
             break;
           case 'markOutOfStock':
             await db.update(menuItems).set({ outOfStock: true }).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
+            break;
+          case 'delete':
+            await db.delete(menuItems).where(sql`${menuItems.id} IN (${sql.join(itemIds.map(id => sql`${id}`), sql`, `)})`);
             break;
         }
 

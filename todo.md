@@ -1278,3 +1278,8 @@
 - [x] Create bulkUpdateCategories tRPC mutation (activate, deactivate, delete)
 - [ ] Test Menu Items bulk price update workflow
 - [ ] Test Categories bulk operations workflow
+
+## Bulk Delete Functionality (User Request - Feb 6, 2026)
+- [x] Add bulk delete button to Menu Items bulk operations toolbar
+- [x] Add confirmation dialog before bulk delete
+- [ ] Test bulk delete with multiple selected items
