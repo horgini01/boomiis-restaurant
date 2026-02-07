@@ -28,7 +28,7 @@ export const rolePermissions: Record<Role, string[]> = {
     "/admin/settings",
   ],
   admin: [
-    // All except user management (can't create/edit other admins)
+    // Full access including user management
     "/admin/dashboard",
     "/admin/categories",
     "/admin/menu-items",
@@ -43,6 +43,7 @@ export const rolePermissions: Record<Role, string[]> = {
     "/admin/about-content",
     "/admin/legal-pages",
     "/admin/analytics",
+    "/admin/users",
     "/admin/email-delivery",
     "/admin/newsletter-subscribers",
     "/admin/email-campaigns",

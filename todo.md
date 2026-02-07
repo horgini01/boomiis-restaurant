@@ -1510,3 +1510,8 @@
 - [x] Test invitation flow (email sending tested in backend)
 - [ ] Test permission checks across different roles
 - [ ] Verify navigation items show/hide correctly per role
+
+## Bug Fix - Missing Admin Users Navigation (User Report - Feb 7)
+- [x] Fix Admin Users navigation item not appearing in sidebar (added /admin/users to admin role permissions)
+- [x] Verify navigation item is visible for owner/admin roles
+- [x] Test that role-based filtering is working correctly
