@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
@@ -35,6 +36,9 @@ import {
   ChevronRight,
   Pin,
   PinOff,
+  Search,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { useSettings } from '@/hooks/useSettings';
@@ -46,10 +50,18 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+interface NavItem {
+  path: string;
+  label: string;
+  icon: React.ElementType;
+  category: string;
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { restaurantName } = useSettings();
   
   // Sidebar state management with localStorage
@@ -67,6 +79,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       return saved !== 'false'; // Default to pinned
     }
     return true;
+  });
+  
+  // Navigation group expanded state
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('adminNavGroupsExpanded');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    }
+    // Default: all groups expanded
+    return {
+      'Dashboard': true,
+      'Content Management': true,
+      'Customer Engagement': true,
+      'Communication': true,
+      'System Settings': true,
+      'Analytics & Logs': true,
+    };
   });
   
   // Fetch custom roles for navigation filtering
@@ -87,39 +118,52 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     localStorage.setItem('adminSidebarPinned', String(isPinned));
   }, [isPinned]);
+  
+  useEffect(() => {
+    localStorage.setItem('adminNavGroupsExpanded', JSON.stringify(expandedGroups));
+  }, [expandedGroups]);
 
-  const allNavItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/admin/categories', label: 'Categories', icon: FolderTree },
-    { path: '/admin/menu-items', label: 'Menu Items', icon: UtensilsCrossed },
-
-    { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-    { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
-    { path: '/admin/events', label: 'Events & Catering', icon: Calendar },
-    { path: '/admin/reviews', label: 'Reviews', icon: Star },
-    { path: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
-    { path: '/admin/response-templates', label: 'Response Templates', icon: MessageSquare },
-    { path: '/admin/gallery', label: 'Gallery', icon: Image },
-    { path: '/admin/blog', label: 'Blog', icon: FileText },
-    { path: '/admin/about-content', label: 'About Content', icon: BookOpen },
-    { path: '/admin/legal-pages', label: 'Legal Pages', icon: Scale },
-    { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-    { path: '/admin/users', label: 'Admin Users', icon: UserCog },
-    { path: '/admin/custom-roles', label: 'Custom Roles', icon: Shield },
-    { path: '/admin/audit-logs', label: 'Audit Logs', icon: FileSearch },
-    { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail },
-    { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users },
-    { path: '/admin/email-campaigns', label: 'Email Campaigns', icon: Send },
-    { path: '/admin/email-tracking', label: 'Email Tracking', icon: MailCheck },
-    { path: '/admin/sms-templates', label: 'SMS Templates', icon: MessageSquare },
-    { path: '/admin/sms-analytics', label: 'SMS Analytics', icon: MessageCircle },
-    { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store },
-    { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
-    { path: '/admin/change-password', label: 'Change Password', icon: Lock },
+  const allNavItems: NavItem[] = [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, category: 'Dashboard' },
+    
+    // Content Management
+    { path: '/admin/categories', label: 'Categories', icon: FolderTree, category: 'Content Management' },
+    { path: '/admin/menu-items', label: 'Menu Items', icon: UtensilsCrossed, category: 'Content Management' },
+    { path: '/admin/gallery', label: 'Gallery', icon: Image, category: 'Content Management' },
+    { path: '/admin/blog', label: 'Blog', icon: FileText, category: 'Content Management' },
+    { path: '/admin/about-content', label: 'About Content', icon: BookOpen, category: 'Content Management' },
+    { path: '/admin/legal-pages', label: 'Legal Pages', icon: Scale, category: 'Content Management' },
+    
+    // Customer Engagement
+    { path: '/admin/orders', label: 'Orders', icon: ShoppingBag, category: 'Customer Engagement' },
+    { path: '/admin/reservations', label: 'Reservations', icon: CalendarCheck, category: 'Customer Engagement' },
+    { path: '/admin/events', label: 'Events & Catering', icon: Calendar, category: 'Customer Engagement' },
+    { path: '/admin/reviews', label: 'Reviews', icon: Star, category: 'Customer Engagement' },
+    { path: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare, category: 'Customer Engagement' },
+    { path: '/admin/response-templates', label: 'Response Templates', icon: MessageSquare, category: 'Customer Engagement' },
+    
+    // Communication
+    { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail, category: 'Communication' },
+    { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users, category: 'Communication' },
+    { path: '/admin/email-campaigns', label: 'Email Campaigns', icon: Send, category: 'Communication' },
+    { path: '/admin/email-tracking', label: 'Email Tracking', icon: MailCheck, category: 'Communication' },
+    { path: '/admin/sms-templates', label: 'SMS Templates', icon: MessageSquare, category: 'Communication' },
+    { path: '/admin/sms-analytics', label: 'SMS Analytics', icon: MessageCircle, category: 'Communication' },
+    
+    // System Settings
+    { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store, category: 'System Settings' },
+    { path: '/admin/settings', label: 'Settings', icon: SettingsIcon, category: 'System Settings' },
+    { path: '/admin/users', label: 'Admin Users', icon: UserCog, category: 'System Settings' },
+    { path: '/admin/custom-roles', label: 'Custom Roles', icon: Shield, category: 'System Settings' },
+    { path: '/admin/change-password', label: 'Change Password', icon: Lock, category: 'System Settings' },
+    
+    // Analytics & Logs
+    { path: '/admin/analytics', label: 'Analytics', icon: BarChart3, category: 'Analytics & Logs' },
+    { path: '/admin/audit-logs', label: 'Audit Logs', icon: FileSearch, category: 'Analytics & Logs' },
   ];
 
   // Filter navigation items based on user role
-  const navItems = useMemo(() => {
+  const accessibleNavItems = useMemo(() => {
     if (!user?.role) return [];
     
     return allNavItems.filter(item => {
@@ -135,32 +179,101 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     });
   }, [user?.role, user?.customRoleId, customRoles]);
 
-  const NavLinks = () => (
-    <>
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = location === item.path;
-        return (
-          <Link key={item.path} href={item.path}>
-            <div
-              className={`
-                w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
-                ${isActive 
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-                  : 'hover:bg-accent hover:text-accent-foreground'
-                }
-              `}
-              onClick={() => setMobileMenuOpen(false)}
-              title={isCollapsed ? item.label : undefined}
-            >
-              <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-2'} flex-shrink-0`} />
-              {!isCollapsed && <span className="truncate">{item.label}</span>}
+  // Filter items by search query
+  const filteredNavItems = useMemo(() => {
+    if (!searchQuery.trim()) return accessibleNavItems;
+    
+    const query = searchQuery.toLowerCase();
+    return accessibleNavItems.filter(item => 
+      item.label.toLowerCase().includes(query) ||
+      item.category.toLowerCase().includes(query)
+    );
+  }, [accessibleNavItems, searchQuery]);
+
+  // Group items by category
+  const groupedNavItems = useMemo(() => {
+    const groups: Record<string, NavItem[]> = {};
+    
+    filteredNavItems.forEach(item => {
+      if (!groups[item.category]) {
+        groups[item.category] = [];
+      }
+      groups[item.category].push(item);
+    });
+    
+    return groups;
+  }, [filteredNavItems]);
+
+  const toggleGroup = (category: string) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  const NavLinks = () => {
+    // If searching, show all groups expanded
+    const isSearching = searchQuery.trim().length > 0;
+    
+    if (Object.keys(groupedNavItems).length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground text-sm">
+          {isSearching ? 'No matching pages found' : 'No pages available'}
+        </div>
+      );
+    }
+    
+    return (
+      <>
+        {Object.entries(groupedNavItems).map(([category, items]) => {
+          const isExpanded = isSearching || expandedGroups[category];
+          
+          return (
+            <div key={category} className="space-y-1">
+              {/* Category Header */}
+              {!isCollapsed && (
+                <button
+                  onClick={() => toggleGroup(category)}
+                  className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <span className="truncate">{category}</span>
+                  {isExpanded ? (
+                    <ChevronUp className="h-3 w-3 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-3 w-3 flex-shrink-0" />
+                  )}
+                </button>
+              )}
+              
+              {/* Category Items */}
+              {isExpanded && items.map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.path;
+                return (
+                  <Link key={item.path} href={item.path}>
+                    <div
+                      className={`
+                        w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
+                        ${isActive 
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                          : 'hover:bg-accent hover:text-accent-foreground'
+                        }
+                      `}
+                      onClick={() => setMobileMenuOpen(false)}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-2'} flex-shrink-0`} />
+                      {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-          </Link>
-        );
-      })}
-    </>
-  );
+          );
+        })}
+      </>
+    );
+  };
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -196,7 +309,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         `}
       >
         {/* Header with collapse/pin controls */}
-        <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="p-4 border-b border-border flex items-center justify-between flex-shrink-0">
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <h1 className="text-lg font-bold text-primary truncate">{restaurantName} Admin</h1>
@@ -229,13 +342,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </div>
 
+        {/* Search Box */}
+        {!isCollapsed && (
+          <div className="p-4 border-b border-border flex-shrink-0">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search pages..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Scrollable Navigation */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <nav className="flex-1 p-4 space-y-3 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           <NavLinks />
         </nav>
 
         {/* User info and logout */}
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border flex-shrink-0">
           {!isCollapsed ? (
             <>
               <div className="mb-4 p-3 rounded-lg bg-background/50">
