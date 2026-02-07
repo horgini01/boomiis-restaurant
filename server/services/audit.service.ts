@@ -1,6 +1,7 @@
 import { getDb } from '../db';
 import { auditLogs } from '../../drizzle/schema';
 import { isCriticalAction, sendAuditAlert } from './auditAlerts.service';
+import { detectAnomalies } from './auditAnomaly.service';
 
 export interface AuditLogData {
   userId: number;
@@ -57,6 +58,14 @@ export async function logAuditAction(data: AuditLogData): Promise<void> {
         ownerEmail,
       });
     }
+
+    // Run anomaly detection checks
+    await detectAnomalies(
+      data.userId,
+      data.userName,
+      data.action,
+      data.entityType
+    );
   } catch (error) {
     // Don't throw errors - audit logging should not break the main operation
     console.error('[Audit] Failed to log action:', error);

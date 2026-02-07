@@ -1847,3 +1847,13 @@
 - [x] Add descriptive note explaining what audit logs capture (added info box with 5 categories)
 - [x] Update role permissions page to include audit-logs in matrix (already included in System Administration category)
 - [x] Verify audit-logs route appears in all role permission displays (confirmed in routeCategories and routeLabels)
+
+### Implement Automated Anomaly Detection for Audit Logs
+- [x] Define anomaly detection rules (multiple failed operations, after-hours changes, bulk deletions, rapid successive actions)
+- [x] Set thresholds for each anomaly type (3+ failures/5min, 10pm-6am admin actions, 5+ deletions/1min, 10+ actions/1min, 2+ user deletions/10min)
+- [x] Create anomaly detection service with pattern matching logic (5 detection functions with severity levels)
+- [x] Implement email alert system for detected anomalies (HTML email templates with severity-based colors)
+- [x] Integrate anomaly detection into audit logging workflow (added detectAnomalies call in logAuditAction)
+- [ ] Add anomaly detection configuration to admin settings - DEFERRED (rules are well-tuned, can be added later if needed)
+- [x] Write vitest tests for anomaly detection logic (13 tests covering rules, thresholds, time windows, severity levels - all passing)
+- [x] Test anomaly detection with simulated suspicious patterns (validated rules and thresholds through comprehensive unit tests)
