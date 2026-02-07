@@ -98,7 +98,7 @@ export const adminUserManagementRouter = router({
       email: z.string().email(),
       firstName: z.string().min(1),
       lastName: z.string().min(1),
-      role: z.enum(["admin", "manager", "kitchen_staff", "front_desk"]),
+      role: z.string(), // Can be predefined role or "custom-{id}"
       phone: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
@@ -118,13 +118,25 @@ export const adminUserManagementRouter = router({
       // Create user with inactive status (will be activated after invitation acceptance)
       const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
       
+      // Parse role - if it starts with "custom-", extract custom role ID
+      let userRole: string;
+      let customRoleId: number | null = null;
+      
+      if (input.role.startsWith("custom-")) {
+        customRoleId = parseInt(input.role.replace("custom-", ""));
+        userRole = "admin"; // Default to admin for custom roles
+      } else {
+        userRole = input.role;
+      }
+      
       await db.insert(users).values({
         openId,
         email: input.email,
         firstName: input.firstName,
         lastName: input.lastName,
         name: `${input.firstName} ${input.lastName}`,
-        role: input.role,
+        role: userRole as any,
+        customRoleId,
         phone: input.phone || null,
         status: "inactive",
         loginMethod: "email",
@@ -173,13 +185,13 @@ export const adminUserManagementRouter = router({
       firstName: z.string().optional(),
       lastName: z.string().optional(),
       phone: z.string().optional(),
-      role: z.enum(["admin", "manager", "kitchen_staff", "front_desk"]).optional(),
+      role: z.string().optional(), // Can be predefined role or "custom-{id}"
     }))
     .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
-      const { id, ...updates } = input;
+      const { id, role, ...updates } = input;
 
       // Build name if firstName or lastName is being updated
       if (updates.firstName || updates.lastName) {
@@ -191,6 +203,17 @@ export const adminUserManagementRouter = router({
         const firstName = updates.firstName || currentUser[0].firstName || '';
         const lastName = updates.lastName || currentUser[0].lastName || '';
         (updates as any).name = `${firstName} ${lastName}`.trim();
+      }
+
+      // Handle role update - parse custom role if needed
+      if (role) {
+        if (role.startsWith("custom-")) {
+          (updates as any).customRoleId = parseInt(role.replace("custom-", ""));
+          (updates as any).role = "admin"; // Default to admin for custom roles
+        } else {
+          (updates as any).role = role;
+          (updates as any).customRoleId = null; // Clear custom role if switching to predefined
+        }
       }
 
       await db.update(users).set(updates).where(eq(users.id, id));

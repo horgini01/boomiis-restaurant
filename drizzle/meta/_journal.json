@@ -162,6 +162,13 @@
       "when": 1770461679288,
       "tag": "0022_previous_sabretooth",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1770464026142,
+      "tag": "0023_eager_polaris",
+      "breakpoints": true
     }
   ]
 }

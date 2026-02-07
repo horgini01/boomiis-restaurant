@@ -4,6 +4,7 @@ import { rolePermissions, type Role } from "@/lib/rolePermissions";
 import { Check, X } from "lucide-react";
 import { Fragment } from "react";
 import AdminLayout from "@/components/AdminLayout";
+import { trpc } from "@/lib/trpc";
 
 const roleDescriptions: Record<Role, { description: string; color: string }> = {
   owner: {
@@ -92,9 +93,17 @@ const routeLabels: Record<string, string> = {
 
 export default function RolePermissions() {
   const roles: Role[] = ["owner", "admin", "manager", "kitchen_staff", "front_desk"];
+  
+  // Fetch custom roles
+  const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
 
   const hasAccess = (role: Role, route: string) => {
     return rolePermissions[role].includes(route);
+  };
+  
+  const customRoleHasAccess = (roleId: number, route: string) => {
+    const role = customRoles?.find(r => r.id === roleId);
+    return role?.permissions.includes(route) || false;
   };
 
   return (
@@ -127,6 +136,40 @@ export default function RolePermissions() {
           </Card>
         ))}
       </div>
+      
+      {/* Custom Roles Section */}
+      {customRoles && customRoles.length > 0 && (
+        <>
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold">Custom Roles</h2>
+            <p className="text-muted-foreground mt-2">
+              User-defined roles with specific permission sets
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {customRoles.map((role) => (
+              <Card key={role.id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20">
+                      {role.roleName}
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>{role.description || "No description provided"}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    <strong>Access Count:</strong> {role.permissions.length} routes
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    <strong>Status:</strong> {role.isActive ? "Active" : "Inactive"}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Permissions Matrix */}
       <Card>
@@ -149,13 +192,20 @@ export default function RolePermissions() {
                       </Badge>
                     </th>
                   ))}
+                  {customRoles && customRoles.map((role) => (
+                    <th key={`custom-${role.id}`} className="text-center p-3 font-semibold min-w-[100px]">
+                      <Badge variant="outline" className="bg-indigo-500/10 text-indigo-500 border-indigo-500/20 text-xs">
+                        {role.roleName}
+                      </Badge>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {Object.entries(routeCategories).map(([category, routes]) => (
                   <Fragment key={category}>
                     <tr className="border-b bg-muted/50">
-                      <td colSpan={roles.length + 1} className="p-3 font-semibold">
+                      <td colSpan={roles.length + 1 + (customRoles?.length || 0)} className="p-3 font-semibold">
                         {category}
                       </td>
                     </tr>
@@ -165,6 +215,15 @@ export default function RolePermissions() {
                         {roles.map((role) => (
                           <td key={role} className="text-center p-3">
                             {hasAccess(role, route) ? (
+                              <Check className="inline-block w-5 h-5 text-green-500" />
+                            ) : (
+                              <X className="inline-block w-5 h-5 text-red-500/30" />
+                            )}
+                          </td>
+                        ))}
+                        {customRoles && customRoles.map((customRole) => (
+                          <td key={`custom-${customRole.id}`} className="text-center p-3">
+                            {customRoleHasAccess(customRole.id, route) ? (
                               <Check className="inline-block w-5 h-5 text-green-500" />
                             ) : (
                               <X className="inline-block w-5 h-5 text-red-500/30" />

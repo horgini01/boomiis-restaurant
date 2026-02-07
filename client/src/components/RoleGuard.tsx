@@ -1,8 +1,10 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { canAccessRoute, type Role } from "@/lib/rolePermissions";
+import { canAccessRouteWithCustomRole, setCustomRolesCache } from "@/lib/customRolePermissions";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -12,6 +14,16 @@ interface RoleGuardProps {
 export default function RoleGuard({ children, requiredRoles }: RoleGuardProps) {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
+  
+  // Fetch custom roles for permission checking
+  const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
+  
+  // Update custom roles cache when data changes
+  useEffect(() => {
+    if (customRoles) {
+      setCustomRolesCache(customRoles);
+    }
+  }, [customRoles]);
 
   useEffect(() => {
     if (!user) return;
@@ -28,15 +40,29 @@ export default function RoleGuard({ children, requiredRoles }: RoleGuardProps) {
     }
 
     // Check if user can access current route
-    if (!canAccessRoute(userRole, location)) {
+    // First check if user has a custom role
+    const hasCustomRoleAccess = user.customRoleId 
+      ? canAccessRouteWithCustomRole(user.customRoleId, location, customRoles)
+      : false;
+    
+    const hasStandardRoleAccess = canAccessRoute(userRole, location);
+    
+    if (!hasCustomRoleAccess && !hasStandardRoleAccess) {
       toast.error("Access denied: You don't have permission to access this page");
       setLocation("/admin/dashboard");
     }
-  }, [user, location, requiredRoles, setLocation]);
+  }, [user, location, requiredRoles, setLocation, customRoles]);
 
   // If user doesn't have access, don't render children
-  if (user && !canAccessRoute(user.role as Role, location)) {
-    return null;
+  if (user) {
+    const hasCustomRoleAccess = user.customRoleId 
+      ? canAccessRouteWithCustomRole(user.customRoleId, location, customRoles)
+      : false;
+    const hasStandardRoleAccess = canAccessRoute(user.role as Role, location);
+    
+    if (!hasCustomRoleAccess && !hasStandardRoleAccess) {
+      return null;
+    }
   }
 
   return <>{children}</>;

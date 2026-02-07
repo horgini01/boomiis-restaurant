@@ -31,6 +31,7 @@ import {
 import { useState, useMemo } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { canAccessRoute, type Role } from '@/lib/rolePermissions';
+import { canAccessRouteWithCustomRole } from '@/lib/customRolePermissions';
 import RoleGuard from './RoleGuard';
 
 interface AdminLayoutProps {
@@ -42,6 +43,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { restaurantName } = useSettings();
+  
+  // Fetch custom roles for navigation filtering
+  const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
   
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -79,8 +83,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Filter navigation items based on user role
   const navItems = useMemo(() => {
     if (!user?.role) return [];
-    return allNavItems.filter(item => canAccessRoute(user.role as Role, item.path));
-  }, [user?.role]);
+    
+    return allNavItems.filter(item => {
+      // Check standard role access
+      const hasStandardAccess = canAccessRoute(user.role as Role, item.path);
+      
+      // Check custom role access if user has a custom role
+      const hasCustomAccess = user.customRoleId 
+        ? canAccessRouteWithCustomRole(user.customRoleId, item.path, customRoles)
+        : false;
+      
+      return hasStandardAccess || hasCustomAccess;
+    });
+  }, [user?.role, user?.customRoleId, customRoles]);
 
   const NavLinks = () => (
     <>

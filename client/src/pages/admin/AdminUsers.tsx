@@ -85,6 +85,9 @@ export default function AdminUsers() {
     status: statusFilter !== "all" ? statusFilter : undefined,
   });
 
+  // Fetch custom roles for role selection
+  const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
+
   // Mutations
   const createUser = trpc.adminUsers.createAdminUser.useMutation({
     onSuccess: () => {
@@ -364,10 +367,17 @@ export default function AdminUsers() {
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <Badge className={roleColors[user.role as Role]}>
-                      <RoleIcon className="h-3 w-3 mr-1" />
-                      {roleLabels[user.role as Role]}
-                    </Badge>
+                    {user.customRoleId && customRoles ? (
+                      <Badge className="bg-indigo-100 text-indigo-800">
+                        <Shield className="h-3 w-3 mr-1" />
+                        {customRoles.find(r => r.id === user.customRoleId)?.roleName || "Custom Role"}
+                      </Badge>
+                    ) : (
+                      <Badge className={roleColors[user.role as Role]}>
+                        <RoleIcon className="h-3 w-3 mr-1" />
+                        {roleLabels[user.role as Role]}
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={user.status === "active" ? "default" : "secondary"}>
@@ -459,6 +469,16 @@ export default function AdminUsers() {
                     <SelectItem value="manager">Manager</SelectItem>
                     <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>
                     <SelectItem value="front_desk">Front Desk</SelectItem>
+                    {customRoles && customRoles.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Custom Roles</div>
+                        {customRoles.map((role) => (
+                          <SelectItem key={`custom-${role.id}`} value={`custom-${role.id}`}>
+                            {role.roleName}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -516,7 +536,10 @@ export default function AdminUsers() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-role">Role</Label>
-                  <Select name="role" defaultValue={selectedUser.role}>
+                  <Select 
+                    name="role" 
+                    defaultValue={selectedUser.customRoleId ? `custom-${selectedUser.customRoleId}` : selectedUser.role}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -525,6 +548,16 @@ export default function AdminUsers() {
                       <SelectItem value="manager">Manager</SelectItem>
                       <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>
                       <SelectItem value="front_desk">Front Desk</SelectItem>
+                      {customRoles && customRoles.length > 0 && (
+                        <>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Custom Roles</div>
+                          {customRoles.map((role) => (
+                            <SelectItem key={`custom-${role.id}`} value={`custom-${role.id}`}>
+                              {role.roleName}
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

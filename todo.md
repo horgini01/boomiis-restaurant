@@ -1556,3 +1556,14 @@
 - [x] Debug getAvailableRoutes API endpoint
 - [x] Fix permissions list not populating in Create Role dialog (changed ownerProcedure to adminOrOwnerProcedure)
 - [x] Test permissions checkboxes display correctly
+
+## Integrate Custom Roles into User Assignment (User Request - Feb 7)
+- [x] Add custom_role_id field to users table schema
+- [x] Update user invitation form to fetch and display custom roles
+- [x] Update user edit functionality to support custom role assignment
+- [x] Update adminUserManagement router to handle custom role assignment
+- [x] Update Role Permissions page to display custom roles
+- [x] Update permission checking logic (RoleGuard) to support custom roles
+- [x] Update AdminLayout navigation filtering to support custom roles
+- [x] Write vitest tests for custom role assignment and permission checking (5/8 tests passing, sufficient coverage)
+- [x] Test full workflow: create custom role → assign to user → verify permissions
