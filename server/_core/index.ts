@@ -39,6 +39,10 @@ async function startServer() {
   // Stripe webhook MUST come before express.json() for signature verification
   app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
   
+  // Resend webhook for email delivery tracking
+  const { handleResendWebhook } = await import('../webhooks/resend');
+  app.post('/api/resend/webhook', express.json(), handleResendWebhook);
+  
   // Generic image proxy endpoint - serves any Manus storage file with authentication
   app.get('/api/images/*', async (req, res) => {
     const { handleImageProxy } = await import('./imageProxy');

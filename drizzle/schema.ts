@@ -508,3 +508,28 @@ export const rolePermissions = mysqlTable("role_permissions", {
 
 export type RolePermission = typeof rolePermissions.$inferSelect;
 export type InsertRolePermission = typeof rolePermissions.$inferInsert;
+
+/**
+ * SMS delivery logs for tracking and analytics
+ */
+export const smsLogs = mysqlTable("sms_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  templateType: varchar("template_type", { length: 50 }).notNull(),
+  recipientPhone: varchar("recipient_phone", { length: 50 }).notNull(),
+  recipientName: varchar("recipient_name", { length: 200 }),
+  message: text("message").notNull(),
+  status: mysqlEnum("status", ["sent", "delivered", "failed", "pending"]).default("pending").notNull(),
+  provider: mysqlEnum("provider", ["bulksms", "textlocal"]).notNull(),
+  providerId: varchar("provider_id", { length: 100 }), // Provider's message ID for tracking
+  messageLength: int("message_length").notNull(), // Number of characters in message
+  segmentCount: int("segment_count").default(1).notNull(), // Number of SMS segments (160 chars each)
+  costGBP: decimal("cost_gbp", { precision: 10, scale: 4 }).default("0.0000"), // Cost in GBP
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  deliveredAt: timestamp("delivered_at"),
+  failedAt: timestamp("failed_at"),
+  errorMessage: text("error_message"),
+  metadata: text("metadata"), // JSON string for additional data (order_id, reservation_id, etc.)
+});
+
+export type SmsLog = typeof smsLogs.$inferSelect;
+export type InsertSmsLog = typeof smsLogs.$inferInsert;

@@ -35,6 +35,8 @@ import EmailDelivery from "./pages/admin/EmailDelivery";
 import NewsletterSubscribers from "./pages/admin/NewsletterSubscribers";
 import EmailCampaigns from "./pages/admin/EmailCampaigns";
 import SMSTemplates from "./pages/admin/SMSTemplates";
+import EmailTracking from "./pages/admin/EmailTracking";
+import SMSAnalytics from "./pages/admin/SMSAnalytics";
 import { ReviewsManagement } from "./pages/admin/ReviewsManagement";
 import TestimonialsManagement from "./pages/admin/Testimonials";
 import ResponseTemplates from "./pages/admin/ResponseTemplates";
@@ -98,6 +100,8 @@ function Router() {
       <Route path="/admin/about-content" component={AboutContentManagement} />
       <Route path="/admin/legal-pages" component={LegalPagesManagement} />
       <Route path="/admin/email-campaigns" component={EmailCampaigns} />
+      <Route path="/admin/email-tracking" component={EmailTracking} />
+      <Route path="/admin/sms-analytics" component={SMSAnalytics} />
       <Route path="/kitchen" component={Kitchen} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

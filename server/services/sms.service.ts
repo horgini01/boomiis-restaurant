@@ -188,6 +188,37 @@ async function sendViaTwilio({ to, message }: SendSMSParams): Promise<SMSResult>
 }
 
 /**
+ * Send SMS and log to database for tracking
+ * @param params - SMS parameters including template type and metadata
+ * @returns Promise with SMS send result
+ */
+export async function sendAndLogSMS(params: {
+  to: string;
+  message: string;
+  templateType: string;
+  recipientName?: string;
+  metadata?: Record<string, any>;
+}): Promise<SMSResult> {
+  const result = await sendSMS({ to: params.to, message: params.message });
+  
+  // Log SMS to database
+  const { logSMS } = await import('./sms-logger');
+  await logSMS({
+    templateType: params.templateType,
+    recipientPhone: params.to,
+    recipientName: params.recipientName,
+    message: params.message,
+    provider: (result.provider as 'bulksms' | 'textlocal') || 'bulksms',
+    providerId: result.messageId,
+    status: result.success ? 'sent' : 'failed',
+    errorMessage: result.error,
+    metadata: params.metadata,
+  });
+  
+  return result;
+}
+
+/**
  * Send SMS notification to customer using configured provider
  * @param to - Customer phone number
  * @param message - SMS message content
@@ -251,9 +282,12 @@ export async function sendOrderReadyForPickupSMS(
     message = `Hi ${customerName}! Your order #${orderNumber} is ready for pickup at Boomiis Restaurant. See you soon!`;
   }
   
-  const result = await sendSMS({
+  const result = await sendAndLogSMS({
     to: customerPhone,
     message,
+    templateType: 'order_ready',
+    recipientName: customerName,
+    metadata: { orderNumber },
   });
   
   if (result.success) {
@@ -288,9 +322,12 @@ export async function sendOrderOutForDeliverySMS(
     message = `Hi ${customerName}! Your order #${orderNumber} is out for delivery and will arrive in approximately ${estimatedMinutes} minutes.`;
   }
   
-  const result = await sendSMS({
+  const result = await sendAndLogSMS({
     to: customerPhone,
     message,
+    templateType: 'out_for_delivery',
+    recipientName: customerName,
+    metadata: { orderNumber, estimatedMinutes },
   });
   
   if (result.success) {
@@ -376,9 +413,12 @@ export async function sendOrderStatusSMS(
     }
   }
   
-  const result = await sendSMS({
+  const result = await sendAndLogSMS({
     to: customerPhone,
     message,
+    templateType,
+    recipientName: customerName,
+    metadata: { orderNumber, estimatedMinutes },
   });
   
   if (result.success) {

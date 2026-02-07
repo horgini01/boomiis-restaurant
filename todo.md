@@ -1646,3 +1646,53 @@
 - [ ] Test all email templates with custom content
 - [ ] Test all SMS templates with custom content
 - [ ] Verify all workflows trigger both email and SMS
+
+
+### Email Delivery Tracking Dashboard - COMPLETE ✅RESS
+
+#### Database Schema
+- [x] Create emailLogs table with delivery status, open tracking, bounce tracking (already exists in schema)
+- [ ] Add indexes for efficient querying by date, template type, status
+- [x] Create smsLogs table with delivery status, cost tracking, provider info (added to schema.ts)
+- [ ] Add indexes for SMS logs by date, template type, provider
+
+#### Email Tracking Implementation
+- [x] Implement Resend webhook endpoint for delivery events (created /api/resend/webhook)
+- [x] Track email sent, delivered, opened, bounced, complained events (webhook handler updates emailLogs)
+- [x] Store email metadata (recipient, template type, subject, timestamp) (emailLogs table already has all fields)
+- [ ] Calculate open rates and delivery rates per template type (will be done in analytics endpoint)
+
+#### SMS Tracking Implementation
+- [x] Add SMS logging to all sendSMS functions in sms.service.ts (created sendAndLogSMS wrapper, refactored all functions)
+- [x] Track SMS delivery status from BulkSMS/TextLocal responses (logSMS captures provider response)
+- [x] Calculate SMS costs based on provider pricing (calculateSMSCost in sms-logger.ts: BulkSMS £0.04/segment, TextLocal £0.035/segment)
+- [x] Store SMS metadata (recipient, template type, message length, timestamp) (smsLogs table stores all metadata)
+
+#### Backend API Endpoints
+- [x] Create email analytics endpoint (total sent, delivered, opened, bounced) (analytics.email.analytics)
+- [x] Create email logs list endpoint with pagination and filters (analytics.email.logs)
+- [x] Create SMS analytics endpoint (total sent, delivered, cost breakdown) (analytics.sms.analytics)
+- [x] Create SMS logs list endpoint with pagination and filters (analytics.sms.logs)
+- [x] Add date range filtering for both dashboards (startDate/endDate params)
+- [x] Add template type filtering for both dashboards (templateType param)
+
+#### Email Dashboard UI
+- [x] Create Email Tracking page at /admin/email-tracking (EmailTracking.tsx)
+- [x] Add summary cards (Total Sent, Delivery Rate, Open Rate, Bounce Rate)
+- [x] Create email logs table with columns (Date, Recipient, Template, Subject, Status)
+- [x] Add date range picker and template type filter
+- [x] Add pagination for email logs table
+- [x] Add export to CSV functionality
+### SMS Analytics Dashboard - COMPLETE ✅] Create SMS Analytics page at /admin/sms-analytics (SMSAnalytics.tsx)
+- [x] Add summary cards (Total Sent, Delivery Rate, Total Cost, Avg Cost per SMS)
+- [x] Create SMS logs table with columns (Date, Recipient, Template, Message, Status, Cost)
+- [x] Add date range picker and template type filter
+- [x] Add pagination for SMS logs table
+- [x] Add cost breakdown by template type chart (byTemplate table)
+- [x] Add export to CSV functionality
+
+#### Navigation and Integration
+- [ ] Add Email Tracking link to admin sidebar navigation
+- [ ] Add SMS Analytics link to admin sidebar navigation
+- [ ] Add quick links from Email Templates page to Email Tracking
+- [ ] Add quick links from SMS Templates page to SMS Analytics

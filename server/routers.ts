@@ -15,9 +15,11 @@ import { storagePut, storageGet } from "./storage";
 import { optimizeAndUploadImage } from "./imageOptimization";
 import { adminUserManagementRouter } from "./adminUserManagement";
 import { customRolesRouter } from "./customRoles";
+import { analyticsRouter } from "./routers/analytics";
 
 export const appRouter = router({
   system: systemRouter,
+  analytics: analyticsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     login: publicProcedure
