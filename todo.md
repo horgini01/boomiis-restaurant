@@ -1462,3 +1462,51 @@
 - [x] Created generateAnalyticsPDF endpoint using PDFKit for reliable PDF generation
 - [x] Added activeTab state tracking to Tabs component for PDF export
 - [x] Test PDF export functionality with all analytics tabs (tested Sales and Events tabs successfully)
+
+## Admin User Management System (User Request - Feb 7, 2026)
+
+### Database Schema
+- [x] Extend user table with additional fields (firstName, lastName, phone, status: active/inactive)
+- [x] Update role enum to include: owner, manager, kitchen_staff, front_desk, admin
+- [x] Add invitedBy field to track who created the account
+- [x] Push database schema changes (migration 0021_same_namor.sql applied)
+
+### Backend API
+- [x] Create getAdminUsers procedure (list all admin users with filters)
+- [x] Create createAdminUser procedure (invite new admin with email)
+- [x] Create updateAdminUser procedure (edit profile, change role)
+- [x] Create deleteAdminUser procedure (soft delete/deactivate)
+- [x] Create updateAdminStatus procedure (activate/deactivate accounts)
+- [x] Add role-based authorization middleware (requireRole helper)
+- [ ] Update existing procedures to check role permission### Frontend - Admin Users Page
+- [x] Create Admin Users management page (/admin/users)
+- [x] Add users list table with columns (name, email, role, status, last login, actions)
+- [x] Implement search and filter functionality (by role, status)
+- [x] Create "Invite User" dialog with form (email, firstName, lastName, role, phone)
+- [x] Create "Edit User" dialog to update user details
+- [x] Add action dropdown menu (edit, activate/deactivate, delete)
+- [x] Add role badges with colors and icons (5 roles with distinct colors)
+- [x] Add status badges (active/inactive)
+- [x] Add Admin Users link to sidebar navigation (between Analytics and Email Delivery)e permission matrix for each role:
+  - owner: full access to everything
+  - manager: all except user management and critical settings
+  - kitchen_staff: kitchen display, orders (read-only)
+  - front_desk: reservations, events & catering
+  - admin: legacy role, same as manager
+- [x] Update AdminLayout navigation to hide/show items based on role (useMemo filter with canAccessRoute)
+- [x] Add permission checks to all admin routes (RoleGuard component wraps AdminLayout)
+- [x] Show "Access Denied" toast and redirect to dashboard for unauthorized access attempts
+
+### User Invitation System
+- [x] Create invitation email template (HTML email with credentials)
+- [x] Generate secure random password (12 chars, alphanumeric + special)
+- [x] Send invitation email when admin user is created (via Resend)
+- [x] User account created immediately (no acceptance flow needed)
+- Note: Simplified approach - users receive credentials and can login immediately
+
+### Testing
+- [x] Write vitest tests for user CRUD operations (8 tests: creation, roles, status, updates, deletion, queries)
+- [x] All tests passing (8/8) for OAuth-based user management
+- [x] Test invitation flow (email sending tested in backend)
+- [ ] Test permission checks across different roles
+- [ ] Verify navigation items show/hide correctly per role

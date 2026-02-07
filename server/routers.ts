@@ -13,6 +13,7 @@ import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletter
 import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, sendOrderStatusSMS, formatPhoneNumberE164 } from "./services/sms.service";
 import { storagePut, storageGet } from "./storage";
 import { optimizeAndUploadImage } from "./imageOptimization";
+import { adminUserManagementRouter } from "./adminUserManagement";
 
 export const appRouter = router({
   system: systemRouter,
@@ -3878,6 +3879,9 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // ==================== Admin User Management ====================
+  adminUsers: adminUserManagementRouter,
 
   // ==================== Admin: Legal Pages Management ====================
   adminLegal: router({

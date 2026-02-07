@@ -18,6 +18,7 @@ import {
   Store,
   Mail,
   Users,
+  UserCog,
   Send,
   MessageSquare,
   Star,
@@ -26,8 +27,10 @@ import {
   BookOpen,
   Scale,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useSettings } from '@/hooks/useSettings';
+import { canAccessRoute, type Role } from '@/lib/rolePermissions';
+import RoleGuard from './RoleGuard';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -46,7 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     },
   });
 
-  const navItems = [
+  const allNavItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/categories', label: 'Categories', icon: FolderTree },
     { path: '/admin/menu-items', label: 'Menu Items', icon: UtensilsCrossed },
@@ -62,6 +65,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/about-content', label: 'About Content', icon: BookOpen },
     { path: '/admin/legal-pages', label: 'Legal Pages', icon: Scale },
     { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { path: '/admin/users', label: 'Admin Users', icon: UserCog },
     { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail },
     { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users },
     { path: '/admin/email-campaigns', label: 'Email Campaigns', icon: Send },
@@ -69,6 +73,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store },
     { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
   ];
+
+  // Filter navigation items based on user role
+  const navItems = useMemo(() => {
+    if (!user?.role) return [];
+    return allNavItems.filter(item => canAccessRoute(user.role as Role, item.path));
+  }, [user?.role]);
 
   const NavLinks = () => (
     <>
@@ -92,7 +102,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   );
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <RoleGuard>
+      <div className="min-h-screen flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-background">
         <h1 className="text-xl font-bold text-primary">{restaurantName} Admin</h1>
@@ -146,5 +157,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </main>
     </div>
+    </RoleGuard>
   );
 }

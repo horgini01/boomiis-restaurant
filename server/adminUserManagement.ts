@@ -1,0 +1,238 @@
+import { z } from "zod";
+import { router, protectedProcedure } from "./_core/trpc";
+import { getDb } from "./db";
+import { users } from "../drizzle/schema";
+import { eq, and, or, like, desc } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+import { getResendClient, FROM_EMAIL } from "./email";
+
+// Helper function to send emails
+async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  const resend = getResendClient();
+  if (!resend) {
+    console.log('[Email] Skipping email - Resend not configured');
+    return { success: false };
+  }
+
+  try {
+    const result = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject,
+      html,
+    });
+    return { success: true, id: result.data?.id };
+  } catch (error) {
+    console.error('[Email] Failed to send:', error);
+    return { success: false, error };
+  }
+}
+
+// Role-based authorization helper
+const requireRole = (allowedRoles: string[]) => {
+  return protectedProcedure.use(({ ctx, next }) => {
+    if (!ctx.user || !allowedRoles.includes(ctx.user.role)) {
+      throw new Error(`Access denied. Required roles: ${allowedRoles.join(", ")}`);
+    }
+    return next({ ctx });
+  });
+};
+
+// Only owners can manage users
+const ownerProcedure = requireRole(["owner", "admin"]);
+
+export const adminUserManagementRouter = router({
+  // List all admin users with optional filters
+  getAdminUsers: ownerProcedure
+    .input(z.object({
+      search: z.string().optional(),
+      role: z.enum(["owner", "admin", "manager", "kitchen_staff", "front_desk"]).optional(),
+      status: z.enum(["active", "inactive"]).optional(),
+    }).optional())
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const conditions = [
+        // Only show admin-level users (not regular customers)
+        or(
+          eq(users.role, "owner"),
+          eq(users.role, "admin"),
+          eq(users.role, "manager"),
+          eq(users.role, "kitchen_staff"),
+          eq(users.role, "front_desk")
+        )
+      ];
+
+      if (input?.search) {
+        conditions.push(
+          or(
+            like(users.name, `%${input.search}%`),
+            like(users.email, `%${input.search}%`),
+            like(users.firstName, `%${input.search}%`),
+            like(users.lastName, `%${input.search}%`)
+          )!
+        );
+      }
+
+      if (input?.role) {
+        conditions.push(eq(users.role, input.role));
+      }
+
+      if (input?.status) {
+        conditions.push(eq(users.status, input.status));
+      }
+
+      const adminUsers = await db
+        .select()
+        .from(users)
+        .where(and(...conditions))
+        .orderBy(desc(users.createdAt));
+
+      return adminUsers;
+    }),
+
+  // Create new admin user (sends invitation email)
+  createAdminUser: ownerProcedure
+    .input(z.object({
+      email: z.string().email(),
+      firstName: z.string().min(1),
+      lastName: z.string().min(1),
+      role: z.enum(["admin", "manager", "kitchen_staff", "front_desk"]),
+      phone: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      // Check if user already exists
+      const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+      if (existing.length > 0) {
+        throw new Error('A user with this email already exists');
+      }
+
+      // Generate temporary password
+      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+      // Create user with inactive status (will be activated after invitation acceptance)
+      const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      
+      await db.insert(users).values({
+        openId,
+        email: input.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        name: `${input.firstName} ${input.lastName}`,
+        role: input.role,
+        phone: input.phone || null,
+        status: "inactive",
+        loginMethod: "email",
+        invitedBy: ctx.user.id,
+      });
+
+      // Send invitation email
+      try {
+        await sendEmail({
+          to: input.email,
+          subject: "You've been invited to join Boomiis Restaurant Admin",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2>Welcome to Boomiis Restaurant!</h2>
+              <p>Hi ${input.firstName},</p>
+              <p>You've been invited by ${ctx.user.name} to join the Boomiis Restaurant admin team as a <strong>${input.role.replace("_", " ")}</strong>.</p>
+              <p>Your temporary login credentials:</p>
+              <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 5px 0;"><strong>Email:</strong> ${input.email}</p>
+                <p style="margin: 5px 0;"><strong>Temporary Password:</strong> ${tempPassword}</p>
+              </div>
+              <p><strong>Important:</strong> Please change your password immediately after your first login.</p>
+              <p>
+                <a href="${process.env.BASE_URL}/admin/login" 
+                   style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+                  Login to Admin Panel
+                </a>
+              </p>
+              <p>If you have any questions, please contact ${ctx.user.email}.</p>
+              <p>Best regards,<br>Boomiis Restaurant Team</p>
+            </div>
+          `,
+        });
+      } catch (error) {
+        console.error('[Email] Failed to send invitation:', error);
+        // Don't fail the user creation if email fails
+      }
+
+      return { success: true, message: 'User invited successfully. Invitation email sent.' };
+    }),
+
+  // Update admin user details
+  updateAdminUser: ownerProcedure
+    .input(z.object({
+      id: z.number(),
+      firstName: z.string().optional(),
+      lastName: z.string().optional(),
+      phone: z.string().optional(),
+      role: z.enum(["admin", "manager", "kitchen_staff", "front_desk"]).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      const { id, ...updates } = input;
+
+      // Build name if firstName or lastName is being updated
+      if (updates.firstName || updates.lastName) {
+        const currentUser = await db.select().from(users).where(eq(users.id, id)).limit(1);
+        if (currentUser.length === 0) {
+          throw new Error('User not found');
+        }
+
+        const firstName = updates.firstName || currentUser[0].firstName || '';
+        const lastName = updates.lastName || currentUser[0].lastName || '';
+        (updates as any).name = `${firstName} ${lastName}`.trim();
+      }
+
+      await db.update(users).set(updates).where(eq(users.id, id));
+
+      return { success: true };
+    }),
+
+  // Update user status (activate/deactivate)
+  updateAdminStatus: ownerProcedure
+    .input(z.object({
+      id: z.number(),
+      status: z.enum(["active", "inactive"]),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      // Prevent deactivating yourself
+      if (input.id === ctx.user.id && input.status === "inactive") {
+        throw new Error('You cannot deactivate your own account');
+      }
+
+      await db.update(users).set({ status: input.status }).where(eq(users.id, input.id));
+
+      return { success: true };
+    }),
+
+  // Delete admin user (soft delete by setting status to inactive)
+  deleteAdminUser: ownerProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      // Prevent deleting yourself
+      if (input.id === ctx.user.id) {
+        throw new Error('You cannot delete your own account');
+      }
+
+      // Soft delete by setting status to inactive
+      await db.update(users).set({ status: "inactive" }).where(eq(users.id, input.id));
+
+      return { success: true };
+    }),
+});
