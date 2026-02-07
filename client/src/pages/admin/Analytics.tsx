@@ -5,8 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { trpc } from '@/lib/trpc';
-import { Loader2, TrendingUp, DollarSign, ShoppingCart, Clock, Users, Award, Download, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Loader2, TrendingUp, DollarSign, ShoppingCart, Clock, Users, Award, Download, Calendar as CalendarIcon, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText } from 'lucide-react';
+import { useMemo, useState, useRef } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { format, startOfDay, subDays, eachDayOfInterval, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import {
   LineChart,
@@ -24,10 +29,15 @@ import {
   Cell,
 } from 'recharts';
 
-type DateRange = 'last7' | 'last30' | 'last90' | 'thisMonth' | 'lastMonth';
+type DateRange = 'last7' | 'last30' | 'last90' | 'thisMonth' | 'lastMonth' | 'custom';
 
 export default function Analytics() {
   const [dateRange, setDateRange] = useState<DateRange>('last30');
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>(undefined);
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>(undefined);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Calculate date range
   const { startDate, endDate } = useMemo(() => {
@@ -35,37 +45,98 @@ export default function Analytics() {
     let start: Date;
     let end: Date = now;
 
-    switch (dateRange) {
-      case 'last7':
-        start = subDays(now, 6);
-        break;
-      case 'last30':
-        start = subDays(now, 29);
-        break;
-      case 'last90':
-        start = subDays(now, 89);
-        break;
-      case 'thisMonth':
-        start = startOfMonth(now);
-        break;
-      case 'lastMonth':
-        start = startOfMonth(subMonths(now, 1));
-        end = endOfMonth(subMonths(now, 1));
-        break;
-      default:
-        start = subDays(now, 29);
+    if (dateRange === 'custom' && customStartDate && customEndDate) {
+      start = customStartDate;
+      end = customEndDate;
+    } else {
+      switch (dateRange) {
+        case 'last7':
+          start = subDays(now, 6);
+          break;
+        case 'last30':
+          start = subDays(now, 29);
+          break;
+        case 'last90':
+          start = subDays(now, 89);
+          break;
+        case 'thisMonth':
+          start = startOfMonth(now);
+          break;
+        case 'lastMonth':
+          start = startOfMonth(subMonths(now, 1));
+          end = endOfMonth(subMonths(now, 1));
+          break;
+        default:
+          start = subDays(now, 29);
+      }
     }
 
     return {
       startDate: format(start, 'yyyy-MM-dd'),
       endDate: format(end, 'yyyy-MM-dd'),
     };
-  }, [dateRange]);
+  }, [dateRange, customStartDate, customEndDate]);
 
+  const utils = trpc.useUtils();
   const { data: orders, isLoading: ordersLoading } = trpc.admin.getOrders.useQuery();
   const { data: customerInsights, isLoading: customerLoading } = trpc.admin.customerInsights.useQuery({ startDate, endDate });
   const { data: menuPerformance, isLoading: menuLoading } = trpc.admin.menuPerformance.useQuery({ startDate, endDate });
   const { data: reservationAnalytics, isLoading: reservationLoading } = trpc.admin.reservationAnalytics.useQuery({ startDate, endDate });
+  const { data: eventCateringAnalytics, isLoading: eventCateringLoading } = trpc.admin.eventCateringAnalytics.useQuery({ startDate, endDate });
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      utils.admin.getOrders.invalidate(),
+      utils.admin.customerInsights.invalidate(),
+      utils.admin.menuPerformance.invalidate(),
+      utils.admin.reservationAnalytics.invalidate(),
+      utils.admin.eventCateringAnalytics.invalidate(),
+    ]);
+    setLastRefreshed(new Date());
+  };
+
+  const exportToPDF = async () => {
+    if (!contentRef.current) return;
+    
+    setIsExportingPDF(true);
+    try {
+      const canvas = await html2canvas(contentRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#000000',
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      pdf.save(`analytics-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
 
   // Calculate analytics data for charts
   const analyticsData = useMemo(() => {
@@ -134,7 +205,7 @@ export default function Analytics() {
     };
   }, [orders, startDate, endDate]);
 
-  const isLoading = ordersLoading || customerLoading || menuLoading || reservationLoading;
+  const isLoading = ordersLoading || customerLoading || menuLoading || reservationLoading || eventCateringLoading;
 
   // Export functions
   const exportToCSV = (data: any[], filename: string) => {
@@ -159,32 +230,102 @@ export default function Analytics() {
       <AdminLayout>
         <div>
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-4xl font-bold">Analytics</h1>
-            <Select value={dateRange} onValueChange={(value) => setDateRange(value as DateRange)}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select date range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="last7">Last 7 Days</SelectItem>
-                <SelectItem value="last30">Last 30 Days</SelectItem>
-                <SelectItem value="last90">Last 90 Days</SelectItem>
-                <SelectItem value="thisMonth">This Month</SelectItem>
-                <SelectItem value="lastMonth">Last Month</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <h1 className="text-4xl font-bold">Analytics</h1>
+              <p className="text-sm text-muted-foreground mt-2">
+                Last updated: {format(lastRefreshed, 'MMM dd, yyyy HH:mm:ss')}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={exportToPDF}
+                disabled={isExportingPDF || isLoading}
+              >
+                <FileText className={cn("h-4 w-4 mr-2", isExportingPDF && "animate-pulse")} />
+                {isExportingPDF ? 'Generating...' : 'Download Report'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isLoading}
+              >
+                <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
+                Refresh
+              </Button>
+              <Select value={dateRange} onValueChange={(value) => setDateRange(value as DateRange)}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last7">Last 7 Days</SelectItem>
+                  <SelectItem value="last30">Last 30 Days</SelectItem>
+                  <SelectItem value="last90">Last 90 Days</SelectItem>
+                  <SelectItem value="thisMonth">This Month</SelectItem>
+                  <SelectItem value="lastMonth">Last Month</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+              {dateRange === 'custom' && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[280px] justify-start text-left font-normal",
+                        !customStartDate && !customEndDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {customStartDate && customEndDate ? (
+                        <>
+                          {format(customStartDate, 'MMM dd, yyyy')} - {format(customEndDate, 'MMM dd, yyyy')}
+                        </>
+                      ) : (
+                        <span>Pick date range</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <div className="p-3 border-b">
+                      <p className="text-sm font-medium">Select Start Date</p>
+                      <Calendar
+                        mode="single"
+                        selected={customStartDate}
+                        onSelect={setCustomStartDate}
+                        disabled={(date) => date > new Date()}
+                      />
+                    </div>
+                    <div className="p-3">
+                      <p className="text-sm font-medium">Select End Date</p>
+                      <Calendar
+                        mode="single"
+                        selected={customEndDate}
+                        onSelect={setCustomEndDate}
+                        disabled={(date) => date > new Date() || (customStartDate ? date < customStartDate : false)}
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
           </div>
 
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <Tabs defaultValue="sales" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
+          <div ref={contentRef}>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <Tabs defaultValue="sales" className="w-full">
+              <TabsList className="grid w-full grid-cols-5 mb-8">
                 <TabsTrigger value="sales">Sales Overview</TabsTrigger>
                 <TabsTrigger value="customers">Customer Insights</TabsTrigger>
                 <TabsTrigger value="menu">Menu Performance</TabsTrigger>
                 <TabsTrigger value="reservations">Reservations</TabsTrigger>
+                <TabsTrigger value="events">Events & Catering</TabsTrigger>
               </TabsList>
 
               {/* Sales Overview Tab */}
@@ -655,10 +796,151 @@ export default function Analytics() {
                       </Card>
                     </div>
                   </div>
+                 )}
+              </TabsContent>
+
+              {/* Events & Catering Tab */}
+              <TabsContent value="events">
+                {eventCateringAnalytics && (
+                  <div className="space-y-6">
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      <Card className="border-border/50">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Total Inquiries</CardTitle>
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold">{eventCateringAnalytics.totalInquiries}</div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-border/50">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Conversion Rate</CardTitle>
+                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold">{eventCateringAnalytics.conversionRate}%</div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {eventCateringAnalytics.statusBreakdown.booked} booked
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-border/50">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Avg Guest Count</CardTitle>
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold">{eventCateringAnalytics.avgGuestCount}</div>
+                          <p className="text-xs text-muted-foreground mt-1">per event</p>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-border/50">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+                          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold">{eventCateringAnalytics.statusBreakdown.new + eventCateringAnalytics.statusBreakdown.contacted}</div>
+                          <p className="text-xs text-muted-foreground mt-1">needs follow-up</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Status Breakdown */}
+                    <Card className="border-border/50">
+                      <CardHeader>
+                        <CardTitle>Inquiry Status Breakdown</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-5 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-500">{eventCateringAnalytics.statusBreakdown.new}</div>
+                            <p className="text-sm text-muted-foreground">New</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-yellow-500">{eventCateringAnalytics.statusBreakdown.contacted}</div>
+                            <p className="text-sm text-muted-foreground">Contacted</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-purple-500">{eventCateringAnalytics.statusBreakdown.quoted}</div>
+                            <p className="text-sm text-muted-foreground">Quoted</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-500">{eventCateringAnalytics.statusBreakdown.booked}</div>
+                            <p className="text-sm text-muted-foreground">Booked</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-red-500">{eventCateringAnalytics.statusBreakdown.cancelled}</div>
+                            <p className="text-sm text-muted-foreground">Cancelled</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Event Types Distribution */}
+                      <Card className="border-border/50">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                          <CardTitle>Popular Event Types</CardTitle>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportToCSV(eventCateringAnalytics.eventTypes, 'event-types')}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Export CSV
+                          </Button>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={eventCateringAnalytics.eventTypes}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                              <XAxis dataKey="type" stroke="#888" />
+                              <YAxis stroke="#888" />
+                              <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
+                              <Bar dataKey="count" fill="#8b5cf6" name="Inquiries" animationDuration={800} animationBegin={0} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+
+                      {/* Monthly Trend */}
+                      <Card className="border-border/50">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                          <CardTitle>Monthly Inquiry Trend</CardTitle>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => exportToCSV(eventCateringAnalytics.monthlyTrend, 'monthly-trend')}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Export CSV
+                          </Button>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={eventCateringAnalytics.monthlyTrend}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                              <XAxis dataKey="month" stroke="#888" />
+                              <YAxis stroke="#888" />
+                              <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
+                              <Line type="monotone" dataKey="count" stroke="#10b981" name="Inquiries" strokeWidth={2} animationDuration={800} animationBegin={0} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
                 )}
               </TabsContent>
             </Tabs>
-          )}
+            )}
+          </div>
         </div>
       </AdminLayout>
     </AdminGuard>

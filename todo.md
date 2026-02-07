@@ -1437,3 +1437,12 @@
 - [x] Add smooth entry animations to all charts in Analytics dashboard (800ms duration)
 - [x] Configure animation duration and easing for professional feel (staggered Line chart animations)
 - [x] Test animations across all four analytics tabs (Sales, Customer, Menu, Reservations)
+
+## Analytics Enhancements (User Request - Feb 6)
+- [x] Add Events & Catering analytics tab with metrics (total inquiries, conversion rate, avg guests, status breakdown)
+- [x] Create backend procedure for Events & Catering analytics data (eventCateringAnalytics)
+- [x] Implement custom date range picker with calendar component (dual calendar for start/end dates)
+- [x] Add data refresh indicator with last updated timestamp
+- [x] Add manual refresh button to reload analytics data
+- [x] Implement PDF export functionality for comprehensive analytics reports (jsPDF + html2canvas)
+- [x] Add "Download Report" button to export current analytics view as PDF

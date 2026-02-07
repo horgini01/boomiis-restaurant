@@ -955,6 +955,85 @@ export const appRouter = router({
         };
       }),
 
+    eventCateringAnalytics: protectedProcedure
+      .input(z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get event inquiries in date range
+        const inquiriesData = await db.select().from(eventInquiries)
+          .where(and(
+            sql`DATE(${eventInquiries.createdAt}) >= ${input.startDate}`,
+            sql`DATE(${eventInquiries.createdAt}) <= ${input.endDate}`
+          ));
+
+        // Status breakdown
+        const statusBreakdown = {
+          new: inquiriesData.filter(i => i.status === 'new').length,
+          contacted: inquiriesData.filter(i => i.status === 'contacted').length,
+          quoted: inquiriesData.filter(i => i.status === 'quoted').length,
+          booked: inquiriesData.filter(i => i.status === 'booked').length,
+          cancelled: inquiriesData.filter(i => i.status === 'cancelled').length,
+        };
+
+        // Event types distribution
+        const eventTypeStats: Record<string, number> = {};
+        inquiriesData.forEach(inquiry => {
+          eventTypeStats[inquiry.eventType] = (eventTypeStats[inquiry.eventType] || 0) + 1;
+        });
+
+        const eventTypes = Object.entries(eventTypeStats)
+          .map(([type, count]) => ({
+            type,
+            count,
+          }))
+          .sort((a, b) => b.count - a.count);
+
+        // Average guest count
+        const totalGuests = inquiriesData.reduce((sum, i) => sum + (i.guestCount || 0), 0);
+        const avgGuestCount = inquiriesData.length > 0
+          ? (totalGuests / inquiriesData.length).toFixed(0)
+          : '0';
+
+        // Conversion rate (booked / total)
+        const bookedCount = statusBreakdown.booked;
+        const totalInquiries = inquiriesData.length;
+        const conversionRate = totalInquiries > 0
+          ? ((bookedCount / totalInquiries) * 100).toFixed(1)
+          : '0';
+
+        // Monthly trend (group by month)
+        const monthlyStats: Record<string, number> = {};
+        inquiriesData.forEach(inquiry => {
+          const month = new Date(inquiry.createdAt).toISOString().slice(0, 7); // YYYY-MM
+          monthlyStats[month] = (monthlyStats[month] || 0) + 1;
+        });
+
+        const monthlyTrend = Object.entries(monthlyStats)
+          .map(([month, count]) => ({
+            month,
+            count,
+          }))
+          .sort((a, b) => a.month.localeCompare(b.month));
+
+        return {
+          statusBreakdown,
+          eventTypes,
+          avgGuestCount,
+          conversionRate,
+          totalInquiries,
+          monthlyTrend,
+        };
+      }),
+
     // Generate weekly report data
     generateWeeklyReport: protectedProcedure
       .query(async ({ ctx }) => {
