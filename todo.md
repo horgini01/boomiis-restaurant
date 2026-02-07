@@ -1837,3 +1837,8 @@
 - [x] Identify GROUP BY query error in getAuditStats (selecting id without aggregation)
 - [x] Fix query to use count() aggregation function for most active users
 - [x] Test audit logs page loads without SQL errors
+
+### Fix Remaining Admin Access Required Errors
+- [x] Search for all "Admin access required" error messages in routers
+- [x] Update 5 remaining admin-only checks to allow owner/admin/manager roles
+- [x] Test orders page and other admin pages load without errors

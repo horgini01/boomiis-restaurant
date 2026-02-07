@@ -429,7 +429,7 @@ export const appRouter = router({
         mimeType: z.string(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user?.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
           throw new Error('Admin access required');
         }
 
@@ -1493,7 +1493,7 @@ export const appRouter = router({
         priceChange: z.number(), // percentage change, e.g., 10 for 10% increase, -5 for 5% decrease
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user?.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
           throw new Error('Admin access required');
         }
 
@@ -1522,7 +1522,7 @@ export const appRouter = router({
         isAvailable: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user?.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
           throw new Error('Admin access required');
         }
 
@@ -1545,7 +1545,7 @@ export const appRouter = router({
         id: z.number(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user?.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
           throw new Error('Admin access required');
         }
 
@@ -1585,7 +1585,7 @@ export const appRouter = router({
 
     getMenuItems: protectedProcedure
       .query(async ({ ctx }) => {
-        if (ctx.user?.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
           throw new Error('Admin access required');
         }
 
