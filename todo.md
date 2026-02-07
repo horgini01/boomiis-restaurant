@@ -1842,3 +1842,8 @@
 - [x] Search for all "Admin access required" error messages in routers
 - [x] Update 5 remaining admin-only checks to allow owner/admin/manager roles
 - [x] Test orders page and other admin pages load without errors
+
+### Improve Audit Logs Page Documentation and Permissions
+- [x] Add descriptive note explaining what audit logs capture (added info box with 5 categories)
+- [x] Update role permissions page to include audit-logs in matrix (already included in System Administration category)
+- [x] Verify audit-logs route appears in all role permission displays (confirmed in routeCategories and routeLabels)

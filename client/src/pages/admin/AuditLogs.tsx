@@ -97,6 +97,16 @@ export default function AuditLogs() {
           <p className="text-muted-foreground mt-2">
             Track all administrative actions for accountability and compliance
           </p>
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg border">
+            <h3 className="font-semibold text-sm mb-2">What's Captured in Audit Logs:</h3>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>• <strong>Order Management:</strong> Status updates, modifications, and deletions</li>
+              <li>• <strong>Menu Operations:</strong> Item creation, updates, deletions, bulk price changes, and availability toggles</li>
+              <li>• <strong>User Management:</strong> Account deletions and role modifications</li>
+              <li>• <strong>Settings Changes:</strong> Restaurant settings updates and delivery zone modifications</li>
+              <li>• <strong>Metadata:</strong> User name, role, IP address, timestamp, and detailed before/after changes for each action</li>
+            </ul>
+          </div>
         </div>
 
         {/* Statistics Cards */}
