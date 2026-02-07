@@ -1546,3 +1546,8 @@
 - [x] Update role-based access control to support custom roles
 - [x] Write vitest tests for bulk user operations
 - [x] Write vitest tests for custom role CRUD operations
+
+## Grant Admin Access to Custom Roles (User Request - Feb 7)
+- [x] Update rolePermissions.ts to add /admin/custom-roles to admin role permissions
+- [x] Verify Admin users can see Custom Roles in sidebar navigation
+- [x] Test Custom Roles page access with Admin role

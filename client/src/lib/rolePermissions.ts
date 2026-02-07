@@ -47,6 +47,7 @@ export const rolePermissions: Record<Role, string[]> = {
     "/admin/analytics",
     "/admin/users",
     "/admin/role-permissions",
+    "/admin/custom-roles",
     "/admin/email-delivery",
     "/admin/newsletter-subscribers",
     "/admin/email-campaigns",
