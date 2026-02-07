@@ -1880,3 +1880,24 @@
 - [x] Add "Send Test Email" buttons next to each toggle in settings UI (added buttons for all 5 notification types)
 - [x] Add loading states and success/error toasts for test email buttons (using isSendingTestEmail state and toast notifications)
 - [x] Test all test email functionality (server running without errors, TypeScript compilation successful, all 5 test email buttons integrated)
+
+### Implement Password Reset Flow for Staff Accounts
+- [x] Design password reset tokens table schema (token, userId, expiresAt, used)
+- [x] Add passwordResetTokens table to drizzle schema (6 fields: id, userId, token, expiresAt, used, createdAt)
+- [x] Push database schema changes (migration 0026_watery_kat_farrell.sql applied successfully)
+- [x] Create forgot password API endpoint (sends email with reset link, generates secure token, 1-hour expiry)
+- [x] Create reset password API endpoint (validates token and updates password, marks token as used)
+- [x] Create change password API endpoint (for logged-in users, verifies current password)
+- [x] Create validate reset token endpoint (checks token validity before showing reset form)
+- [x] Add password reset router to main appRouter
+- [x] Build forgot password page UI (/forgot-password) with email input and success state
+- [x] Build reset password page UI (/reset-password?token=xxx) with token validation and password confirmation
+- [x] Add routes to App.tsx for forgot password and reset password pages
+- [x] Add "Forgot password?" link to admin login page
+- [x] Add change password section to user profile/settings (created dedicated /admin/change-password page)
+- [x] Add change password route to App.tsx
+- [x] Add change password navigation link to AdminLayout sidebar
+- [x] Create password reset email template (included in forgotPassword endpoint)
+- [x] Add password validation (minimum length 8 characters, enforced in UI and API)
+- [x] Write vitest tests for password reset flow (19 tests covering all scenarios - all passing)
+- [x] Test complete password reset workflow (forgot password, reset password, change password, token validation, security)

@@ -30,6 +30,7 @@ import {
   Scale,
   Shield,
   FileSearch,
+  Lock,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useSettings } from '@/hooks/useSettings';
@@ -84,6 +85,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/sms-analytics', label: 'SMS Analytics', icon: MessageCircle },
     { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store },
     { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
+    { path: '/admin/change-password', label: 'Change Password', icon: Lock },
   ];
 
   // Filter navigation items based on user role

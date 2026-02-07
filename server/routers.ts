@@ -17,12 +17,14 @@ import { adminUserManagementRouter } from "./adminUserManagement";
 import { customRolesRouter } from "./customRoles";
 import { analyticsRouter } from "./routers/analytics";
 import { auditLogsRouter } from "./routers/auditLogs";
+import { passwordResetRouter } from "./passwordReset";
 import { logAuditAction, getIpAddress, createChangesObject } from "./services/audit.service";
 
 export const appRouter = router({
   system: systemRouter,
   analytics: analyticsRouter,
   auditLogs: auditLogsRouter,
+  passwordReset: passwordResetRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     login: publicProcedure

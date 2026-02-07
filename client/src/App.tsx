@@ -21,6 +21,8 @@ import { About } from "./pages/About";
 import { Blog } from "./pages/Blog";
 import { BlogArticle } from "./pages/BlogArticle";
 import AdminLogin from "./pages/admin/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CategoriesManagement from "./pages/admin/Categories";
 import MenuItemsManagement from './pages/admin/MenuItems';
@@ -49,6 +51,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import RolePermissions from "./pages/admin/RolePermissions";
 import CustomRoles from "./pages/admin/CustomRoles";
 import AuditLogs from "./pages/admin/AuditLogs";
+import ChangePassword from "./pages/admin/ChangePassword";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import Accessibility from "./pages/Accessibility";
@@ -77,6 +80,8 @@ function Router() {
       <Route path="/accessibility" component={Accessibility} />
       <Route path="/submit-testimonial" component={SubmitTestimonial} />
       <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/categories" component={CategoriesManagement} />
       <Route path="/admin/menu-items" component={MenuItemsManagement} />
@@ -88,7 +93,8 @@ function Router() {
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/admin/role-permissions"} component={RolePermissions} />
       <Route path={"/admin/custom-roles"} component={CustomRoles} />
-      <Route path={"/admin/audit-logs"} component={AuditLogs} />
+        <Route path="/admin/audit-logs" component={AuditLogs} />
+      <Route path="/admin/change-password" component={ChangePassword} />
       <Route path={"/admin/settings"} component={Settings} />
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/admin/email-delivery"} component={EmailDelivery} />
