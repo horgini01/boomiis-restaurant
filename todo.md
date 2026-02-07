@@ -1832,3 +1832,8 @@
 - [x] Add search tips/help text for users (added to card description and input tooltip)
 - [x] Write vitest tests for search functionality (14 tests for containsSearchTerm and calculateRelevanceScore - all passing)
 - [x] Test search with various queries and edge cases (tested exact matches, partial matches, null/undefined, empty search, IP addresses, entity IDs, changes JSON, score accumulation)
+
+### Fix Audit Stats SQL Query Error
+- [x] Identify GROUP BY query error in getAuditStats (selecting id without aggregation)
+- [x] Fix query to use count() aggregation function for most active users
+- [x] Test audit logs page loads without SQL errors

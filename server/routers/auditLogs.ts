@@ -154,15 +154,16 @@ export const auditLogsRouter = router({
         .where(gte(auditLogs.createdAt, oneDayAgo));
 
       // Get most active users
+      const { count } = await import('drizzle-orm');
       const topUsers = await db
         .select({
           userId: auditLogs.userId,
           userName: auditLogs.userName,
-          count: auditLogs.id,
+          count: count(auditLogs.id),
         })
         .from(auditLogs)
         .groupBy(auditLogs.userId, auditLogs.userName)
-        .orderBy(desc(auditLogs.id))
+        .orderBy(desc(count(auditLogs.id)))
         .limit(5);
 
       return {
