@@ -364,6 +364,9 @@ export async function sendOrderStatusSMS(
       case 'order_cancelled':
         message = `Your order #${orderNumber} has been cancelled. If you have questions, please contact Boomiis Restaurant.`;
         break;
+      case 'order_completed':
+        message = `Thank you for your order #${orderNumber}, ${customerName}! We hope you enjoyed your meal from Boomiis Restaurant. We'd love to see you again soon!`;
+        break;
       default:
         console.warn(`[SMS] Unknown template type: ${templateType}`);
         return;
@@ -401,19 +404,34 @@ export async function sendReservationStatusSMS(
   const formattedDate = format(reservationDate, 'MMM dd, yyyy');
   
   let message = '';
+  let templateType = '';
   
   switch (status) {
     case 'confirmed':
+      templateType = 'reservation_confirmed';
       message = `Hi ${customerName}, your reservation at Boomiis Restaurant is CONFIRMED for ${formattedDate} at ${reservationTime}. We look forward to serving you! Reply STOP to opt out.`;
       break;
     case 'cancelled':
+      templateType = 'reservation_cancelled';
       message = `Hi ${customerName}, your reservation at Boomiis Restaurant for ${formattedDate} at ${reservationTime} has been CANCELLED. Contact us if you have questions. Reply STOP to opt out.`;
       break;
     case 'completed':
+      templateType = 'reservation_completed';
       message = `Thank you for dining with us, ${customerName}! We hope you enjoyed your experience at Boomiis Restaurant. We'd love to see you again soon! Reply STOP to opt out.`;
       break;
     default:
       message = `Hi ${customerName}, your reservation at Boomiis Restaurant for ${formattedDate} at ${reservationTime} has been updated. Status: ${status}. Reply STOP to opt out.`;
+  }
+  
+  // Try to get custom template from database if templateType is set
+  if (templateType) {
+    const customTemplate = await getSmsTemplateByType(templateType);
+    if (customTemplate) {
+      message = customTemplate.message
+        .replace(/{{customerName}}/g, customerName)
+        .replace(/{{reservationDate}}/g, formattedDate)
+        .replace(/{{reservationTime}}/g, reservationTime);
+    }
   }
   
   const result = await sendSMS({
