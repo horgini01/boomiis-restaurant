@@ -1606,13 +1606,26 @@
 - [x] Create Reservation Reminder SMS template in database (added 'reminder' case to sendReservationStatusSMS)
 - [x] Implement scheduled job to send reminders 24h before reservation (created reservation-reminders.ts job, setup-cron.ts scheduler, runs every hour)
 
-### PHASE 3 - LOWER PRIORITY (Admin/Optional) - PENDING
-- [ ] Add SMS template for New Order Notification (Admin)
-- [ ] Add SMS template for Weekly Report (Admin)
-- [ ] Add SMS template for Newsletter Confirmation
-- [ ] Implement Event Confirmation workflow (email + SMS)
-- [ ] Implement Event Inquiry Response workflow (email + SMS)
-- [ ] Implement Catering Quote Request workflow (email + SMS)
+### PHASE 3 - LOWER PRIORITY (Admin/Optional) - COMPLETE ✅
+
+#### Admin SMS Notifications
+- [x] Create SMS template for New Order Notification (Admin) (sendAdminNewOrderSMS added to sms.service.ts)
+- [x] Integrate New Order SMS into createOrder mutation (added to Stripe webhook after payment success)
+- [x] Create SMS template for Weekly Report (Admin) (sendAdminWeeklyReportSMS added to sms.service.ts)
+- [x] Integrate Weekly Report SMS into weekly report job (added to weekly-report.ts after email send)
+- [x] Create SMS template for Newsletter Confirmation (sendNewsletterConfirmationSMS added to sms.service.ts)
+- [x] Integrate Newsletter SMS into newsletter subscription workflow (added to newsletter.subscribe mutation with optional phone field)
+
+#### Event/Catering Workflows
+- [x] Create sendEventConfirmationEmail function in email.ts (sendEventConfirmationEmail added)
+- [x] Create Event Confirmation SMS template in sms.service.ts (sendEventConfirmationSMS added)
+- [x] Add Event Confirmation trigger to event inquiry status update (added to updateStatus mutation when status='booked')
+- [x] Create sendEventInquiryResponseEmail function in email.ts (sendEventInquiryResponseEmail added)
+- [x] Create Event Inquiry Response SMS template in sms.service.ts (sendEventInquiryResponseSMS added)
+- [x] Add Event Inquiry Response trigger to event inquiry response workflow (added sendResponse endpoint to eventInquiries router)
+- [x] Create sendCateringQuoteRequestEmail function in email.ts (sendCateringQuoteRequestEmail added)
+- [x] Create Catering Quote Request SMS template in sms.service.ts (sendCateringQuoteRequestSMS added)
+- [x] Add Catering Quote Request trigger to catering inquiry workflow (added requestCateringQuote endpoint to eventInquiries router)
 
 ### Implement Missing Workflows (5 Not-Integrated Templates)
 - [x] Implement Order Completed workflow (email already exists in sendOrderStatusUpdateEmail line 1271, SMS template added to sendOrderStatusSMS)

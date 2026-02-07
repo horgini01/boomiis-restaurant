@@ -452,3 +452,266 @@ export async function sendReservationStatusSMS(
     console.error(`[SMS] Failed to send reservation ${status} notification: ${result.error}`);
   }
 }
+
+/**
+ * Send SMS notification to admin for new orders
+ * @param adminPhone - Admin's phone number (E.164 format)
+ * @param orderNumber - Order number
+ * @param orderTotal - Order total amount
+ * @param orderType - Order type (delivery or pickup)
+ */
+export async function sendAdminNewOrderSMS(
+  adminPhone: string,
+  orderNumber: string,
+  orderTotal: number,
+  orderType: string
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('admin_new_order');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      orderNumber,
+      orderTotal: orderTotal.toFixed(2),
+      orderType,
+    });
+  } else {
+    // Fallback to default message
+    message = `[Boomiis] New ${orderType} order #${orderNumber} received! Total: £${orderTotal.toFixed(2)}. Check admin panel for details.`;
+  }
+  
+  const result = await sendSMS({
+    to: adminPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Admin new order notification sent to ${adminPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send admin new order notification: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS notification to admin for weekly sales report
+ * @param adminPhone - Admin's phone number (E.164 format)
+ * @param totalOrders - Total number of orders this week
+ * @param totalRevenue - Total revenue this week
+ * @param topItem - Best-selling item this week
+ */
+export async function sendAdminWeeklyReportSMS(
+  adminPhone: string,
+  totalOrders: number,
+  totalRevenue: number,
+  topItem: string
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('admin_weekly_report');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      totalOrders,
+      totalRevenue: totalRevenue.toFixed(2),
+      topItem,
+    });
+  } else {
+    // Fallback to default message
+    message = `[Boomiis] Weekly Report: ${totalOrders} orders, £${totalRevenue.toFixed(2)} revenue. Top item: ${topItem}. Full report in admin panel.`;
+  }
+  
+  const result = await sendSMS({
+    to: adminPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Admin weekly report sent to ${adminPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send admin weekly report: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS confirmation for newsletter subscription
+ * @param customerName - Customer's name
+ * @param customerPhone - Customer's phone number (E.164 format)
+ * @param customerEmail - Customer's email address
+ */
+export async function sendNewsletterConfirmationSMS(
+  customerName: string,
+  customerPhone: string,
+  customerEmail: string
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('newsletter_confirmation');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      customerEmail,
+    });
+  } else {
+    // Fallback to default message
+    message = `Hi ${customerName}! You're now subscribed to Boomiis Restaurant newsletter at ${customerEmail}. Get ready for exclusive offers and updates!`;
+  }
+  
+  const result = await sendSMS({
+    to: customerPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Newsletter confirmation sent to ${customerPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send newsletter confirmation: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS notification for event confirmation
+ * @param customerName - Customer's name
+ * @param customerPhone - Customer's phone number (E.164 format)
+ * @param eventType - Type of event
+ * @param eventDate - Event date
+ * @param guestCount - Number of guests
+ */
+export async function sendEventConfirmationSMS(
+  customerName: string,
+  customerPhone: string,
+  eventType: string,
+  eventDate: Date,
+  guestCount: number
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('event_confirmation');
+  
+  const formattedDate = eventDate.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      eventType,
+      eventDate: formattedDate,
+      guestCount,
+    });
+  } else {
+    // Fallback to default message
+    message = `Hi ${customerName}! Your ${eventType} event at Boomiis Restaurant is confirmed for ${formattedDate} with ${guestCount} guests. We're excited to host you!`;
+  }
+  
+  const result = await sendSMS({
+    to: customerPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Event confirmation sent to ${customerPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send event confirmation: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS response to event inquiry
+ * @param customerName - Customer's name
+ * @param customerPhone - Customer's phone number (E.164 format)
+ * @param eventType - Type of event
+ * @param responseMessage - Custom response message from admin
+ */
+export async function sendEventInquiryResponseSMS(
+  customerName: string,
+  customerPhone: string,
+  eventType: string,
+  responseMessage: string
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('event_inquiry_response');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      eventType,
+      responseMessage,
+    });
+  } else {
+    // Fallback to default message
+    message = `Hi ${customerName}! Regarding your ${eventType} inquiry at Boomiis: ${responseMessage}. Check your email for full details.`;
+  }
+  
+  const result = await sendSMS({
+    to: customerPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Event inquiry response sent to ${customerPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send event inquiry response: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS notification for catering quote request
+ * @param customerName - Customer's name
+ * @param customerPhone - Customer's phone number (E.164 format)
+ * @param cateringType - Type of catering service
+ * @param guestCount - Number of guests
+ * @param eventDate - Event date
+ */
+export async function sendCateringQuoteRequestSMS(
+  customerName: string,
+  customerPhone: string,
+  cateringType: string,
+  guestCount: number,
+  eventDate: Date
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('catering_quote_request');
+  
+  const formattedDate = eventDate.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      cateringType,
+      guestCount,
+      eventDate: formattedDate,
+    });
+  } else {
+    // Fallback to default message
+    message = `Hi ${customerName}! We received your catering quote request for ${cateringType} on ${formattedDate} (${guestCount} guests). We'll send you a detailed quote via email within 24 hours!`;
+  }
+  
+  const result = await sendSMS({
+    to: customerPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Catering quote request confirmation sent to ${customerPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send catering quote request confirmation: ${result.error}`);
+  }
+}

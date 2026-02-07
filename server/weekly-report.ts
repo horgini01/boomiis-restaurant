@@ -211,6 +211,23 @@ router.post('/api/send-weekly-report', async (req, res) => {
       subject,
       html: fullHtml,
     });
+    
+    // Send admin SMS notification
+    try {
+      const { sendAdminWeeklyReportSMS } = await import('./services/sms.service');
+      const adminPhone = process.env.ADMIN_PHONE;
+      if (adminPhone) {
+        await sendAdminWeeklyReportSMS(
+          adminPhone,
+          totalOrders,
+          totalRevenue,
+          topItem
+        );
+      }
+    } catch (smsError: any) {
+      console.error('[Weekly Report] Failed to send admin SMS notification:', smsError.message);
+      // Don't fail the request if SMS fails
+    }
 
     res.json({ success: true, message: 'Weekly report sent successfully' });
   } catch (error: any) {

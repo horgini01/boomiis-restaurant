@@ -49,6 +49,44 @@ const smsTemplates = [
     message: 'Your order #{{orderNumber}} has been cancelled. If you have questions, please contact Boomiis Restaurant.',
     isActive: true,
   },
+  // Phase 3: Admin SMS Notifications
+  {
+    templateType: 'admin_new_order',
+    templateName: 'Admin: New Order Alert',
+    message: '🔔 New Order #{{orderNumber}}! Total: £{{total}} | Type: {{orderType}}. Check admin panel for details.',
+    isActive: true,
+  },
+  {
+    templateType: 'admin_weekly_report',
+    templateName: 'Admin: Weekly Sales Report',
+    message: '📊 Weekly Report: {{totalOrders}} orders, £{{totalRevenue}} revenue. Top item: {{topItem}}. Full report sent to email.',
+    isActive: true,
+  },
+  {
+    templateType: 'newsletter_confirmation',
+    templateName: 'Newsletter Subscription Confirmed',
+    message: 'Hi {{customerName}}! You\'re now subscribed to Boomiis Restaurant newsletter ({{email}}). Stay tuned for exclusive offers!',
+    isActive: true,
+  },
+  // Phase 3: Event/Catering Workflows
+  {
+    templateType: 'event_confirmation',
+    templateName: 'Event Booking Confirmed',
+    message: 'Hi {{customerName}}! Your {{eventType}} is confirmed for {{eventDate}} ({{guestCount}} guests). Check your email for full details!',
+    isActive: true,
+  },
+  {
+    templateType: 'event_inquiry_response',
+    templateName: 'Event Inquiry Response',
+    message: 'Hi {{customerName}}! Regarding your {{eventType}} inquiry at Boomiis: {{responseMessage}}. Check your email for full details.',
+    isActive: true,
+  },
+  {
+    templateType: 'catering_quote_request',
+    templateName: 'Catering Quote Request Received',
+    message: 'Hi {{customerName}}! We received your catering quote request for {{cateringType}} on {{eventDate}} ({{guestCount}} guests). We\'ll send you a detailed quote via email within 24 hours!',
+    isActive: true,
+  },
 ];
 
 console.log('Seeding SMS templates...');

@@ -70,6 +70,7 @@ export const appRouter = router({
       .input(z.object({ 
         email: z.string().email(), 
         name: z.string().optional(),
+        phone: z.string().optional(),
         source: z.enum(["homepage", "checkout", "admin"]).default("homepage"),
       }))
       .mutation(async ({ input }) => {
@@ -106,6 +107,21 @@ export const appRouter = router({
 
         // Send confirmation email
         await sendNewsletterConfirmationEmail(input.email, input.name || 'Valued Customer');
+        
+        // Send SMS confirmation if phone provided
+        if (input.phone) {
+          try {
+            const { sendNewsletterConfirmationSMS } = await import('./services/sms.service');
+            await sendNewsletterConfirmationSMS(
+              input.name || 'Valued Customer',
+              input.phone,
+              input.email
+            );
+          } catch (smsError: any) {
+            console.error('[Newsletter] Failed to send SMS confirmation:', smsError.message);
+            // Don't fail the subscription if SMS fails
+          }
+        }
 
         return { success: true, message: 'Successfully subscribed' };
       }),
@@ -2968,6 +2984,147 @@ export const appRouter = router({
           });
         } catch (emailError: any) {
           console.error('[EventInquiry] Failed to send status email:', emailError.message);
+        }
+        
+        // Send Event Confirmation email and SMS when status is 'booked'
+        if (input.status === 'booked' && inquiry.eventDate && inquiry.guestCount) {
+          try {
+            const { sendEventConfirmationEmail } = await import('./email');
+            await sendEventConfirmationEmail({
+              customerName: inquiry.customerName,
+              customerEmail: inquiry.customerEmail,
+              eventType: inquiry.eventType,
+              eventDate: inquiry.eventDate,
+              guestCount: inquiry.guestCount,
+              specialRequests: inquiry.message,
+            });
+            
+            // Send SMS confirmation
+            if (inquiry.customerPhone) {
+              const { sendEventConfirmationSMS } = await import('./services/sms.service');
+              await sendEventConfirmationSMS(
+                inquiry.customerName,
+                inquiry.customerPhone,
+                inquiry.eventType,
+                inquiry.eventDate,
+                inquiry.guestCount
+              );
+            }
+          } catch (error: any) {
+            console.error('[EventInquiry] Failed to send event confirmation:', error.message);
+          }
+        }
+
+        return { success: true };
+      }),
+      
+    sendResponse: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        responseMessage: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Get inquiry details
+        const [inquiry] = await db.select().from(eventInquiries).where(eq(eventInquiries.id, input.id));
+        if (!inquiry) {
+          throw new Error('Event inquiry not found');
+        }
+
+        // Send Event Inquiry Response email and SMS
+        try {
+          const { sendEventInquiryResponseEmail } = await import('./email');
+          await sendEventInquiryResponseEmail({
+            customerName: inquiry.customerName,
+            customerEmail: inquiry.customerEmail,
+            eventType: inquiry.eventType,
+            responseMessage: input.responseMessage,
+          });
+          
+          // Send SMS response
+          if (inquiry.customerPhone) {
+            const { sendEventInquiryResponseSMS } = await import('./services/sms.service');
+            await sendEventInquiryResponseSMS(
+              inquiry.customerName,
+              inquiry.customerPhone,
+              inquiry.eventType,
+              input.responseMessage
+            );
+          }
+        } catch (error: any) {
+          console.error('[EventInquiry] Failed to send response:', error.message);
+          throw new Error('Failed to send response to customer');
+        }
+
+        // Update status to 'contacted' if it was 'new'
+        if (inquiry.status === 'new') {
+          await db.update(eventInquiries)
+            .set({ status: 'contacted', updatedAt: new Date() })
+            .where(eq(eventInquiries.id, input.id));
+        }
+
+        return { success: true };
+      }),
+      
+    requestCateringQuote: publicProcedure
+      .input(z.object({
+        customerName: z.string(),
+        customerEmail: z.string().email(),
+        customerPhone: z.string(),
+        cateringType: z.string(),
+        guestCount: z.number(),
+        eventDate: z.date(),
+        specialRequests: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Insert catering inquiry into event inquiries table
+        await db.insert(eventInquiries).values({
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          customerPhone: input.customerPhone,
+          eventType: input.cateringType,
+          venueAddress: 'Catering Service', // Placeholder for catering
+          eventDate: input.eventDate,
+          guestCount: input.guestCount,
+          message: input.specialRequests || 'Catering quote request',
+          status: 'new',
+        });
+
+        // Send Catering Quote Request email and SMS
+        try {
+          const { sendCateringQuoteRequestEmail } = await import('./email');
+          await sendCateringQuoteRequestEmail({
+            customerName: input.customerName,
+            customerEmail: input.customerEmail,
+            cateringType: input.cateringType,
+            guestCount: input.guestCount,
+            eventDate: input.eventDate,
+            specialRequests: input.specialRequests,
+          });
+          
+          // Send SMS confirmation
+          if (input.customerPhone) {
+            const { sendCateringQuoteRequestSMS } = await import('./services/sms.service');
+            await sendCateringQuoteRequestSMS(
+              input.customerName,
+              input.customerPhone,
+              input.cateringType,
+              input.guestCount,
+              input.eventDate
+            );
+          }
+        } catch (error: any) {
+          console.error('[CateringQuote] Failed to send confirmation:', error.message);
+          // Don't fail the request if email/SMS fails
         }
 
         return { success: true };

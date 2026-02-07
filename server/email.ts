@@ -2555,3 +2555,322 @@ export async function sendReservationReminderEmail(data: {
     return { success: false, error };
   }
 }
+
+/**
+ * Send event confirmation email to customer
+ */
+export async function sendEventConfirmationEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  eventType: string;
+  eventDate: Date;
+  guestCount: number;
+  specialRequests?: string;
+}): Promise<{ success: boolean; error?: any; id?: string }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const settings = await getRestaurantSettings();
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+    const restaurantPhone = settings?.restaurant_phone || '';
+    const restaurantEmail = settings?.restaurant_email || ENV.fromEmail;
+    const logoUrl = settings?.restaurant_logo ? `${ENV.baseUrl}/api/logo` : '';
+
+    const formattedDate = data.eventDate.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const formattedTime = data.eventDate.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // Try to get custom template
+    const customTemplate = await getCustomTemplate('event_confirmation');
+    const subject = customTemplate?.subject || `Event Confirmed at ${restaurantName}`;
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${subject}</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        ${logoUrl ? `<div style="text-align: center; margin-bottom: 30px;"><img src="${logoUrl}" alt="${restaurantName}" style="max-width: 200px; height: auto;"></div>` : `<h1 style="color: #d4af37; text-align: center;">${restaurantName}</h1>`}
+        
+        <div style="background-color: #f9f9f9; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <h2 style="color: #d4af37; margin-top: 0;">Event Confirmed! 🎉</h2>
+          
+          ${customTemplate?.bodyHtml ? `<div style="margin: 20px 0;">${customTemplate.bodyHtml}</div>` : `
+          <p>Dear ${data.customerName},</p>
+          
+          <p>We're thrilled to confirm your ${data.eventType} event at ${restaurantName}!</p>
+          `}
+          
+          <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <h3 style="color: #333; margin-top: 0;">Event Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Event Type:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${data.eventType}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Date:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${formattedDate}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Time:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${formattedTime}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Guest Count:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${data.guestCount} guests</td>
+              </tr>
+              ${data.specialRequests ? `
+              <tr>
+                <td style="padding: 8px 0;"><strong>Special Requests:</strong></td>
+                <td style="padding: 8px 0;">${data.specialRequests}</td>
+              </tr>
+              ` : ''}
+            </table>
+          </div>
+          
+          <p>Our team will be in touch soon with further details about your event, including menu options and final arrangements.</p>
+          
+          <p>If you have any questions or need to make changes, please don't hesitate to contact us.</p>
+        </div>
+        
+        <div style="background-color: #333; color: white; padding: 20px; border-radius: 10px; text-align: center;">
+          <p style="margin: 5px 0;"><strong>${restaurantName}</strong></p>
+          ${restaurantPhone ? `<p style="margin: 5px 0;">Phone: ${restaurantPhone}</p>` : ''}
+          ${restaurantEmail ? `<p style="margin: 5px 0;">Email: ${restaurantEmail}</p>` : ''}
+          ${customTemplate?.footerText ? `<p style="margin: 15px 0 5px 0; font-size: 12px;">${customTemplate.footerText}</p>` : ''}
+        </div>
+      </body>
+    </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: ENV.fromEmail,
+      to: data.customerEmail,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Resend API error:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Failed to send event confirmation email:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send event inquiry response email to customer
+ */
+export async function sendEventInquiryResponseEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  eventType: string;
+  responseMessage: string;
+}): Promise<{ success: boolean; error?: any; id?: string }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const settings = await getRestaurantSettings();
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+    const restaurantPhone = settings?.restaurant_phone || '';
+    const restaurantEmail = settings?.restaurant_email || ENV.fromEmail;
+    const logoUrl = settings?.restaurant_logo ? `${ENV.baseUrl}/api/logo` : '';
+
+    // Try to get custom template
+    const customTemplate = await getCustomTemplate('event_inquiry_response');
+    const subject = customTemplate?.subject || `Response to Your ${data.eventType} Inquiry`;
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${subject}</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        ${logoUrl ? `<div style="text-align: center; margin-bottom: 30px;"><img src="${logoUrl}" alt="${restaurantName}" style="max-width: 200px; height: auto;"></div>` : `<h1 style="color: #d4af37; text-align: center;">${restaurantName}</h1>`}
+        
+        <div style="background-color: #f9f9f9; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <h2 style="color: #d4af37; margin-top: 0;">Response to Your Event Inquiry</h2>
+          
+          ${customTemplate?.bodyHtml ? `<div style="margin: 20px 0;">${customTemplate.bodyHtml}</div>` : `
+          <p>Dear ${data.customerName},</p>
+          
+          <p>Thank you for your interest in hosting your ${data.eventType} at ${restaurantName}.</p>
+          `}
+          
+          <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <h3 style="color: #333; margin-top: 0;">Our Response:</h3>
+            <p style="white-space: pre-wrap;">${data.responseMessage}</p>
+          </div>
+          
+          <p>If you have any additional questions or would like to proceed with booking, please reply to this email or contact us directly.</p>
+          
+          <p>We look forward to making your event memorable!</p>
+        </div>
+        
+        <div style="background-color: #333; color: white; padding: 20px; border-radius: 10px; text-align: center;">
+          <p style="margin: 5px 0;"><strong>${restaurantName}</strong></p>
+          ${restaurantPhone ? `<p style="margin: 5px 0;">Phone: ${restaurantPhone}</p>` : ''}
+          ${restaurantEmail ? `<p style="margin: 5px 0;">Email: ${restaurantEmail}</p>` : ''}
+          ${customTemplate?.footerText ? `<p style="margin: 15px 0 5px 0; font-size: 12px;">${customTemplate.footerText}</p>` : ''}
+        </div>
+      </body>
+    </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: ENV.fromEmail,
+      to: data.customerEmail,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Resend API error:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Failed to send event inquiry response email:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send catering quote request confirmation email to customer
+ */
+export async function sendCateringQuoteRequestEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  cateringType: string;
+  guestCount: number;
+  eventDate: Date;
+  specialRequests?: string;
+}): Promise<{ success: boolean; error?: any; id?: string }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const settings = await getRestaurantSettings();
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+    const restaurantPhone = settings?.restaurant_phone || '';
+    const restaurantEmail = settings?.restaurant_email || ENV.fromEmail;
+    const logoUrl = settings?.restaurant_logo ? `${ENV.baseUrl}/api/logo` : '';
+
+    const formattedDate = data.eventDate.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    // Try to get custom template
+    const customTemplate = await getCustomTemplate('catering_quote_request');
+    const subject = customTemplate?.subject || `Catering Quote Request Received - ${restaurantName}`;
+
+    const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${subject}</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        ${logoUrl ? `<div style="text-align: center; margin-bottom: 30px;"><img src="${logoUrl}" alt="${restaurantName}" style="max-width: 200px; height: auto;"></div>` : `<h1 style="color: #d4af37; text-align: center;">${restaurantName}</h1>`}
+        
+        <div style="background-color: #f9f9f9; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+          <h2 style="color: #d4af37; margin-top: 0;">Catering Quote Request Received 📋</h2>
+          
+          ${customTemplate?.bodyHtml ? `<div style="margin: 20px 0;">${customTemplate.bodyHtml}</div>` : `
+          <p>Dear ${data.customerName},</p>
+          
+          <p>Thank you for your interest in ${restaurantName}'s catering services!</p>
+          
+          <p>We've received your quote request and our catering team will review your requirements and send you a detailed quote within 24 hours.</p>
+          `}
+          
+          <div style="background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <h3 style="color: #333; margin-top: 0;">Your Request Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Catering Type:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${data.cateringType}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Event Date:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${formattedDate}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Guest Count:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${data.guestCount} guests</td>
+              </tr>
+              ${data.specialRequests ? `
+              <tr>
+                <td style="padding: 8px 0;"><strong>Special Requests:</strong></td>
+                <td style="padding: 8px 0;">${data.specialRequests}</td>
+              </tr>
+              ` : ''}
+            </table>
+          </div>
+          
+          <p>In the meantime, if you have any questions or additional requirements, please don't hesitate to contact us.</p>
+          
+          <p>We look forward to catering your event!</p>
+        </div>
+        
+        <div style="background-color: #333; color: white; padding: 20px; border-radius: 10px; text-align: center;">
+          <p style="margin: 5px 0;"><strong>${restaurantName}</strong></p>
+          ${restaurantPhone ? `<p style="margin: 5px 0;">Phone: ${restaurantPhone}</p>` : ''}
+          ${restaurantEmail ? `<p style="margin: 5px 0;">Email: ${restaurantEmail}</p>` : ''}
+          ${customTemplate?.footerText ? `<p style="margin: 15px 0 5px 0; font-size: 12px;">${customTemplate.footerText}</p>` : ''}
+        </div>
+      </body>
+    </html>
+    `;
+
+    const { data: result, error } = await resend.emails.send({
+      from: ENV.fromEmail,
+      to: data.customerEmail,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Resend API error:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Failed to send catering quote request email:', error);
+    return { success: false, error };
+  }
+}
