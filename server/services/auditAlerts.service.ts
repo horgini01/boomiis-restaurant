@@ -1,4 +1,7 @@
 import { getResendClient, FROM_EMAIL } from "../email";
+import { getDb } from '../db';
+import { siteSettings } from '../../drizzle/schema';
+import { eq } from 'drizzle-orm';
 
 // Define critical action types that trigger email alerts
 export const CRITICAL_ACTIONS = {
@@ -53,6 +56,25 @@ export function isCriticalAction(action: string, entityType: string): boolean {
  * Send email alert to owner about critical audit action
  */
 export async function sendAuditAlert(params: AuditAlertParams): Promise<boolean> {
+  // Check if audit alerts are enabled
+  const db = await getDb();
+  if (!db) {
+    console.log('[Audit Alert] Database not available, skipping alert');
+    return false;
+  }
+
+  const [alertsSetting] = await db
+    .select()
+    .from(siteSettings)
+    .where(eq(siteSettings.settingKey, 'audit_alerts_enabled'))
+    .limit(1);
+
+  const isEnabled = alertsSetting?.settingValue === 'true';
+  if (!isEnabled) {
+    console.log('[Audit Alert] Audit alerts are disabled in settings');
+    return false;
+  }
+
   const resend = getResendClient();
   if (!resend) {
     console.log('[Audit Alert] Skipping email - Resend not configured');

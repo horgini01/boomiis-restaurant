@@ -1863,3 +1863,10 @@
 - [x] Identify all missing admin routes in permissions dialog (found 10+ missing routes)
 - [x] Add all new pages to permissions categories (added reviews, response templates, about content, legal pages, email tracking, SMS analytics, email delivery, restaurant settings, audit logs)
 - [x] Verify permissions dialog displays all 27 admin routes (now organized into 9 categories with 27 total routes)
+
+### Add Notification Toggles to Admin Settings
+- [x] Identify all periodic email notifications (daily sales, weekly report, reservation reminders, anomaly alerts, audit alerts)
+- [x] Add database fields for notification enable/disable settings (using existing siteSettings table with keys: daily_sales_email_enabled, weekly_report_email_enabled, reservation_reminders_enabled, anomaly_alerts_enabled, audit_alerts_enabled)
+- [x] Update settings page UI with toggles for each notification type (added 5 toggles with descriptions)
+- [x] Update notification services to check settings before sending emails (added checks to reservation reminders, anomaly alerts, audit alerts, daily sales already had check)
+- [x] Test that toggles properly enable/disable notifications (server running without errors, TypeScript compilation successful)

@@ -1,6 +1,6 @@
 import { getDb } from '../db';
-import { reservations } from '../../drizzle/schema';
-import { sql } from 'drizzle-orm';
+import { reservations, siteSettings } from '../../drizzle/schema';
+import { sql, eq } from 'drizzle-orm';
 import { sendReservationReminderEmail } from '../email';
 import { sendReservationStatusSMS } from '../services/sms.service';
 import { formatPhoneNumberE164 } from '../services/sms.service';
@@ -16,6 +16,19 @@ export async function sendReservationReminders(): Promise<void> {
     const db = await getDb();
     if (!db) {
       console.error('[Reservation Reminders] Database not available');
+      return;
+    }
+
+    // Check if reservation reminders are enabled
+    const [remindersSetting] = await db
+      .select()
+      .from(siteSettings)
+      .where(eq(siteSettings.settingKey, 'reservation_reminders_enabled'))
+      .limit(1);
+
+    const isEnabled = remindersSetting?.settingValue === 'true';
+    if (!isEnabled) {
+      console.log('[Reservation Reminders] Reservation reminders are disabled in settings');
       return;
     }
 

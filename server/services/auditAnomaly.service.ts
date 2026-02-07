@@ -1,5 +1,5 @@
 import { getDb } from '../db';
-import { auditLogs } from '../../drizzle/schema';
+import { auditLogs, siteSettings } from '../../drizzle/schema';
 import { and, gte, eq, desc } from 'drizzle-orm';
 import { getResendClient } from '../email';
 import { ENV } from '../_core/env';
@@ -310,6 +310,24 @@ export async function detectAnomalies(
  * Send alert email for detected anomaly
  */
 async function sendAnomalyAlert(anomaly: AnomalyDetection): Promise<void> {
+  // Check if anomaly alerts are enabled
+  const db = await getDb();
+  if (!db) {
+    console.log('[Anomaly Alert] Database not available, skipping alert');
+    return;
+  }
+
+  const [alertsSetting] = await db
+    .select()
+    .from(siteSettings)
+    .where(eq(siteSettings.settingKey, 'anomaly_alerts_enabled'))
+    .limit(1);
+
+  const isEnabled = alertsSetting?.settingValue === 'true';
+  if (!isEnabled) {
+    console.log('[Anomaly Alert] Anomaly alerts are disabled in settings');
+    return;
+  }
   const severityColors = {
     low: '#3b82f6',
     medium: '#f59e0b',
