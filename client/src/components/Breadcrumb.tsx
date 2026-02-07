@@ -16,9 +16,9 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
   return (
     <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
       <Link href="/admin/dashboard">
-        <a className="flex items-center hover:text-foreground transition-colors">
+        <div className="flex items-center hover:text-foreground transition-colors cursor-pointer">
           <Home className="h-4 w-4" />
-        </a>
+        </div>
       </Link>
       
       {items.map((item, index) => {
@@ -29,9 +29,9 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
             <ChevronRight className="h-4 w-4" />
             {item.href && !isLast ? (
               <Link href={item.href}>
-                <a className="hover:text-foreground transition-colors">
+                <span className="hover:text-foreground transition-colors cursor-pointer">
                   {item.label}
-                </a>
+                </span>
               </Link>
             ) : (
               <span className={isLast ? 'text-foreground font-medium' : ''}>
