@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Search, Filter, ChevronLeft, ChevronRight, Activity, Users, FileText } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Activity, Users, FileText, Download } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 export default function AuditLogs() {
   const [page, setPage] = useState(1);
@@ -29,6 +30,35 @@ export default function AuditLogs() {
 
   const { data: filterOptions } = trpc.auditLogs.getFilterOptions.useQuery();
   const { data: stats } = trpc.auditLogs.getAuditStats.useQuery();
+
+  const exportCSVMutation = trpc.auditLogs.exportCSV.useMutation({
+    onSuccess: (data) => {
+      // Create blob and download
+      const blob = new Blob([data.content], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = data.filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Audit logs exported successfully');
+    },
+    onError: () => {
+      toast.error('Failed to export audit logs');
+    },
+  });
+
+  const handleExportCSV = () => {
+    exportCSVMutation.mutate({
+      search: search || undefined,
+      action: actionFilter || undefined,
+      entityType: entityTypeFilter || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+    });
+  };
 
   const actionColors: Record<string, string> = {
     create: "bg-green-500/10 text-green-500 border-green-500/20",
@@ -166,6 +196,15 @@ export default function AuditLogs() {
             <div className="mt-4 flex gap-2">
               <Button onClick={handleReset} variant="outline" size="sm">
                 Reset Filters
+              </Button>
+              <Button 
+                onClick={handleExportCSV} 
+                variant="outline" 
+                size="sm"
+                disabled={exportCSVMutation.isPending}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {exportCSVMutation.isPending ? 'Exporting...' : 'Export CSV'}
               </Button>
             </div>
           </CardContent>

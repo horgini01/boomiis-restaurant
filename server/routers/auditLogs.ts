@@ -3,6 +3,7 @@ import { router, protectedProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import { auditLogs } from "../../drizzle/schema";
 import { eq, and, like, desc, gte, lte, or } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 export const auditLogsRouter = router({
   // Get audit logs with filtering and pagination
@@ -162,6 +163,73 @@ export const auditLogsRouter = router({
         totalLogs: totalResult?.count || 0,
         recentLogs: recentResult?.count || 0,
         topUsers,
+      };
+    }),
+
+  // Export audit logs as CSV
+  exportCSV: protectedProcedure
+    .input(z.object({
+      userId: z.number().optional(),
+      action: z.string().optional(),
+      entityType: z.string().optional(),
+      search: z.string().optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }).optional())
+    .mutation(async ({ ctx, input }) => {
+      // Only owner, admin, and manager can export audit logs
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      }
+
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+
+      // Build filter conditions (same as getAuditLogs)
+      const conditions = [];
+      if (input?.userId) conditions.push(eq(auditLogs.userId, input.userId));
+      if (input?.action) conditions.push(eq(auditLogs.action, input.action));
+      if (input?.entityType) conditions.push(eq(auditLogs.entityType, input.entityType));
+      if (input?.search) {
+        conditions.push(
+          or(
+            like(auditLogs.entityName, `%${input.search}%`),
+            like(auditLogs.userName, `%${input.search}%`)
+          )!
+        );
+      }
+      if (input?.startDate) conditions.push(gte(auditLogs.createdAt, new Date(input.startDate)));
+      if (input?.endDate) conditions.push(lte(auditLogs.createdAt, new Date(input.endDate)));
+
+      // Get all matching logs (no pagination for export)
+      const logs = await db
+        .select()
+        .from(auditLogs)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(desc(auditLogs.createdAt))
+        .limit(10000); // Safety limit
+
+      // Generate CSV content
+      const headers = ['Timestamp', 'User', 'Role', 'Action', 'Entity Type', 'Entity Name', 'IP Address', 'Changes'];
+      const rows = logs.map(log => [
+        new Date(log.createdAt).toISOString(),
+        log.userName || 'Unknown',
+        log.userRole,
+        log.action,
+        log.entityType,
+        log.entityName || `ID: ${log.entityId}`,
+        log.ipAddress || 'N/A',
+        log.changes || '{}',
+      ]);
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      ].join('\n');
+
+      return {
+        content: csvContent,
+        filename: `audit-logs-${new Date().toISOString().split('T')[0]}.csv`,
       };
     }),
 });

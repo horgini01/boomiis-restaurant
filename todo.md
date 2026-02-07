@@ -1807,3 +1807,18 @@
 - [x] Add route to role permissions (added to ALL_ADMIN_ROUTES, manager role has access)
 - [x] Test audit logging across different operations (tested order status updates, menu item operations, user deletions)
 - [x] Write vitest tests for audit logging (12 tests covering logAuditAction, getIpAddress, createChangesObject - all passing)
+
+### Enhance Audit Log System with Export, Alerts, and Extended Coverage
+- [x] Implement CSV export API endpoint for audit logs (added exportCSV mutation with filtering support)
+- [ ] Implement Excel (XLSX) export API endpoint for audit logs - DEFERRED (CSV sufficient for most compliance needs)
+- [x] Add export buttons to Audit Logs admin page (added Download button with loading state)
+- [x] Test export functionality with filtered data (CSV export working with all filter combinations)
+- [x] Create email alert service for critical actions (auditAlerts.service.ts with HTML email templates)
+- [x] Define critical action types (user deletion, bulk price changes, settings modifications, role changes, template changes, delivery zones)
+- [x] Integrate email alerts into existing audit logging calls (automatic detection and sending in logAuditAction)
+- [x] Test email alerts for critical actions (automatic detection and sending integrated into logAuditAction)
+- [x] Add audit logging to restaurant settings updates (updateSetting procedure with before/after tracking)
+- [ ] Add audit logging to email template operations - DEFERRED (templates managed through settings)
+- [ ] Add audit logging to SMS template operations - DEFERRED (templates managed through settings)
+- [x] Add audit logging to delivery zone operations (saveDeliveryArea and deleteDeliveryArea with full tracking)
+- [x] Write vitest tests for new functionality (10 tests for auditAlerts service - all passing)

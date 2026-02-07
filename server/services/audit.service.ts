@@ -1,5 +1,6 @@
 import { getDb } from '../db';
 import { auditLogs } from '../../drizzle/schema';
+import { isCriticalAction, sendAuditAlert } from './auditAlerts.service';
 
 export interface AuditLogData {
   userId: number;
@@ -39,6 +40,23 @@ export async function logAuditAction(data: AuditLogData): Promise<void> {
     });
 
     console.log(`[Audit] Logged ${data.action} on ${data.entityType} by ${data.userName} (ID: ${data.userId})`);
+
+    // Send email alert for critical actions
+    if (isCriticalAction(data.action, data.entityType)) {
+      // Get owner email from environment or use default admin email
+      const ownerEmail = process.env.ADMIN_EMAIL || 'admin@boomiis.uk';
+      
+      await sendAuditAlert({
+        action: data.action,
+        entityType: data.entityType,
+        entityName: data.entityName,
+        userName: data.userName,
+        userRole: data.userRole,
+        changes: data.changes,
+        ipAddress: data.ipAddress,
+        ownerEmail,
+      });
+    }
   } catch (error) {
     // Don't throw errors - audit logging should not break the main operation
     console.error('[Audit] Failed to log action:', error);

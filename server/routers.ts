@@ -1998,6 +1998,9 @@ export const appRouter = router({
         // Check if setting exists
         const [existing] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, input.settingKey)).limit(1);
 
+        const action = existing ? 'update' : 'create';
+        const oldValue = existing?.settingValue;
+
         if (existing) {
           // Update existing setting
           await db.update(siteSettings)
@@ -2010,6 +2013,22 @@ export const appRouter = router({
             settingValue: input.settingValue,
           });
         }
+
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action,
+          entityType: 'settings',
+          entityName: input.settingKey,
+          changes: existing ? createChangesObject(
+            { value: oldValue },
+            { value: input.settingValue }
+          ) : undefined,
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
 
         return { success: true };
       }),
@@ -2291,7 +2310,13 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
+        const action = input.id ? 'update' : 'create';
+        let existingArea = null;
+
         if (input.id) {
+          // Get existing area for audit log
+          [existingArea] = await db.select().from(deliveryAreas).where(eq(deliveryAreas.id, input.id)).limit(1);
+
           // Update existing area
           await db.update(deliveryAreas)
             .set({
@@ -2318,6 +2343,28 @@ export const appRouter = router({
           });
         }
 
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action,
+          entityType: 'delivery_zone',
+          entityId: input.id,
+          entityName: input.areaName,
+          changes: existingArea ? createChangesObject(existingArea, {
+            areaName: input.areaName,
+            postcodesPrefixes: input.postcodesPrefixes,
+            deliveryFee: input.deliveryFee.toString(),
+            latitude: input.latitude?.toString(),
+            longitude: input.longitude?.toString(),
+            radiusMeters: input.radiusMeters,
+            displayOrder: input.displayOrder,
+          }) : undefined,
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
+
         return { success: true };
       }),
 
@@ -2331,7 +2378,24 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
+        // Get area details before deletion for audit log
+        const [area] = await db.select().from(deliveryAreas).where(eq(deliveryAreas.id, input.id)).limit(1);
+        if (!area) throw new Error('Delivery area not found');
+
         await db.delete(deliveryAreas).where(eq(deliveryAreas.id, input.id));
+
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action: 'delete',
+          entityType: 'delivery_zone',
+          entityId: input.id,
+          entityName: area.areaName,
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
 
         return { success: true };
       }),
