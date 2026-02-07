@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { rolePermissions, type Role } from "@/lib/rolePermissions";
+import { rolePermissions, type Role, getRouteCount } from "@/lib/rolePermissions";
 import { Check, X } from "lucide-react";
 import { Fragment } from "react";
 import AdminLayout from "@/components/AdminLayout";
@@ -53,9 +53,13 @@ const routeCategories = {
   ],
   "Analytics & Reporting": [
     "/admin/analytics",
+    "/admin/email-tracking",
+    "/admin/sms-analytics",
   ],
   "System Administration": [
     "/admin/users",
+    "/admin/custom-roles",
+    "/admin/role-permissions",
     "/admin/settings",
     "/admin/restaurant-settings",
   ],
@@ -83,10 +87,14 @@ const routeLabels: Record<string, string> = {
   "/admin/legal-pages": "Legal Pages",
   "/admin/analytics": "Analytics",
   "/admin/users": "Admin Users",
+  "/admin/custom-roles": "Custom Roles",
+  "/admin/role-permissions": "Role Permissions",
   "/admin/email-delivery": "Email Delivery",
   "/admin/newsletter-subscribers": "Newsletter Subscribers",
   "/admin/email-campaigns": "Email Campaigns",
+  "/admin/email-tracking": "Email Tracking",
   "/admin/sms-templates": "SMS Templates",
+  "/admin/sms-analytics": "SMS Analytics",
   "/admin/restaurant-settings": "Restaurant Info",
   "/admin/settings": "Settings",
 };
@@ -130,7 +138,7 @@ export default function RolePermissions() {
             </CardHeader>
             <CardContent>
               <div className="text-sm text-muted-foreground">
-                <strong>Access Count:</strong> {rolePermissions[role].length} routes
+                <strong>Access Count:</strong> {getRouteCount(role)} routes
               </div>
             </CardContent>
           </Card>
@@ -204,29 +212,29 @@ export default function RolePermissions() {
               <tbody>
                 {Object.entries(routeCategories).map(([category, routes]) => (
                   <Fragment key={category}>
-                    <tr className="border-b bg-muted/50">
+                    <tr className="bg-muted/50">
                       <td colSpan={roles.length + 1 + (customRoles?.length || 0)} className="p-3 font-semibold">
                         {category}
                       </td>
                     </tr>
                     {routes.map((route) => (
                       <tr key={route} className="border-b hover:bg-muted/30">
-                        <td className="p-3 text-sm">{routeLabels[route]}</td>
+                        <td className="p-3 pl-8">{routeLabels[route] || route}</td>
                         {roles.map((role) => (
-                          <td key={role} className="text-center p-3">
+                          <td key={`${route}-${role}`} className="text-center p-3">
                             {hasAccess(role, route) ? (
-                              <Check className="inline-block w-5 h-5 text-green-500" />
+                              <Check className="h-5 w-5 text-green-500 mx-auto" />
                             ) : (
-                              <X className="inline-block w-5 h-5 text-red-500/30" />
+                              <X className="h-5 w-5 text-red-500 mx-auto" />
                             )}
                           </td>
                         ))}
-                        {customRoles && customRoles.map((customRole) => (
-                          <td key={`custom-${customRole.id}`} className="text-center p-3">
-                            {customRoleHasAccess(customRole.id, route) ? (
-                              <Check className="inline-block w-5 h-5 text-green-500" />
+                        {customRoles && customRoles.map((role) => (
+                          <td key={`${route}-custom-${role.id}`} className="text-center p-3">
+                            {customRoleHasAccess(role.id, route) ? (
+                              <Check className="h-5 w-5 text-green-500 mx-auto" />
                             ) : (
-                              <X className="inline-block w-5 h-5 text-red-500/30" />
+                              <X className="h-5 w-5 text-red-500 mx-auto" />
                             )}
                           </td>
                         ))}
@@ -239,24 +247,7 @@ export default function RolePermissions() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Legend */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Legend</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5 text-green-500" />
-            <span className="text-sm">Has access to this route</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <X className="w-5 h-5 text-red-500/30" />
-            <span className="text-sm">No access to this route</span>
-          </div>
-        </CardContent>
-      </Card>
-      </div>
+    </div>
     </AdminLayout>
   );
 }

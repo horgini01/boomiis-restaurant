@@ -1,38 +1,47 @@
 // Role-based access control configuration
 export type Role = "owner" | "admin" | "manager" | "kitchen_staff" | "front_desk";
 
+// All available admin routes (26 total routes)
+const ALL_ADMIN_ROUTES = [
+  "/admin/dashboard",
+  "/admin/categories",
+  "/admin/menu-items",
+  "/admin/orders",
+  "/admin/reservations",
+  "/admin/events",
+  "/admin/reviews",
+  "/admin/testimonials",
+  "/admin/response-templates",
+  "/admin/gallery",
+  "/admin/blog",
+  "/admin/about-content",
+  "/admin/legal-pages",
+  "/admin/analytics",
+  "/admin/users",
+  "/admin/custom-roles",
+  "/admin/email-delivery",
+  "/admin/newsletter-subscribers",
+  "/admin/email-campaigns",
+  "/admin/email-tracking",
+  "/admin/sms-templates",
+  "/admin/sms-analytics",
+  "/admin/restaurant-settings",
+  "/admin/settings",
+  "/admin/role-permissions", // Added missing route
+];
+
 // Define which routes each role can access
 export const rolePermissions: Record<Role, string[]> = {
   owner: [
-    // Full access to everything
-    "/admin/dashboard",
-    "/admin/categories",
-    "/admin/menu-items",
-    "/admin/orders",
-    "/admin/reservations",
-    "/admin/events",
-    "/admin/reviews",
-    "/admin/testimonials",
-    "/admin/response-templates",
-    "/admin/gallery",
-    "/admin/blog",
-    "/admin/about-content",
-    "/admin/legal-pages",
-    "/admin/analytics",
-    "/admin/users",
-    "/admin/role-permissions",
-    "/admin/custom-roles",
-    "/admin/email-delivery",
-    "/admin/newsletter-subscribers",
-    "/admin/email-campaigns",
-    "/admin/email-tracking",
-    "/admin/sms-templates",
-    "/admin/sms-analytics",
-    "/admin/restaurant-settings",
-    "/admin/settings",
+    // Full access to all 26 routes
+    ...ALL_ADMIN_ROUTES,
   ],
   admin: [
-    // Full access including user management
+    // Full access to all 26 routes
+    ...ALL_ADMIN_ROUTES,
+  ],
+  manager: [
+    // Operations management - no system settings, user management, or custom roles (20 routes)
     "/admin/dashboard",
     "/admin/categories",
     "/admin/menu-items",
@@ -45,46 +54,22 @@ export const rolePermissions: Record<Role, string[]> = {
     "/admin/gallery",
     "/admin/blog",
     "/admin/about-content",
-    "/admin/legal-pages",
     "/admin/analytics",
-    "/admin/users",
-    "/admin/role-permissions",
-    "/admin/custom-roles",
     "/admin/email-delivery",
+    "/admin/email-tracking",
     "/admin/newsletter-subscribers",
     "/admin/email-campaigns",
-    "/admin/email-tracking",
     "/admin/sms-templates",
     "/admin/sms-analytics",
     "/admin/restaurant-settings",
-    "/admin/settings",
-  ],
-  manager: [
-    // Operations management - no system settings or user management
-    "/admin/dashboard",
-    "/admin/categories",
-    "/admin/menu-items",
-    "/admin/orders",
-    "/admin/reservations",
-    "/admin/events",
-    "/admin/reviews",
-    "/admin/testimonials",
-    "/admin/response-templates",
-    "/admin/gallery",
-    "/admin/blog",
-    "/admin/analytics",
-    "/admin/email-delivery",
-    "/admin/email-tracking",
-    "/admin/newsletter-subscribers",
-    "/admin/sms-analytics",
   ],
   kitchen_staff: [
-    // Kitchen operations only
+    // Kitchen operations only (2 routes)
     "/admin/dashboard",
     "/admin/orders",
   ],
   front_desk: [
-    // Customer-facing operations
+    // Customer-facing operations (5 routes)
     "/admin/dashboard",
     "/admin/reservations",
     "/admin/events",
@@ -112,6 +97,11 @@ export function getAccessibleRoutes(role: Role | undefined): string[] {
   return rolePermissions[role] || [];
 }
 
+// Get route count for each role
+export function getRouteCount(role: Role): number {
+  return rolePermissions[role]?.length || 0;
+}
+
 // Role display names
 export const roleLabels: Record<Role, string> = {
   owner: "Owner",
@@ -123,9 +113,9 @@ export const roleLabels: Record<Role, string> = {
 
 // Role descriptions for UI
 export const roleDescriptions: Record<Role, string> = {
-  owner: "Full access to all features including user management and critical settings",
-  admin: "Full operational access except user management",
-  manager: "Manage daily operations, menu, orders, reservations, and content",
-  kitchen_staff: "View and manage kitchen orders only",
-  front_desk: "Manage customer interactions, reservations, and events",
+  owner: "Full access to all 26 admin features including user management and critical settings",
+  admin: "Full access to all 26 admin features including user management and critical settings",
+  manager: "Manage daily operations, menu, orders, reservations, and content (20 routes)",
+  kitchen_staff: "View and manage kitchen orders only (2 routes)",
+  front_desk: "Manage customer interactions, reservations, and events (5 routes)",
 };

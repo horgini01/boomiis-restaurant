@@ -1781,3 +1781,11 @@
 - [x] Test reservations page loads without errors (server restarted successfully, no TypeScript errors)
 - [x] Test all other admin pages (orders, menu, settings, etc.) (all 102 procedures now use multi-role check)
 - [x] Verify no more unauthorized errors for owner role users (all admin procedures now allow owner/admin/manager)
+
+### Update Role Permissions Matrix with All Admin Pages
+- [x] Audit all admin routes from AdminLayout sidebar (found 25 routes)
+- [x] Read current rolePermissions.ts to see existing structure
+- [x] Add all missing routes to rolePermissions.ts (added role-permissions route)
+- [x] Ensure owner and admin roles have access to ALL 26 routes by default
+- [x] Update route count display in role permissions page (using getRouteCount function)
+- [x] Test that permissions matrix shows all routes correctly (server restarted, no errors)
