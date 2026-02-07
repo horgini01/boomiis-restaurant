@@ -124,7 +124,7 @@ export default function AdminUsers() {
 
   const deleteUser = trpc.adminUsers.deleteAdminUser.useMutation({
     onSuccess: () => {
-      toast.success("User deactivated successfully");
+      toast.success("User deleted successfully");
       refetch();
     },
     onError: (error) => {
@@ -184,7 +184,7 @@ export default function AdminUsers() {
   };
 
   const handleDeleteUser = (userId: number) => {
-    if (confirm("Are you sure you want to deactivate this user? They will no longer be able to access the admin panel.")) {
+    if (confirm("⚠️ WARNING: This will permanently delete this user from the database. This action cannot be undone. Are you sure you want to continue?")) {
       deleteUser.mutate({ id: userId });
     }
   };

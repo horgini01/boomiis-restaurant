@@ -311,7 +311,7 @@ export const adminUserManagementRouter = router({
       return { success: true };
     }),
 
-  // Delete admin user (soft delete by setting status to inactive)
+  // Delete admin user (hard delete - permanently removes from database)
   deleteAdminUser: ownerProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
@@ -323,8 +323,8 @@ export const adminUserManagementRouter = router({
         throw new Error('You cannot delete your own account');
       }
 
-      // Soft delete by setting status to inactive
-      await db.update(users).set({ status: "inactive" }).where(eq(users.id, input.id));
+      // Hard delete - permanently remove from database
+      await db.delete(users).where(eq(users.id, input.id));
 
       return { success: true };
     }),

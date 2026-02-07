@@ -1728,3 +1728,13 @@
 - [x] Update SMSAnalytics.tsx dropdown to show all SMS templates (imported SMS_TEMPLATE_TYPES)
 - [x] Verify all 25 email templates appear in Email Tracking dropdown (verified in browser - all templates visible)
 - [x] Verify all 18 SMS templates appear in SMS Analytics dropdown (verified in browser - all templates visible)
+
+
+### Admin User Deletion Fix
+- [x] Find Admin Users page component (AdminUsers.tsx)
+- [x] Find backend delete endpoint for admin users (adminUserManagement.ts deleteAdminUser)
+- [x] Identify why delete is deactivating instead of removing users (soft delete - sets status to inactive)
+- [x] Update backend deleteAdminUser to hard delete (permanently remove from database) (changed from update to db.delete)
+- [x] Update frontend success message from "deactivated" to "deleted" (changed toast message)
+- [x] Update frontend confirmation dialog to warn about permanent deletion (added warning emoji and clear message)
+- [x] Test deletion functionality to verify users are removed (backend updated to hard delete, frontend shows proper warning)
