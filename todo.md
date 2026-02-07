@@ -1712,3 +1712,10 @@
 - [x] Add /admin/sms-analytics to allowed routes for admin/owner/manager roles
 - [x] Test that Email Tracking and SMS Analytics links appear in sidebar (verified in browser - elements 40 and 44)
 - [x] Verify links are accessible and functional (both dashboards load correctly with data)
+
+
+### Add AdminLayout to Analytics Pages
+- [x] Wrap EmailTracking.tsx with AdminLayout component
+- [x] Wrap SMSAnalytics.tsx with AdminLayout component
+- [x] Verify admin sidebar appears on Email Tracking page (sidebar visible with all navigation links)
+- [x] Verify admin sidebar appears on SMS Analytics page (sidebar visible with all navigation links)

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,7 +12,7 @@ import { CalendarIcon, Download, MessageSquare, CheckCircle2, XCircle, PoundSter
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-export default function SMSAnalytics() {
+function SMSAnalytics() {
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
@@ -81,7 +82,8 @@ export default function SMSAnalytics() {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">SMS Analytics Dashboard</h1>
         <p className="text-muted-foreground mt-2">
@@ -380,6 +382,9 @@ export default function SMSAnalytics() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
+
+export default SMSAnalytics;
