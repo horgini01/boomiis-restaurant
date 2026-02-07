@@ -1551,3 +1551,8 @@
 - [x] Update rolePermissions.ts to add /admin/custom-roles to admin role permissions
 - [x] Verify Admin users can see Custom Roles in sidebar navigation
 - [x] Test Custom Roles page access with Admin role
+
+## Fix Custom Roles Permissions List (Bug - Feb 7)
+- [x] Debug getAvailableRoutes API endpoint
+- [x] Fix permissions list not populating in Create Role dialog (changed ownerProcedure to adminOrOwnerProcedure)
+- [x] Test permissions checkboxes display correctly

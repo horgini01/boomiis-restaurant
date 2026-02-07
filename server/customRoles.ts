@@ -12,9 +12,17 @@ const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
   return next({ ctx });
 });
 
+// Role-based authorization helper - owners and admins can access
+const adminOrOwnerProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (!ctx.user || (ctx.user.role !== "owner" && ctx.user.role !== "admin")) {
+    throw new Error("Access denied. Only owners and admins can manage custom roles.");
+  }
+  return next({ ctx });
+});
+
 export const customRolesRouter = router({
   // Get all custom roles with their permissions
-  getAllCustomRoles: ownerProcedure.query(async ({ ctx }) => {
+  getAllCustomRoles: adminOrOwnerProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) throw new Error('Database not available');
 
@@ -70,7 +78,7 @@ export const customRolesRouter = router({
     }),
 
   // Create new custom role with permissions
-  createCustomRole: ownerProcedure
+  createCustomRole: adminOrOwnerProcedure
     .input(z.object({
       roleName: z.string().min(1).max(100),
       description: z.string().optional(),
@@ -124,7 +132,7 @@ export const customRolesRouter = router({
     }),
 
   // Update custom role (name, description, permissions)
-  updateCustomRole: ownerProcedure
+  updateCustomRole: adminOrOwnerProcedure
     .input(z.object({
       id: z.number(),
       roleName: z.string().min(1).max(100).optional(),
@@ -196,7 +204,7 @@ export const customRolesRouter = router({
     }),
 
   // Delete custom role (also removes all associated permissions)
-  deleteCustomRole: ownerProcedure
+  deleteCustomRole: adminOrOwnerProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       const db = await getDb();
@@ -232,7 +240,7 @@ export const customRolesRouter = router({
     }),
 
   // Get all available routes for permission selection
-  getAvailableRoutes: ownerProcedure.query(async () => {
+  getAvailableRoutes: adminOrOwnerProcedure.query(async () => {
     // Define all admin routes with categories
     const routes = [
       {
