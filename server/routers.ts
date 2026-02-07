@@ -1807,6 +1807,9 @@ export const appRouter = router({
             case 'cancelled':
               templateType = 'order_cancelled';
               break;
+            case 'completed':
+              templateType = 'order_completed';
+              break;
           }
           
           // Send SMS if template type is determined
@@ -1819,6 +1822,35 @@ export const appRouter = router({
               estimatedMinutes,
               order.smsOptIn ?? true // Customer's SMS preference (default true for existing orders)
             );
+          }
+        }
+
+        // Send review request after order is delivered or completed
+        if (input.status === 'delivered' || input.status === 'completed') {
+          try {
+            const { sendReviewRequestEmail } = await import('./email');
+            await sendReviewRequestEmail({
+              customerName: order.customerName,
+              customerEmail: order.customerEmail,
+              orderNumber: order.orderNumber,
+              orderDate: order.createdAt,
+            });
+
+            // Also send review request SMS
+            if (order.customerPhone) {
+              const formattedPhone = formatPhoneNumberE164(order.customerPhone);
+              await sendOrderStatusSMS(
+                order.customerName,
+                formattedPhone,
+                order.orderNumber,
+                'review_request',
+                30,
+                order.smsOptIn ?? true
+              );
+            }
+          } catch (error) {
+            console.error('[Review Request] Failed to send review request:', error);
+            // Don't fail the status update if review request fails
           }
         }
 

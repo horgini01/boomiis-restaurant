@@ -367,6 +367,9 @@ export async function sendOrderStatusSMS(
       case 'order_completed':
         message = `Thank you for your order #${orderNumber}, ${customerName}! We hope you enjoyed your meal from Boomiis Restaurant. We'd love to see you again soon!`;
         break;
+      case 'review_request':
+        message = `Hi ${customerName}! How was your meal from order #${orderNumber}? We'd love to hear your feedback! Leave a review at: ${process.env.BASE_URL || 'https://boomiis.manus.space'}/reviews`;
+        break;
       default:
         console.warn(`[SMS] Unknown template type: ${templateType}`);
         return;
@@ -418,6 +421,10 @@ export async function sendReservationStatusSMS(
     case 'completed':
       templateType = 'reservation_completed';
       message = `Thank you for dining with us, ${customerName}! We hope you enjoyed your experience at Boomiis Restaurant. We'd love to see you again soon! Reply STOP to opt out.`;
+      break;
+    case 'reminder':
+      templateType = 'reservation_reminder';
+      message = `Reminder: You have a reservation TOMORROW at Boomiis Restaurant on ${formattedDate} at ${reservationTime}. We look forward to seeing you! Reply STOP to opt out.`;
       break;
     default:
       message = `Hi ${customerName}, your reservation at Boomiis Restaurant for ${formattedDate} at ${reservationTime} has been updated. Status: ${status}. Reply STOP to opt out.`;

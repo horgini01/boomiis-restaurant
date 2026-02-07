@@ -32,6 +32,10 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   
+  // Initialize scheduled jobs
+  const { setupCronJobs } = await import('../jobs/setup-cron');
+  setupCronJobs();
+  
   // Stripe webhook MUST come before express.json() for signature verification
   app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
   

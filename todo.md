@@ -1598,9 +1598,13 @@
 - [x] Add email template for Reservation Completed (email exists in sendReservationStatusEmail, SMS converted to database template)
 - [x] Implement Order Completed workflow (email already exists in sendOrderStatusUpdateEmail line 1271, SMS template added to sendOrderStatusSMS)
 
-### PHASE 2 - MEDIUM PRIORITY (Customer Engagement) - PENDING
-- [ ] Implement Review Request workflow (email + SMS)
-- [ ] Implement Reservation Reminder workflow (email + SMS, scheduled)
+### PHASE 2 - MEDIUM PRIORITY (Customer Engagement) - IN PROGRESS
+- [x] Create Review Request email template function (sendReviewRequestEmail added to email.ts)
+- [x] Create Review Request SMS template in database (added to sendOrderStatusSMS with review_request type)
+- [x] Add Review Request trigger after order completion/delivery (added to updateOrderStatus mutation for delivered and completed statuses)
+- [x] Create Reservation Reminder email template function (sendReservationReminderEmail added to email.ts)
+- [x] Create Reservation Reminder SMS template in database (added 'reminder' case to sendReservationStatusSMS)
+- [x] Implement scheduled job to send reminders 24h before reservation (created reservation-reminders.ts job, setup-cron.ts scheduler, runs every hour)
 
 ### PHASE 3 - LOWER PRIORITY (Admin/Optional) - PENDING
 - [ ] Add SMS template for New Order Notification (Admin)

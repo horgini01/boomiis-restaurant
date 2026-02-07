@@ -2286,3 +2286,272 @@ export async function sendTestimonialResponseEmail(testimonial: {
     return false;
   }
 }
+
+/**
+ * Send review request email to customer after order completion
+ */
+export async function sendReviewRequestEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  orderNumber: string;
+  orderDate: Date;
+}): Promise<{ success: boolean; id?: string; error?: any }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const { format } = await import('date-fns');
+    const formattedDate = format(data.orderDate, 'MMMM dd, yyyy');
+    
+    // Try to get custom template from database
+    const customTemplate = await getCustomTemplate('review_request');
+    
+    let subject: string;
+    let html: string;
+    
+    if (customTemplate) {
+      // Use custom template
+      subject = customTemplate.subject
+        .replace(/{{customerName}}/g, data.customerName)
+        .replace(/{{orderNumber}}/g, data.orderNumber)
+        .replace(/{{orderDate}}/g, formattedDate);
+      
+      html = customTemplate.bodyHtml
+        .replace(/{{customerName}}/g, data.customerName)
+        .replace(/{{orderNumber}}/g, data.orderNumber)
+        .replace(/{{orderDate}}/g, formattedDate);
+    } else {
+      // Fallback to default template
+      subject = `How was your meal from Boomiis Restaurant?`;
+      
+      const reviewUrl = `${process.env.BASE_URL || 'https://boomiis.manus.space'}/reviews`;
+      
+      html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; padding: 40px 20px;">
+              <tr>
+                <td align="center">
+                  <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                      <td style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 30px; text-align: center;">
+                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">⭐ Share Your Experience</h1>
+                      </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                      <td style="padding: 40px 30px;">
+                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #374151;">
+                          Hi ${data.customerName},
+                        </p>
+                        
+                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #374151;">
+                          Thank you for your recent order (#${data.orderNumber}) on ${formattedDate}. We hope you enjoyed your authentic West African cuisine!
+                        </p>
+                        
+                        <p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.6; color: #374151;">
+                          Your feedback helps us improve and helps others discover the flavors of Boomiis Restaurant. Would you take a moment to share your experience?
+                        </p>
+                        
+                        <!-- CTA Button -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td align="center" style="padding: 20px 0;">
+                              <a href="${reviewUrl}" style="display: inline-block; padding: 16px 40px; background-color: #f59e0b; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Leave a Review</a>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <p style="margin: 30px 0 0 0; font-size: 14px; line-height: 1.6; color: #6b7280; text-align: center;">
+                          It only takes a minute and means the world to us!
+                        </p>
+                      </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background-color: #f3f4f6; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;">
+                          Boomiis Restaurant - Authentic West African Cuisine
+                        </p>
+                        <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+                          This email was sent because you recently placed an order with us.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+      `;
+    }
+
+    const { data: result, error } = await resend.emails.send({
+      from: ENV.fromEmail,
+      to: data.customerEmail,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Resend API error:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Failed to send review request email:', error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Send reservation reminder email 24h before reservation
+ */
+export async function sendReservationReminderEmail(data: {
+  customerName: string;
+  customerEmail: string;
+  reservationDate: Date;
+  reservationTime: string;
+  partySize: number;
+  specialRequests?: string;
+}): Promise<{ success: boolean; id?: string; error?: any }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const { format } = await import('date-fns');
+    const formattedDate = format(data.reservationDate, 'MMMM dd, yyyy');
+    
+    // Try to get custom template from database
+    const customTemplate = await getCustomTemplate('reservation_reminder');
+    
+    let subject: string;
+    let html: string;
+    
+    if (customTemplate) {
+      subject = customTemplate.subject
+        .replace(/{{customerName}}/g, data.customerName)
+        .replace(/{{reservationDate}}/g, formattedDate)
+        .replace(/{{reservationTime}}/g, data.reservationTime);
+      
+      html = customTemplate.bodyHtml
+        .replace(/{{customerName}}/g, data.customerName)
+        .replace(/{{reservationDate}}/g, formattedDate)
+        .replace(/{{reservationTime}}/g, data.reservationTime)
+        .replace(/{{partySize}}/g, data.partySize.toString())
+        .replace(/{{specialRequests}}/g, data.specialRequests || 'None');
+    } else {
+      // Fallback to default template
+      subject = `Reminder: Your reservation tomorrow at Boomiis Restaurant`;
+      
+      html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <!-- Header -->
+                  <tr>
+                    <td style="background-color: #D4AF37; padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px;">Reservation Reminder</h1>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
+                        Dear ${data.customerName},
+                      </p>
+                      
+                      <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #333333;">
+                        This is a friendly reminder that you have a reservation at <strong>Boomiis Restaurant</strong> tomorrow:
+                      </p>
+                      
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f8f8; border-radius: 6px; padding: 20px; margin: 20px 0;">
+                        <tr>
+                          <td>
+                            <p style="margin: 0 0 10px; font-size: 16px; color: #666666;">
+                              <strong style="color: #333333;">Date:</strong> ${formattedDate}
+                            </p>
+                            <p style="margin: 0 0 10px; font-size: 16px; color: #666666;">
+                              <strong style="color: #333333;">Time:</strong> ${data.reservationTime}
+                            </p>
+                            <p style="margin: 0 0 10px; font-size: 16px; color: #666666;">
+                              <strong style="color: #333333;">Party Size:</strong> ${data.partySize} ${data.partySize === 1 ? 'guest' : 'guests'}
+                            </p>
+                            ${data.specialRequests ? `
+                            <p style="margin: 0; font-size: 16px; color: #666666;">
+                              <strong style="color: #333333;">Special Requests:</strong> ${data.specialRequests}
+                            </p>
+                            ` : ''}
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <p style="margin: 20px 0; font-size: 16px; line-height: 1.6; color: #333333;">
+                        We're looking forward to serving you! If you need to make any changes to your reservation, please contact us as soon as possible.
+                      </p>
+                      
+                      <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.6; color: #333333;">
+                        See you soon!<br>
+                        <strong>The Boomiis Restaurant Team</strong>
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f8f8f8; padding: 20px 30px; text-align: center;">
+                      <p style="margin: 0; font-size: 14px; color: #666666;">
+                        Boomiis Restaurant | Premium Dining Experience
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `;
+    }
+
+    const { data: result, error } = await resend.emails.send({
+      from: ENV.fromEmail,
+      to: data.customerEmail,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error('[Email] Resend API error:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Failed to send reservation reminder email:', error);
+    return { success: false, error };
+  }
+}
