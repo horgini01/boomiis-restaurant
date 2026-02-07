@@ -1446,3 +1446,8 @@
 - [x] Add manual refresh button to reload analytics data
 - [x] Implement PDF export functionality for comprehensive analytics reports (jsPDF + html2canvas)
 - [x] Add "Download Report" button to export current analytics view as PDF
+
+## Bug Fix - Calendar Positioning (User Report - Feb 7)
+- [x] Fix calendar popover appearing in awkward position overlapping content (added controlled open state)
+- [x] Ensure calendar only shows when "Custom Range" is selected (conditional rendering working)
+- [x] Improve popover positioning and alignment (side-by-side layout, proper z-index, auto-close on selection)

@@ -37,6 +37,7 @@ export default function Analytics() {
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>(undefined);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Calculate date range
@@ -269,7 +270,7 @@ export default function Analytics() {
                 </SelectContent>
               </Select>
               {dateRange === 'custom' && (
-                <Popover>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -288,24 +289,36 @@ export default function Analytics() {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="end">
-                    <div className="p-3 border-b">
-                      <p className="text-sm font-medium">Select Start Date</p>
-                      <Calendar
-                        mode="single"
-                        selected={customStartDate}
-                        onSelect={setCustomStartDate}
-                        disabled={(date) => date > new Date()}
-                      />
-                    </div>
-                    <div className="p-3">
-                      <p className="text-sm font-medium">Select End Date</p>
-                      <Calendar
-                        mode="single"
-                        selected={customEndDate}
-                        onSelect={setCustomEndDate}
-                        disabled={(date) => date > new Date() || (customStartDate ? date < customStartDate : false)}
-                      />
+                  <PopoverContent className="w-auto p-0 z-50" align="end" side="bottom" sideOffset={5}>
+                    <div className="flex gap-0">
+                      <div className="p-3 border-r">
+                        <p className="text-sm font-medium mb-2">Start Date</p>
+                        <Calendar
+                          mode="single"
+                          selected={customStartDate}
+                          onSelect={(date) => {
+                            setCustomStartDate(date);
+                            if (date && customEndDate && date <= customEndDate) {
+                              setIsCalendarOpen(false);
+                            }
+                          }}
+                          disabled={(date) => date > new Date()}
+                        />
+                      </div>
+                      <div className="p-3">
+                        <p className="text-sm font-medium mb-2">End Date</p>
+                        <Calendar
+                          mode="single"
+                          selected={customEndDate}
+                          onSelect={(date) => {
+                            setCustomEndDate(date);
+                            if (date && customStartDate && date >= customStartDate) {
+                              setIsCalendarOpen(false);
+                            }
+                          }}
+                          disabled={(date) => date > new Date() || (customStartDate ? date < customStartDate : false)}
+                        />
+                      </div>
                     </div>
                   </PopoverContent>
                 </Popover>
