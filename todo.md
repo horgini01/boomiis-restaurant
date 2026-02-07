@@ -1719,3 +1719,12 @@
 - [x] Wrap SMSAnalytics.tsx with AdminLayout component
 - [x] Verify admin sidebar appears on Email Tracking page (sidebar visible with all navigation links)
 - [x] Verify admin sidebar appears on SMS Analytics page (sidebar visible with all navigation links)
+
+
+### Template Dropdown Filter Fix
+- [x] Create comprehensive list of all 25 email template types (created shared/templateTypes.ts)
+- [x] Create comprehensive list of all 18 SMS template types (created shared/templateTypes.ts)
+- [x] Update EmailTracking.tsx dropdown to show all email templates (imported EMAIL_TEMPLATE_TYPES)
+- [x] Update SMSAnalytics.tsx dropdown to show all SMS templates (imported SMS_TEMPLATE_TYPES)
+- [x] Verify all 25 email templates appear in Email Tracking dropdown (verified in browser - all templates visible)
+- [x] Verify all 18 SMS templates appear in SMS Analytics dropdown (verified in browser - all templates visible)

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import AdminLayout from '@/components/AdminLayout';
+import { EMAIL_TEMPLATE_TYPES } from '@/../../shared/templateTypes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -131,12 +132,11 @@ function EmailTracking() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Templates</SelectItem>
-              <SelectItem value="order_confirmed">Order Confirmed</SelectItem>
-              <SelectItem value="order_ready">Order Ready</SelectItem>
-              <SelectItem value="order_delivered">Order Delivered</SelectItem>
-              <SelectItem value="reservation_confirmed">Reservation Confirmed</SelectItem>
-              <SelectItem value="review_request">Review Request</SelectItem>
-              <SelectItem value="newsletter">Newsletter</SelectItem>
+              {EMAIL_TEMPLATE_TYPES.map((template) => (
+                <SelectItem key={template.value} value={template.value}>
+                  {template.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
