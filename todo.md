@@ -1952,3 +1952,6 @@
 - [x] Ensure favorites persist across sessions
 - [x] Handle favorites in both expanded and collapsed sidebar states
 - [x] Test favorites functionality across all admin pages
+
+### Bug Fixes (User Reported - Feb 7 Part 3)
+- [x] Fix nested anchor tag error on admin login page (removed inner <a> tag from Link component)
