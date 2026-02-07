@@ -241,7 +241,7 @@ export const customRolesRouter = router({
 
   // Get all available routes for permission selection
   getAvailableRoutes: adminOrOwnerProcedure.query(async () => {
-    // Define all admin routes with categories
+    // Define all admin routes with categories (matches AdminLayout navigation)
     const routes = [
       {
         category: "Dashboard & Overview",
@@ -260,8 +260,8 @@ export const customRolesRouter = router({
       {
         category: "Menu Management",
         routes: [
-          { route: "/admin/menu", label: "Menu Items" },
-          { route: "/admin/menu-categories", label: "Menu Categories" },
+          { route: "/admin/categories", label: "Menu Categories" },
+          { route: "/admin/menu-items", label: "Menu Items" },
         ],
       },
       {
@@ -274,34 +274,44 @@ export const customRolesRouter = router({
       {
         category: "Content Management",
         routes: [
-          { route: "/admin/blog", label: "Blog Posts" },
-          { route: "/admin/gallery", label: "Gallery" },
+          { route: "/admin/reviews", label: "Reviews" },
           { route: "/admin/testimonials", label: "Testimonials" },
+          { route: "/admin/response-templates", label: "Response Templates" },
+          { route: "/admin/gallery", label: "Gallery" },
+          { route: "/admin/blog", label: "Blog Posts" },
+          { route: "/admin/about-content", label: "About Content" },
+          { route: "/admin/legal-pages", label: "Legal Pages" },
         ],
       },
       {
         category: "Marketing",
         routes: [
-          { route: "/admin/newsletter", label: "Newsletter Subscribers" },
-          { route: "/admin/campaigns", label: "Email Campaigns" },
+          { route: "/admin/newsletter-subscribers", label: "Newsletter Subscribers" },
+          { route: "/admin/email-campaigns", label: "Email Campaigns" },
+          { route: "/admin/email-tracking", label: "Email Tracking" },
+        ],
+      },
+      {
+        category: "Communication",
+        routes: [
+          { route: "/admin/email-delivery", label: "Email Delivery" },
+          { route: "/admin/sms-templates", label: "SMS Templates" },
+          { route: "/admin/sms-analytics", label: "SMS Analytics" },
         ],
       },
       {
         category: "User Management",
         routes: [
           { route: "/admin/users", label: "Admin Users" },
-          { route: "/admin/role-permissions", label: "Role Permissions" },
           { route: "/admin/custom-roles", label: "Custom Roles" },
         ],
       },
       {
-        category: "Settings",
+        category: "System Administration",
         routes: [
+          { route: "/admin/audit-logs", label: "Audit Logs" },
+          { route: "/admin/restaurant-settings", label: "Restaurant Info" },
           { route: "/admin/settings", label: "General Settings" },
-          { route: "/admin/delivery-areas", label: "Delivery Areas" },
-          { route: "/admin/opening-hours", label: "Opening Hours" },
-          { route: "/admin/email-templates", label: "Email Templates" },
-          { route: "/admin/sms-templates", label: "SMS Templates" },
         ],
       },
     ];

@@ -1857,3 +1857,9 @@
 - [ ] Add anomaly detection configuration to admin settings - DEFERRED (rules are well-tuned, can be added later if needed)
 - [x] Write vitest tests for anomaly detection logic (13 tests covering rules, thresholds, time windows, severity levels - all passing)
 - [x] Test anomaly detection with simulated suspicious patterns (validated rules and thresholds through comprehensive unit tests)
+
+### Update Custom Roles Permissions List
+- [x] Read custom roles page to see current permissions structure (uses getAvailableRoutes API)
+- [x] Identify all missing admin routes in permissions dialog (found 10+ missing routes)
+- [x] Add all new pages to permissions categories (added reviews, response templates, about content, legal pages, email tracking, SMS analytics, email delivery, restaurant settings, audit logs)
+- [x] Verify permissions dialog displays all 27 admin routes (now organized into 9 categories with 27 total routes)
