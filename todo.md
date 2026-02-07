@@ -1769,3 +1769,8 @@
 - [x] Fix role check to allow owner and manager roles (updated to check ['admin', 'owner', 'manager'])
 - [x] Test admin dashboard loads without errors (dev server running, no errors in logs)
 - [x] Verify all admin pages still require authentication (AdminGuard now checks for admin/owner/manager roles)
+
+### Fix Admin Dashboard Unauthorized Error
+- [x] Identify which API procedures are failing with Unauthorized error (todaySnapshot, alerts, recentActivity, statsWithTrends)
+- [x] Update all 4 admin dashboard procedures to allow owner/admin/manager roles instead of admin-only
+- [x] Verify dashboard loads successfully for owner role users

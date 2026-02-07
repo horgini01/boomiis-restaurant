@@ -470,7 +470,7 @@ export const appRouter = router({
     }),
 
     todaySnapshot: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -556,7 +556,7 @@ export const appRouter = router({
     }),
 
     alerts: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -586,7 +586,7 @@ export const appRouter = router({
     }),
 
     recentActivity: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -634,7 +634,7 @@ export const appRouter = router({
     }),
 
     statsWithTrends: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
