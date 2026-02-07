@@ -2,7 +2,7 @@ import { z } from "zod";
 import { router, protectedProcedure } from "./_core/trpc";
 import { getDb } from "./db";
 import { users } from "../drizzle/schema";
-import { eq, and, or, like, desc } from "drizzle-orm";
+import { eq, and, or, like, desc, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getResendClient, FROM_EMAIL } from "./email";
 
@@ -234,5 +234,58 @@ export const adminUserManagementRouter = router({
       await db.update(users).set({ status: "inactive" }).where(eq(users.id, input.id));
 
       return { success: true };
+    }),
+
+  // Bulk update status for multiple users
+  bulkUpdateStatus: ownerProcedure
+    .input(z.object({
+      userIds: z.array(z.number()).min(1, "At least one user must be selected"),
+      status: z.enum(["active", "inactive"]),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      // Prevent deactivating yourself
+      if (input.userIds.includes(ctx.user.id) && input.status === "inactive") {
+        throw new Error('You cannot deactivate your own account');
+      }
+
+      // Update all selected users
+      await db
+        .update(users)
+        .set({ status: input.status })
+        .where(inArray(users.id, input.userIds));
+
+      return { 
+        success: true, 
+        message: `${input.userIds.length} user(s) ${input.status === "active" ? "activated" : "deactivated"} successfully` 
+      };
+    }),
+
+  // Bulk delete multiple users
+  bulkDeleteUsers: ownerProcedure
+    .input(z.object({
+      userIds: z.array(z.number()).min(1, "At least one user must be selected"),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      // Prevent deleting yourself
+      if (input.userIds.includes(ctx.user.id)) {
+        throw new Error('You cannot delete your own account');
+      }
+
+      // Soft delete by setting status to inactive
+      await db
+        .update(users)
+        .set({ status: "inactive" })
+        .where(inArray(users.id, input.userIds));
+
+      return { 
+        success: true, 
+        message: `${input.userIds.length} user(s) deleted successfully` 
+      };
     }),
 });

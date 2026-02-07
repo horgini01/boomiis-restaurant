@@ -1531,3 +1531,18 @@
 - [x] Fix Admin Users page missing sidebar navigation (wrapped with AdminLayout)
 - [x] Fix Role Permissions page missing sidebar navigation (wrapped with AdminLayout)
 - [x] Verify both pages use AdminLayout wrapper correctly
+
+## Bulk User Actions & Custom Role Builder (User Request - Feb 7)
+- [x] Add multi-select checkboxes to Admin Users table
+- [x] Implement bulk activate/deactivate functionality
+- [x] Implement bulk delete functionality with confirmation
+- [x] Add bulk action toolbar showing selected count
+- [x] Create custom_roles table in database schema
+- [x] Add role_permissions junction table for custom roles
+- [x] Build backend API for custom role CRUD operations
+- [x] Create Custom Role Builder UI page
+- [x] Implement granular permission selection interface
+- [x] Add custom role assignment to user management
+- [x] Update role-based access control to support custom roles
+- [x] Write vitest tests for bulk user operations
+- [x] Write vitest tests for custom role CRUD operations

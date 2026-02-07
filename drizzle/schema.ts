@@ -477,3 +477,33 @@ export const legalPages = mysqlTable("legal_pages", {
 
 export type LegalPage = typeof legalPages.$inferSelect;
 export type InsertLegalPage = typeof legalPages.$inferInsert;
+
+/**
+ * Custom roles created by owners for granular access control
+ */
+export const customRoles = mysqlTable("custom_roles", {
+  id: int("id").autoincrement().primaryKey(),
+  roleName: varchar("role_name", { length: 100 }).notNull().unique(),
+  roleSlug: varchar("role_slug", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdBy: int("created_by").notNull(), // User ID of creator (must be owner)
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomRole = typeof customRoles.$inferSelect;
+export type InsertCustomRole = typeof customRoles.$inferInsert;
+
+/**
+ * Permissions assigned to custom roles (junction table)
+ */
+export const rolePermissions = mysqlTable("role_permissions", {
+  id: int("id").autoincrement().primaryKey(),
+  roleId: int("role_id").notNull(), // References custom_roles.id
+  route: varchar("route", { length: 200 }).notNull(), // e.g., '/admin/dashboard', '/admin/orders'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = typeof rolePermissions.$inferInsert;

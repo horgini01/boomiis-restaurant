@@ -26,6 +26,7 @@ import {
   FileText,
   BookOpen,
   Scale,
+  Shield,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useSettings } from '@/hooks/useSettings';
@@ -66,6 +67,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/legal-pages', label: 'Legal Pages', icon: Scale },
     { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { path: '/admin/users', label: 'Admin Users', icon: UserCog },
+    { path: '/admin/custom-roles', label: 'Custom Roles', icon: Shield },
     { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail },
     { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users },
     { path: '/admin/email-campaigns', label: 'Email Campaigns', icon: Send },

@@ -35,7 +35,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, UserPlus, MoreVertical, Shield, Users, ChefHat, UserCog, Eye } from "lucide-react";
+import { Search, UserPlus, MoreVertical, Shield, Users, ChefHat, UserCog, Eye, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -75,6 +76,7 @@ export default function AdminUsers() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
 
   // Fetch users
   const { data: users, refetch } = trpc.adminUsers.getAdminUsers.useQuery({
@@ -127,6 +129,28 @@ export default function AdminUsers() {
     },
   });
 
+  const bulkUpdateStatus = trpc.adminUsers.bulkUpdateStatus.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      setSelectedUserIds([]);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update users");
+    },
+  });
+
+  const bulkDeleteUsers = trpc.adminUsers.bulkDeleteUsers.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      setSelectedUserIds([]);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete users");
+    },
+  });
+
   const handleCreateUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -162,6 +186,41 @@ export default function AdminUsers() {
     }
   };
 
+  const handleBulkActivate = () => {
+    if (selectedUserIds.length === 0) return;
+    bulkUpdateStatus.mutate({ userIds: selectedUserIds, status: "active" });
+  };
+
+  const handleBulkDeactivate = () => {
+    if (selectedUserIds.length === 0) return;
+    if (confirm(`Are you sure you want to deactivate ${selectedUserIds.length} user(s)?`)) {
+      bulkUpdateStatus.mutate({ userIds: selectedUserIds, status: "inactive" });
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedUserIds.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedUserIds.length} user(s)? This action cannot be undone.`)) {
+      bulkDeleteUsers.mutate({ userIds: selectedUserIds });
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedUserIds.length === users?.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(users?.map(u => u.id) || []);
+    }
+  };
+
+  const handleSelectUser = (userId: number) => {
+    setSelectedUserIds(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -186,6 +245,46 @@ export default function AdminUsers() {
           </Button>
         </div>
       </div>
+
+      {/* Bulk Actions Toolbar */}
+      {selectedUserIds.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-blue-900">
+              {selectedUserIds.length} user(s) selected
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleBulkActivate}
+              disabled={bulkUpdateStatus.isPending}
+            >
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Activate
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleBulkDeactivate}
+              disabled={bulkUpdateStatus.isPending}
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Deactivate
+            </Button>
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={handleBulkDelete}
+              disabled={bulkDeleteUsers.isPending}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex gap-4">
@@ -228,6 +327,12 @@ export default function AdminUsers() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <Checkbox 
+                  checked={selectedUserIds.length === users?.length && users.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+              </TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
@@ -241,6 +346,12 @@ export default function AdminUsers() {
               const RoleIcon = roleIcons[user.role as Role];
               return (
                 <TableRow key={user.id}>
+                  <TableCell>
+                    <Checkbox 
+                      checked={selectedUserIds.includes(user.id)}
+                      onCheckedChange={() => handleSelectUser(user.id)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">
                     <div>
                       <div>{user.name}</div>

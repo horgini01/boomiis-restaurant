@@ -14,6 +14,7 @@ import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, sendOrderStatus
 import { storagePut, storageGet } from "./storage";
 import { optimizeAndUploadImage } from "./imageOptimization";
 import { adminUserManagementRouter } from "./adminUserManagement";
+import { customRolesRouter } from "./customRoles";
 
 export const appRouter = router({
   system: systemRouter,
@@ -3882,6 +3883,9 @@ export const appRouter = router({
 
   // ==================== Admin User Management ====================
   adminUsers: adminUserManagementRouter,
+
+  // ==================== Custom Roles Management ====================
+  customRoles: customRolesRouter,
 
   // ==================== Admin: Legal Pages Management ====================
   adminLegal: router({
