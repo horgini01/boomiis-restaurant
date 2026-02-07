@@ -1963,19 +1963,80 @@ export async function sendTestimonialNotificationEmail(testimonial: {
   try {
     const adminEmails = await getAdminEmails();
     const baseUrl = ENV.baseUrl || 'http://localhost:3000';
-    
-    // Generate quick action links with tokens
-    const approveToken = Buffer.from(JSON.stringify({ id: testimonial.id, action: 'approve', timestamp: Date.now() })).toString('base64url');
-    const rejectToken = Buffer.from(JSON.stringify({ id: testimonial.id, action: 'reject', timestamp: Date.now() })).toString('base64url');
-    
-    const approveUrl = `${baseUrl}/api/testimonial-action?token=${approveToken}`;
-    const rejectUrl = `${baseUrl}/api/testimonial-action?token=${rejectToken}`;
     const adminUrl = `${baseUrl}/admin/testimonials`;
+    const settings = await getRestaurantSettings();
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
 
-    // Generate star rating HTML
-    const stars = '★'.repeat(testimonial.rating) + '☆'.repeat(5 - testimonial.rating);
+    // Try to get custom template
+    const customTemplate = await getCustomTemplate('testimonial_notification');
+    
+    let subject: string;
+    let html: string;
 
-    const html = `
+    if (customTemplate) {
+      // Use custom template with variable replacement
+      subject = customTemplate.subject
+        .replace(/{restaurantName}/g, restaurantName);
+      
+      const submittedDate = format(new Date(), 'MMMM d, yyyy');
+      
+      let bodyHtml = customTemplate.bodyHtml
+        .replace(/{restaurantName}/g, restaurantName)
+        .replace(/{customerName}/g, testimonial.customerName)
+        .replace(/{rating}/g, testimonial.rating.toString())
+        .replace(/{submittedDate}/g, submittedDate)
+        .replace(/{testimonialText}/g, testimonial.content)
+        .replace(/{adminUrl}/g, adminUrl);
+
+      // Build email HTML with custom template
+      html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  <tr>
+                    <td style="padding: 30px; background-color: ${customTemplate.headerColor}; text-align: center;">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 24px;">New Testimonial</h1>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      ${bodyHtml}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 20px 30px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+                      <p style="margin: 0; font-size: 12px; color: #666666;">
+                        ${customTemplate.footerText}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+      `;
+    } else {
+      // Fallback to default template
+      subject = `New Testimonial: ${testimonial.rating}★ from ${testimonial.customerName}`;
+      const stars = '★'.repeat(testimonial.rating) + '☆'.repeat(5 - testimonial.rating);
+      
+      // Generate quick action links
+      const approveToken = Buffer.from(JSON.stringify({ id: testimonial.id, action: 'approve', timestamp: Date.now() })).toString('base64url');
+      const rejectToken = Buffer.from(JSON.stringify({ id: testimonial.id, action: 'reject', timestamp: Date.now() })).toString('base64url');
+      const approveUrl = `${baseUrl}/api/testimonial-action?token=${approveToken}`;
+      const rejectUrl = `${baseUrl}/api/testimonial-action?token=${rejectToken}`;
+
+      html = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -2060,13 +2121,14 @@ export async function sendTestimonialNotificationEmail(testimonial: {
         </body>
       </html>
     `;
+    }
 
     // Send to all admin emails
     for (const adminEmail of adminEmails) {
       const result = await resend.emails.send({
         from: FROM_EMAIL,
         to: adminEmail,
-        subject: `New Testimonial: ${testimonial.rating}★ from ${testimonial.customerName}`,
+        subject,
         html,
       });
 
@@ -2074,7 +2136,7 @@ export async function sendTestimonialNotificationEmail(testimonial: {
         templateType: 'testimonial_notification',
         recipientEmail: adminEmail,
         recipientName: 'Admin',
-        subject: `New Testimonial: ${testimonial.rating}★ from ${testimonial.customerName}`,
+        subject,
         resendId: result.data?.id,
         metadata: { testimonialId: testimonial.id },
       });

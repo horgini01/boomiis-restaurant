@@ -25,6 +25,16 @@ const TEMPLATE_TYPES = [
   { value: 'order_out_for_delivery', label: 'Order Out for Delivery (Customer)' },
   { value: 'order_completed', label: 'Order Completed (Customer)' },
   { value: 'weekly_report', label: 'Weekly Report (Admin)' },
+  { value: 'testimonial_notification', label: 'New Testimonial Notification (Admin)' },
+  { value: 'testimonial_response', label: 'Testimonial Response (Customer)' },
+  { value: 'admin_user_welcome', label: 'New Admin User Welcome' },
+  { value: 'event_confirmation', label: 'Event Confirmation (Customer)' },
+  { value: 'event_inquiry_response', label: 'Event Inquiry Response (Customer)' },
+  { value: 'catering_quote_request', label: 'Catering Quote Request (Admin)' },
+  { value: 'review_request', label: 'Review Request (Customer)' },
+  { value: 'reservation_reminder', label: 'Reservation Reminder (Customer)' },
+  { value: 'order_cancellation', label: 'Order Cancellation (Customer)' },
+  { value: 'newsletter_confirmation', label: 'Newsletter Subscription Confirmation' },
 ];
 
 const DEFAULT_TEMPLATES = {
@@ -179,6 +189,227 @@ const DEFAULT_TEMPLATES = {
 <p><strong>Never Ordered Items:</strong> {neverOrderedCount}</p>
 
 <p style="margin-top: 20px;">View detailed analytics in the <a href="{dashboardUrl}">admin dashboard</a>.</p>`,
+  },
+  testimonial_notification: {
+    subject: '⭐ New Testimonial Received - {restaurantName}',
+    headerColor: '#10b981',
+    footerText: 'Thank you for providing excellent service!',
+    bodyHtml: `<h2>New Customer Testimonial</h2>
+<p>A customer has shared their experience at {restaurantName}!</p>
+
+<div style="background: #f0fdf4; padding: 20px; border-left: 4px solid #10b981; margin: 20px 0;">
+  <p><strong>Customer:</strong> {customerName}</p>
+  <p><strong>Rating:</strong> {rating}/5 ⭐</p>
+  <p><strong>Date:</strong> {submittedDate}</p>
+  
+  <h3>Testimonial:</h3>
+  <p style="font-style: italic;">"{testimonialText}"</p>
+</div>
+
+<p><strong>Next Steps:</strong></p>
+<ul>
+  <li>Review the testimonial in the <a href="{adminUrl}">admin panel</a></li>
+  <li>Approve or respond to the testimonial</li>
+  <li>Consider featuring it on your website</li>
+</ul>`,
+  },
+  testimonial_response: {
+    subject: 'Thank You for Your Feedback - {restaurantName}',
+    headerColor: '#d4a574',
+    footerText: 'We appreciate your support!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Thank you so much for taking the time to share your experience with us!</p>
+
+<div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+  <p><strong>Our Response:</strong></p>
+  <p>{responseText}</p>
+</div>
+
+<p>Your feedback helps us continue to improve and serve you better. We look forward to welcoming you back soon!</p>`,
+  },
+  admin_user_welcome: {
+    subject: 'Welcome to {restaurantName} Admin Team',
+    headerColor: '#6366f1',
+    footerText: 'Welcome aboard!',
+    bodyHtml: `<h2>Welcome to the Team!</h2>
+<p>Dear {userName},</p>
+<p>You've been added as an admin user for {restaurantName}. Here are your account details:</p>
+
+<div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <p><strong>Email:</strong> {userEmail}</p>
+  <p><strong>Role:</strong> {userRole}</p>
+  <p><strong>Login URL:</strong> <a href="{loginUrl}">{loginUrl}</a></p>
+</div>
+
+<h3>Getting Started</h3>
+<p>As an admin user, you'll have access to:</p>
+<ul>
+  <li>Order management and kitchen display</li>
+  <li>Reservation and event bookings</li>
+  <li>Menu and content management</li>
+  <li>Customer communications</li>
+  <li>Analytics and reports</li>
+</ul>
+
+<p>If you have any questions, please contact the restaurant owner or your manager.</p>`,
+  },
+  event_confirmation: {
+    subject: '🎉 Event Booking Confirmed - {restaurantName}',
+    headerColor: '#d4a574',
+    footerText: 'We look forward to hosting your event!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Your event booking has been confirmed!</p>
+
+<h3>Event Details</h3>
+<div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <p><strong>Event Type:</strong> {eventType}</p>
+  <p><strong>Date & Time:</strong> {eventDateTime}</p>
+  <p><strong>Number of Guests:</strong> {guestCount}</p>
+  <p><strong>Venue:</strong> {venueName}</p>
+</div>
+
+<h3>Package Details</h3>
+<p>{packageDetails}</p>
+
+<h3>Special Requests</h3>
+<p>{specialRequests}</p>
+
+<p><strong>Total Cost:</strong> £{totalCost}</p>
+
+<p>If you need to make any changes, please contact us at least 7 days before the event.</p>`,
+  },
+  event_inquiry_response: {
+    subject: 'Thank You for Your Event Inquiry - {restaurantName}',
+    headerColor: '#d4a574',
+    footerText: 'Let us help make your event special!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Thank you for your interest in hosting your event at {restaurantName}!</p>
+
+<h3>Your Inquiry</h3>
+<div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+  <p><strong>Event Type:</strong> {eventType}</p>
+  <p><strong>Preferred Date:</strong> {preferredDate}</p>
+  <p><strong>Guest Count:</strong> {guestCount}</p>
+</div>
+
+<p>We've received your inquiry and our events team will contact you within 24 hours to discuss:</p>
+<ul>
+  <li>Available dates and venues</li>
+  <li>Menu options and packages</li>
+  <li>Pricing and customization</li>
+  <li>Any special requirements</li>
+</ul>
+
+<p>In the meantime, if you have any questions, feel free to reach out to us.</p>`,
+  },
+  catering_quote_request: {
+    subject: '📋 New Catering Quote Request',
+    headerColor: '#f59e0b',
+    footerText: 'Respond promptly to secure the booking',
+    bodyHtml: `<h2>New Catering Quote Request</h2>
+<p>A customer has requested a catering quote.</p>
+
+<h3>Customer Information</h3>
+<div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <p><strong>Name:</strong> {customerName}</p>
+  <p><strong>Email:</strong> {customerEmail}</p>
+  <p><strong>Phone:</strong> {customerPhone}</p>
+</div>
+
+<h3>Event Details</h3>
+<p><strong>Event Type:</strong> {eventType}</p>
+<p><strong>Event Date:</strong> {eventDate}</p>
+<p><strong>Guest Count:</strong> {guestCount}</p>
+<p><strong>Budget Range:</strong> {budgetRange}</p>
+
+<h3>Requirements</h3>
+<p>{requirements}</p>
+
+<p><strong>Action Required:</strong> Prepare and send a detailed quote within 24 hours.</p>`,
+  },
+  review_request: {
+    subject: 'How Was Your Experience at {restaurantName}?',
+    headerColor: '#d4a574',
+    footerText: 'Your feedback matters to us!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Thank you for dining with us recently! We hope you enjoyed your meal.</p>
+
+<div style="text-align: center; padding: 30px 20px; background: #f9fafb; border-radius: 8px; margin: 20px 0;">
+  <h3>Share Your Experience</h3>
+  <p>Your feedback helps us improve and helps others discover great food!</p>
+  <a href="{reviewUrl}" style="display: inline-block; background: #d4a574; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin-top: 15px;">Leave a Review</a>
+</div>
+
+<p>It only takes a minute, and we'd love to hear about:</p>
+<ul>
+  <li>The quality of your meal</li>
+  <li>Our service and atmosphere</li>
+  <li>Any suggestions for improvement</li>
+</ul>
+
+<p>Thank you for being a valued customer!</p>`,
+  },
+  reservation_reminder: {
+    subject: '📅 Reminder: Your Reservation Tomorrow at {restaurantName}',
+    headerColor: '#d4a574',
+    footerText: 'We look forward to seeing you!',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>This is a friendly reminder about your upcoming reservation.</p>
+
+<div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+  <h3>Your Reservation</h3>
+  <p><strong>Date & Time:</strong> {reservationDateTime}</p>
+  <p><strong>Party Size:</strong> {partySize} guests</p>
+  <p><strong>Table:</strong> {tableNumber}</p>
+</div>
+
+<p><strong>Our Address:</strong><br>
+{restaurantAddress}</p>
+
+<p>If you need to modify or cancel your reservation, please contact us at least 4 hours in advance.</p>
+
+<p>We're excited to serve you!</p>`,
+  },
+  order_cancellation: {
+    subject: 'Order Cancelled - #{orderNumber}',
+    headerColor: '#ef4444',
+    footerText: 'We hope to serve you again soon',
+    bodyHtml: `<p>Dear {customerName},</p>
+<p>Your order has been cancelled as requested.</p>
+
+<h3>Cancelled Order Details</h3>
+<div style="background: #fee2e2; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <p><strong>Order Number:</strong> #{orderNumber}</p>
+  <p><strong>Order Total:</strong> £{orderTotal}</p>
+  <p><strong>Cancellation Reason:</strong> {cancellationReason}</p>
+</div>
+
+<h3>Refund Information</h3>
+<p>If you've already paid for this order, a refund will be processed within 5-7 business days to your original payment method.</p>
+
+<p>If you have any questions about this cancellation, please don't hesitate to contact us.</p>`,
+  },
+  newsletter_confirmation: {
+    subject: '✅ Welcome to {restaurantName} Newsletter!',
+    headerColor: '#10b981',
+    footerText: 'Stay connected with us!',
+    bodyHtml: `<h2>Welcome to Our Newsletter!</h2>
+<p>Dear {subscriberName},</p>
+<p>Thank you for subscribing to the {restaurantName} newsletter!</p>
+
+<div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+  <h3>What to Expect:</h3>
+  <ul>
+    <li>🍽️ Exclusive menu previews and seasonal specials</li>
+    <li>🎉 Early access to event announcements</li>
+    <li>💰 Special offers and discounts for subscribers</li>
+    <li>📰 Restaurant news and updates</li>
+  </ul>
+</div>
+
+<p>We promise to only send you valuable content - no spam, ever!</p>
+
+<p style="font-size: 12px; color: #6b7280; margin-top: 30px;">You can unsubscribe at any time by clicking the link at the bottom of our emails.</p>`,
   },
 };
 

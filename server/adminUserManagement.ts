@@ -5,6 +5,8 @@ import { users } from "../drizzle/schema";
 import { eq, and, or, like, desc, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getResendClient, FROM_EMAIL } from "./email";
+import { siteSettings } from "../drizzle/schema";
+import { emailTemplates } from "../drizzle/schema";
 
 // Helper function to send emails
 async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
@@ -143,12 +145,78 @@ export const adminUserManagementRouter = router({
         invitedBy: ctx.user.id,
       });
 
-      // Send invitation email
+      // Send invitation email using custom template
       try {
-        await sendEmail({
-          to: input.email,
-          subject: "You've been invited to join Boomiis Restaurant Admin",
-          html: `
+        // Get restaurant name from settings
+        const settings = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'restaurant_name')).limit(1);
+        const restaurantName = settings[0]?.settingValue || 'Boomiis Restaurant';
+        
+        // Try to get custom template
+        const templates = await db.select().from(emailTemplates).where(eq(emailTemplates.templateType, 'admin_user_welcome')).limit(1);
+        
+        let subject: string;
+        let html: string;
+        
+        if (templates.length > 0 && templates[0].isActive) {
+          const template = templates[0];
+          const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+          const loginUrl = `${baseUrl}/admin/login`;
+          
+          // Replace variables in subject
+          subject = template.subject
+            .replace(/{restaurantName}/g, restaurantName)
+            .replace(/{userName}/g, input.firstName);
+          
+          // Replace variables in body
+          let bodyHtml = template.bodyHtml
+            .replace(/{restaurantName}/g, restaurantName)
+            .replace(/{userName}/g, input.firstName)
+            .replace(/{userEmail}/g, input.email)
+            .replace(/{userRole}/g, input.role.replace("_", " ").replace("custom-", "Custom Role "))
+            .replace(/{loginUrl}/g, loginUrl)
+            .replace(/{tempPassword}/g, tempPassword);
+          
+          // Build complete HTML email
+          html = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td align="center" style="padding: 40px 0;">
+                    <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                      <tr>
+                        <td style="padding: 30px; background-color: ${template.headerColor}; text-align: center;">
+                          <h1 style="margin: 0; color: #ffffff; font-size: 24px;">Welcome to the Team</h1>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 40px 30px;">
+                          ${bodyHtml}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 20px 30px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; text-align: center;">
+                          <p style="margin: 0; font-size: 12px; color: #666666;">
+                            ${template.footerText}
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+          </html>
+          `;
+        } else {
+          // Fallback to default template
+          subject = "You've been invited to join Boomiis Restaurant Admin";
+          html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2>Welcome to Boomiis Restaurant!</h2>
               <p>Hi ${input.firstName},</p>
@@ -168,8 +236,10 @@ export const adminUserManagementRouter = router({
               <p>If you have any questions, please contact ${ctx.user.email}.</p>
               <p>Best regards,<br>Boomiis Restaurant Team</p>
             </div>
-          `,
-        });
+          `;
+        }
+        
+        await sendEmail({ to: input.email, subject, html });
       } catch (error) {
         console.error('[Email] Failed to send invitation:', error);
         // Don't fail the user creation if email fails
