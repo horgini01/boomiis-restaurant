@@ -1754,3 +1754,11 @@
 - [x] Update analytics endpoints to allow owner role access (updated all 4 endpoints to allow owner, admin, manager roles)
 - [x] Test SMS Analytics page with owner role (verified - loads successfully with all data)
 - [x] Test Email Tracking page with owner role (verified - loads successfully with all data)
+
+
+### Fix Login Page Unauthorized Error
+- [ ] Find admin login page component
+- [ ] Identify which API call is causing "Unauthorized" error
+- [ ] Check if login page is making protected procedure calls
+- [ ] Fix or remove unnecessary authorization checks on login page
+- [ ] Test login page to ensure error is resolved

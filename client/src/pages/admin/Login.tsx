@@ -26,9 +26,9 @@ export default function AdminLogin() {
     },
   });
 
-  // If already logged in as admin, redirect to dashboard
+  // If already logged in as admin/owner/manager, redirect to dashboard
   useEffect(() => {
-    if (!loading && user?.role === 'admin') {
+    if (!loading && user && ['admin', 'owner', 'manager'].includes(user.role)) {
       setLocation('/admin/dashboard');
     }
   }, [loading, user, setLocation]);
