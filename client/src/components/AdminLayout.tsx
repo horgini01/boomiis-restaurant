@@ -39,6 +39,7 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
+  StarOff,
 } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { useSettings } from '@/hooks/useSettings';
@@ -101,6 +102,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     };
   });
   
+  // Favorites state management
+  const [favoritePaths, setFavoritePaths] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('adminFavoritePages');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    }
+    return [];
+  });
+  
   // Fetch custom roles for navigation filtering
   const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
   
@@ -123,6 +135,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     localStorage.setItem('adminNavGroupsExpanded', JSON.stringify(expandedGroups));
   }, [expandedGroups]);
+  
+  useEffect(() => {
+    localStorage.setItem('adminFavoritePages', JSON.stringify(favoritePaths));
+  }, [favoritePaths]);
+  
+  const toggleFavorite = (path: string) => {
+    setFavoritePaths(prev => {
+      if (prev.includes(path)) {
+        // Remove from favorites
+        return prev.filter(p => p !== path);
+      } else {
+        // Add to favorites (max 5)
+        if (prev.length >= 5) {
+          toast.error('Maximum 5 favorite pages allowed');
+          return prev;
+        }
+        return [...prev, path];
+      }
+    });
+  };
+  
+  const isFavorite = (path: string) => favoritePaths.includes(path);
 
   const allNavItems: NavItem[] = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, category: 'Dashboard' },
@@ -179,6 +213,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       return hasStandardAccess || hasCustomAccess;
     });
   }, [user?.role, user?.customRoleId, customRoles]);
+  
+  // Get favorite nav items
+  const favoriteNavItems = useMemo(() => {
+    return accessibleNavItems.filter(item => favoritePaths.includes(item.path));
+  }, [accessibleNavItems, favoritePaths]);
 
   // Filter items by search query
   const filteredNavItems = useMemo(() => {
@@ -226,6 +265,55 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     
     return (
       <>
+        {/* Favorites Section */}
+        {!isSearching && favoriteNavItems.length > 0 && (
+          <div className="space-y-1 pb-4 mb-4 border-b border-border">
+            {!isCollapsed && (
+              <div className="px-2 py-1.5 text-xs font-semibold text-yellow-600 dark:text-yellow-500 flex items-center gap-1.5">
+                <Star className="h-3.5 w-3.5 fill-yellow-500" />
+                <span>Favorites</span>
+              </div>
+            )}
+            {favoriteNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location === item.path;
+              return (
+                <div key={item.path} className="relative group">
+                  <Link href={item.path}>
+                    <div
+                      className={`
+                        w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
+                        ${isActive 
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                          : 'hover:bg-accent hover:text-accent-foreground'
+                        }
+                      `}
+                      onClick={() => setMobileMenuOpen(false)}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-2'} flex-shrink-0`} />
+                      {!isCollapsed && <span className="truncate flex-1">{item.label}</span>}
+                    </div>
+                  </Link>
+                  {!isCollapsed && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleFavorite(item.path);
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent opacity-100"
+                      title="Remove from favorites"
+                    >
+                      <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
         {Object.entries(groupedNavItems).map(([category, items]) => {
           const isExpanded = isSearching || expandedGroups[category];
           
@@ -250,23 +338,45 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               {isExpanded && items.map((item) => {
                 const Icon = item.icon;
                 const isActive = location === item.path;
+                const itemIsFavorite = isFavorite(item.path);
                 return (
-                  <Link key={item.path} href={item.path}>
-                    <div
-                      className={`
-                        w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
-                        ${isActive 
-                          ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-                          : 'hover:bg-accent hover:text-accent-foreground'
-                        }
-                      `}
-                      onClick={() => setMobileMenuOpen(false)}
-                      title={isCollapsed ? item.label : undefined}
-                    >
-                      <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-2'} flex-shrink-0`} />
-                      {!isCollapsed && <span className="truncate">{item.label}</span>}
-                    </div>
-                  </Link>
+                  <div key={item.path} className="relative group">
+                    <Link href={item.path}>
+                      <div
+                        className={`
+                          w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
+                          ${isActive 
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                            : 'hover:bg-accent hover:text-accent-foreground'
+                          }
+                        `}
+                        onClick={() => setMobileMenuOpen(false)}
+                        title={isCollapsed ? item.label : undefined}
+                      >
+                        <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-2'} flex-shrink-0`} />
+                        {!isCollapsed && <span className="truncate flex-1">{item.label}</span>}
+                      </div>
+                    </Link>
+                    {!isCollapsed && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleFavorite(item.path);
+                        }}
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent ${
+                          itemIsFavorite ? 'opacity-100' : ''
+                        }`}
+                        title={itemIsFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        {itemIsFavorite ? (
+                          <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                        ) : (
+                          <StarOff className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
