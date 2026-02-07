@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "./_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { getDb } from "./db";
 import { users } from "../drizzle/schema";
 import { eq, and, or, like, desc, inArray } from "drizzle-orm";
@@ -108,12 +109,15 @@ export const adminUserManagementRouter = router({
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
-      // Check if user already exists
+      // Check if user already exists (regardless of status)
       const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
       
-      // If user exists and is active, reject
+      // If user exists and is active, reject immediately
       if (existing.length > 0 && existing[0].status === 'active') {
-        throw new Error('A user with this email already exists and is active');
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'A user with this email already exists. Please use a different email address.'
+        });
       }
       
       // If user exists but is inactive, we'll reactivate them with new details

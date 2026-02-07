@@ -42,7 +42,7 @@ export const rolePermissions: Record<Role, string[]> = {
     ...ALL_ADMIN_ROUTES,
   ],
   manager: [
-    // Operations management - no system settings, user management, or custom roles (21 routes)
+    // Operations management - no system settings, user management, or custom roles (22 routes)
     "/admin/dashboard",
     "/admin/categories",
     "/admin/menu-items",
@@ -64,19 +64,22 @@ export const rolePermissions: Record<Role, string[]> = {
     "/admin/sms-templates",
     "/admin/sms-analytics",
     "/admin/restaurant-settings",
+    "/admin/change-password",
   ],
   kitchen_staff: [
-    // Kitchen operations only (2 routes)
+    // Kitchen operations only (3 routes)
     "/admin/dashboard",
     "/admin/orders",
+    "/admin/change-password",
   ],
   front_desk: [
-    // Customer-facing operations (5 routes)
+    // Customer-facing operations (6 routes)
     "/admin/dashboard",
     "/admin/reservations",
     "/admin/events",
     "/admin/reviews",
     "/admin/testimonials",
+    "/admin/change-password",
   ],
 };
 
@@ -118,6 +121,6 @@ export const roleDescriptions: Record<Role, string> = {
   owner: "Full access to all 27 admin features including user management and critical settings",
   admin: "Full access to all 27 admin features including user management and critical settings",
   manager: "Manage daily operations, menu, orders, reservations, and content (21 routes)",
-  kitchen_staff: "View and manage kitchen orders only (2 routes)",
-  front_desk: "Manage customer interactions, reservations, and events (5 routes)",
+  kitchen_staff: "View and manage kitchen orders only (3 routes including password change)",
+  front_desk: "Manage customer interactions, reservations, and events (6 routes including password change)",
 };

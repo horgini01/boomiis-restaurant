@@ -39,11 +39,8 @@ export const appRouter = router({
           throw new Error('Invalid email or password');
         }
 
-        // Allow admin, owner, and manager roles to access admin panel
-        const allowedRoles = ['admin', 'owner', 'manager'];
-        if (!allowedRoles.includes(user.role)) {
-          throw new Error('Access denied. Admin privileges required.');
-        }
+        // Allow all roles to login - navigation will be filtered based on permissions
+        // No role restriction needed here
 
         // Create session token
         const token = await sdk.createSessionToken(user.openId, {

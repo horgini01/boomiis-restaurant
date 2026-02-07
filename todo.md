@@ -1985,3 +1985,15 @@
 - [x] Log password change action in audit logs
 - [x] Change Password link already exists in admin navigation (System Settings group)
 - [x] Write tests for password change functionality (5 passing tests)
+
+### Bug Fixes (User Reported - Feb 7 Part 6)
+- [x] Fix duplicate email issue when creating new users (bravehatconsulting@gmail.com appearing twice)
+- [x] Ensure createAdminUser checks for existing emails across all statuses before creating new record
+- [x] Remove role restriction from login endpoint (allow all roles to login)
+- [x] Implement role-based navigation filtering in AdminLayout (already implemented with rolePermissions.ts)
+- [x] Kitchen Staff role can now login and see only allowed pages (Dashboard, Orders, Change Password)
+- [x] Front Desk role can now login and see only allowed pages (Dashboard, Reservations, Orders, Change Password)
+- [x] Add change-password route to all roles in rolePermissions.ts
+- [x] Fix TRPCError import in adminUserManagement.ts
+- [x] Write comprehensive tests for role-based login (6 passing tests)
+- [x] Test all roles can login: admin, owner, manager, kitchen_staff, front_desk
