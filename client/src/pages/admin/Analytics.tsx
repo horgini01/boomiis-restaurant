@@ -690,7 +690,7 @@ export default function Analytics() {
                       <Card className="border-border/50">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-sm font-medium text-muted-foreground">Total Reservations</CardTitle>
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                           <div className="text-3xl font-bold">{reservationAnalytics.totalReservations}</div>

@@ -1451,3 +1451,7 @@
 - [x] Fix calendar popover appearing in awkward position overlapping content (added controlled open state)
 - [x] Ensure calendar only shows when "Custom Range" is selected (conditional rendering working)
 - [x] Improve popover positioning and alignment (side-by-side layout, proper z-index, auto-close on selection)
+
+## Bug Fix - Stray Calendar Text (User Report - Feb 7)
+- [x] Remove awkward "January 2026" text appearing in Analytics page (fixed: used CalendarIcon instead of Calendar component)
+- [x] Verify no other stray calendar elements are visible
