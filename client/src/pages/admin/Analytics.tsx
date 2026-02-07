@@ -248,8 +248,8 @@ export default function Analytics() {
                               <YAxis yAxisId="right" orientation="right" stroke="#888" />
                               <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
                               <Legend />
-                              <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#f59e0b" name="Revenue (£)" strokeWidth={2} />
-                              <Line yAxisId="right" type="monotone" dataKey="orders" stroke="#3b82f6" name="Orders" strokeWidth={2} />
+                              <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#f59e0b" name="Revenue (£)" strokeWidth={2} animationDuration={800} animationBegin={0} />
+                              <Line yAxisId="right" type="monotone" dataKey="orders" stroke="#3b82f6" name="Orders" strokeWidth={2} animationDuration={800} animationBegin={200} />
                             </LineChart>
                           </ResponsiveContainer>
                         </CardContent>
@@ -273,6 +273,8 @@ export default function Analytics() {
                                   outerRadius={100}
                                   fill="#8884d8"
                                   dataKey="value"
+                                  animationDuration={800}
+                                  animationBegin={0}
                                 >
                                   {analyticsData.orderTypeData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -296,7 +298,7 @@ export default function Analytics() {
                                 <XAxis dataKey="hour" stroke="#888" />
                                 <YAxis stroke="#888" />
                                 <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
-                                <Bar dataKey="orders" fill="#f59e0b" name="Orders" />
+                                <Bar dataKey="orders" fill="#f59e0b" name="Orders" animationDuration={800} animationBegin={0} />
                               </BarChart>
                             </ResponsiveContainer>
                           </CardContent>
@@ -446,7 +448,7 @@ export default function Analytics() {
                             <XAxis dataKey="name" stroke="#888" />
                             <YAxis stroke="#888" />
                             <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
-                            <Bar dataKey="revenue" fill="#10b981" name="Revenue (£)" />
+                            <Bar dataKey="revenue" fill="#10b981" name="Revenue (£)" animationDuration={800} animationBegin={0} />
                           </BarChart>
                         </ResponsiveContainer>
                       </CardContent>
@@ -620,7 +622,7 @@ export default function Analytics() {
                               <XAxis dataKey="day" stroke="#888" />
                               <YAxis stroke="#888" />
                               <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
-                              <Bar dataKey="count" fill="#3b82f6" name="Reservations" />
+                              <Bar dataKey="count" fill="#3b82f6" name="Reservations" animationDuration={800} animationBegin={0} />
                             </BarChart>
                           </ResponsiveContainer>
                         </CardContent>
@@ -646,7 +648,7 @@ export default function Analytics() {
                               <XAxis dataKey="hour" stroke="#888" />
                               <YAxis stroke="#888" />
                               <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
-                              <Bar dataKey="count" fill="#f59e0b" name="Reservations" />
+                              <Bar dataKey="count" fill="#f59e0b" name="Reservations" animationDuration={800} animationBegin={0} />
                             </BarChart>
                           </ResponsiveContainer>
                         </CardContent>
