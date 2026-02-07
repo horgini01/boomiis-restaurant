@@ -1704,3 +1704,11 @@
 - [x] Add SMS Analytics link to admin sidebar under Communications section (added with MessageCircle icon)
 - [x] Verify navigation links work correctly (routes already registered in App.tsx)
 - [x] Ensure proper icons are used for navigation items (MailCheck for Email Tracking, MessageCircle for SMS Analytics)
+
+
+### Role Permissions Fix for Analytics Dashboards
+- [x] Find role permissions configuration file (rolePermissions.ts)
+- [x] Add /admin/email-tracking to allowed routes for admin/owner/manager roles
+- [x] Add /admin/sms-analytics to allowed routes for admin/owner/manager roles
+- [x] Test that Email Tracking and SMS Analytics links appear in sidebar (verified in browser - elements 40 and 44)
+- [x] Verify links are accessible and functional (both dashboards load correctly with data)
