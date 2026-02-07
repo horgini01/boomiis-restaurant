@@ -45,6 +45,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { canAccessRoute, type Role } from '@/lib/rolePermissions';
 import { canAccessRouteWithCustomRole } from '@/lib/customRolePermissions';
 import RoleGuard from './RoleGuard';
+import Breadcrumb, { routeToBreadcrumb } from './Breadcrumb';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -399,6 +400,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         <div className="container py-8">
+          <Breadcrumb items={routeToBreadcrumb[location] || []} />
           {children}
         </div>
       </main>
