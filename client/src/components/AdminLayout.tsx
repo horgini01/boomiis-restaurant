@@ -21,6 +21,8 @@ import {
   UserCog,
   Send,
   MessageSquare,
+  MailCheck,
+  MessageCircle,
   Star,
   Image,
   FileText,
@@ -75,7 +77,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { path: '/admin/email-delivery', label: 'Email Delivery', icon: Mail },
     { path: '/admin/newsletter-subscribers', label: 'Newsletter Subscribers', icon: Users },
     { path: '/admin/email-campaigns', label: 'Email Campaigns', icon: Send },
+    { path: '/admin/email-tracking', label: 'Email Tracking', icon: MailCheck },
     { path: '/admin/sms-templates', label: 'SMS Templates', icon: MessageSquare },
+    { path: '/admin/sms-analytics', label: 'SMS Analytics', icon: MessageCircle },
     { path: '/admin/restaurant-settings', label: 'Restaurant Info', icon: Store },
     { path: '/admin/settings', label: 'Settings', icon: SettingsIcon },
   ];

@@ -1696,3 +1696,11 @@
 - [ ] Add SMS Analytics link to admin sidebar navigation
 - [ ] Add quick links from Email Templates page to Email Tracking
 - [ ] Add quick links from SMS Templates page to SMS Analytics
+
+
+### Admin Sidebar Navigation Updates
+- [x] Find admin sidebar/navigation component (AdminLayout.tsx)
+- [x] Add Email Tracking link to admin sidebar under Communications section (added with MailCheck icon)
+- [x] Add SMS Analytics link to admin sidebar under Communications section (added with MessageCircle icon)
+- [x] Verify navigation links work correctly (routes already registered in App.tsx)
+- [x] Ensure proper icons are used for navigation items (MailCheck for Email Tracking, MessageCircle for SMS Analytics)
