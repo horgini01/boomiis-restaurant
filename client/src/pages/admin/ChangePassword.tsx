@@ -8,49 +8,60 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Lock, CheckCircle2, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function ChangePassword() {
   const { user } = useAuth();
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const changePasswordMutation = trpc.passwordReset.changePassword.useMutation({
+  const changePasswordMutation = trpc.auth.changePassword.useMutation({
     onSuccess: (data) => {
       toast.success(data.message);
-      setCurrentPassword("");
+      setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setPasswordError("");
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
+  // Password strength validation
+  const hasMinLength = newPassword.length >= 8;
+  const hasLowercase = /[a-z]/.test(newPassword);
+  const hasUppercase = /[A-Z]/.test(newPassword);
+  const hasNumber = /[0-9]/.test(newPassword);
+  const isPasswordValid = hasMinLength && hasLowercase && hasUppercase && hasNumber;
+  const passwordsMatch = newPassword === confirmPassword && newPassword.length > 0;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordError("");
 
-    if (newPassword.length < 8) {
-      setPasswordError("Password must be at least 8 characters long");
+    if (!isPasswordValid) {
+      toast.error("Password does not meet security requirements");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match");
+      toast.error("New passwords do not match");
       return;
     }
 
-    if (currentPassword === newPassword) {
-      setPasswordError("New password must be different from current password");
+    if (oldPassword === newPassword) {
+      toast.error("New password must be different from current password");
       return;
     }
 
-    changePasswordMutation.mutate({ currentPassword, newPassword });
+    changePasswordMutation.mutate({
+      oldPassword,
+      newPassword,
+    });
   };
 
   // Check if user is using password-based authentication
@@ -83,68 +94,140 @@ export default function ChangePassword() {
                   Update Password
                 </CardTitle>
                 <CardDescription>
-                  Enter your current password and choose a new password
+                  Enter your current password and choose a new secure password
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {passwordError && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{passwordError}</AlertDescription>
-                    </Alert>
-                  )}
-
+                  {/* Current Password */}
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      placeholder="Enter your current password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      required
-                      disabled={changePasswordMutation.isPending}
-                    />
+                    <Label htmlFor="oldPassword">Current Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="oldPassword"
+                        type={showOldPassword ? "text" : "password"}
+                        placeholder="Enter your current password"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        required
+                        disabled={changePasswordMutation.isPending}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        tabIndex={-1}
+                      >
+                        {showOldPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
 
+                  {/* New Password */}
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">New Password</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      placeholder="Enter your new password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                      disabled={changePasswordMutation.isPending}
-                      minLength={8}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Must be at least 8 characters long
-                    </p>
+                    <div className="relative">
+                      <Input
+                        id="newPassword"
+                        type={showNewPassword ? "text" : "password"}
+                        placeholder="Enter your new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        disabled={changePasswordMutation.isPending}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        tabIndex={-1}
+                      >
+                        {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+
+                    {/* Password Requirements */}
+                    {newPassword && (
+                      <div className="mt-3 p-3 bg-muted/30 rounded-lg space-y-2">
+                        <p className="text-sm font-medium">Password must contain:</p>
+                        <div className="space-y-1">
+                          <div className={`flex items-center gap-2 text-sm ${hasMinLength ? "text-green-600" : "text-muted-foreground"}`}>
+                            {hasMinLength ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                            <span>At least 8 characters</span>
+                          </div>
+                          <div className={`flex items-center gap-2 text-sm ${hasLowercase ? "text-green-600" : "text-muted-foreground"}`}>
+                            {hasLowercase ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                            <span>One lowercase letter (a-z)</span>
+                          </div>
+                          <div className={`flex items-center gap-2 text-sm ${hasUppercase ? "text-green-600" : "text-muted-foreground"}`}>
+                            {hasUppercase ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                            <span>One uppercase letter (A-Z)</span>
+                          </div>
+                          <div className={`flex items-center gap-2 text-sm ${hasNumber ? "text-green-600" : "text-muted-foreground"}`}>
+                            {hasNumber ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                            <span>One number (0-9)</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
+                  {/* Confirm Password */}
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm your new password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      disabled={changePasswordMutation.isPending}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirm your new password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        disabled={changePasswordMutation.isPending}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {confirmPassword && !passwordsMatch && (
+                      <p className="text-sm text-destructive flex items-center gap-1">
+                        <X className="h-4 w-4" />
+                        Passwords do not match
+                      </p>
+                    )}
+                    {passwordsMatch && (
+                      <p className="text-sm text-green-600 flex items-center gap-1">
+                        <Check className="h-4 w-4" />
+                        Passwords match
+                      </p>
+                    )}
                   </div>
 
+                  {/* Security Notice */}
+                  <Alert>
+                    <AlertDescription>
+                      <strong>Security tip:</strong> Use a unique password that you don't use for other accounts. 
+                      Consider using a password manager to generate and store strong passwords.
+                    </AlertDescription>
+                  </Alert>
+
+                  {/* Action Buttons */}
                   <div className="flex items-center gap-4 pt-4">
                     <Button
                       type="submit"
                       disabled={
                         changePasswordMutation.isPending ||
-                        !currentPassword ||
-                        !newPassword ||
-                        !confirmPassword
+                        !oldPassword ||
+                        !isPasswordValid ||
+                        !passwordsMatch
                       }
                     >
                       {changePasswordMutation.isPending ? (
@@ -163,10 +246,9 @@ export default function ChangePassword() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        setCurrentPassword("");
+                        setOldPassword("");
                         setNewPassword("");
                         setConfirmPassword("");
-                        setPasswordError("");
                       }}
                       disabled={changePasswordMutation.isPending}
                     >
@@ -174,15 +256,6 @@ export default function ChangePassword() {
                     </Button>
                   </div>
                 </form>
-
-                <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-                  <h4 className="text-sm font-medium mb-2">Password Requirements:</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• Minimum 8 characters long</li>
-                    <li>• Different from your current password</li>
-                    <li>• Use a combination of letters, numbers, and symbols for better security</li>
-                  </ul>
-                </div>
               </CardContent>
             </Card>
           )}

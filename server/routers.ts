@@ -6,7 +6,7 @@ import { verifyCredentials } from "./customAuth";
 import { sdk } from "./_core/sdk";
 import { z } from "zod";
 import { getDb, getAllMenuCategories, getMenuItemsByCategory, getFeaturedMenuItems, getChefSpecialItems, getMenuItemById, getAllSmsTemplates, getSmsTemplateById, getAllOpeningHours, getOpeningHoursByDay, getAllAboutContent, getAllAboutValues, getAllTeamMembers, getAllAwards, getLegalPageByType, getAllLegalPages } from "./db";
-import { orders as ordersTable, orders, orderItems as orderItemsTable, orderItems, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts, aboutContent, aboutValues, teamMembers, awards, legalPages, testimonials } from '../drizzle/schema';
+import { orders as ordersTable, orders, orderItems as orderItemsTable, orderItems, menuItems, menuCategories, reservations, eventInquiries, siteSettings, deliveryAreas, subscribers, emailCampaigns, smsTemplates, openingHours, menuItemReviews, galleryImages, blogPosts, aboutContent, aboutValues, teamMembers, awards, legalPages, testimonials, users } from '../drizzle/schema';
 import { eq, sql, desc, and } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
@@ -72,6 +72,51 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    changePassword: protectedProcedure
+      .input(z.object({
+        oldPassword: z.string().min(1, 'Old password is required'),
+        newPassword: z.string()
+          .min(8, 'Password must be at least 8 characters')
+          .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+          .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+          .regex(/[0-9]/, 'Password must contain at least one number'),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Verify old password
+        const user = await verifyCredentials(ctx.user.email!, input.oldPassword);
+        if (!user) {
+          throw new Error('Current password is incorrect');
+        }
+
+        // Hash new password
+        const { createPasswordHash } = await import('./customAuth');
+        const hashedPassword = await createPasswordHash(input.newPassword);
+
+        // Update password in database
+        await db.update(users)
+          .set({ password: hashedPassword })
+          .where(eq(users.id, ctx.user.id));
+
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action: 'password_changed',
+          entityType: 'user',
+          entityId: ctx.user.id.toString(),
+          ipAddress: getIpAddress(ctx.req as any),
+          userAgent: ctx.req.headers['user-agent'] || undefined,
+        });
+
+        return {
+          success: true,
+          message: 'Password changed successfully',
+        };
+      }),
   }),
 
   newsletter: router({

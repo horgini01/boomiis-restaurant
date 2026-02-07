@@ -1971,3 +1971,17 @@
 - [x] Add password field to users table schema for email/password authentication
 - [x] Update verifyCredentials function to check hashed passwords from database
 - [x] Push database schema changes to production
+
+### Password Change Feature (User Request - Feb 7)
+- [x] Create backend tRPC mutation for password change with validation (trpc.auth.changePassword)
+- [x] Validate old password before allowing change using verifyCredentials
+- [x] Enforce minimum security requirements (8+ characters, mixed case, numbers) via zod validation
+- [x] Hash new password before storing in database using bcrypt
+- [x] Update Change Password page in admin panel with enhanced UI
+- [x] Build password change form with old/new/confirm fields and visibility toggles
+- [x] Add real-time password strength indicator with checkmarks
+- [x] Show validation errors for security requirements (lowercase, uppercase, number, length)
+- [x] Add success toast notification after password change
+- [x] Log password change action in audit logs
+- [x] Change Password link already exists in admin navigation (System Settings group)
+- [x] Write tests for password change functionality (5 passing tests)
