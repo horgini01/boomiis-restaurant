@@ -1746,3 +1746,11 @@
 - [x] Find role dropdown in Invite User dialog (line 467-472 in AdminUsers.tsx)
 - [x] Add "Owner" option to Invite User role dropdown (added as first option)
 - [x] Test assigning Owner role to a user (verified in browser - Owner appears as first option in dropdown for both Edit User and Invite User dialogs)
+
+
+### Fix Analytics Permission Error
+- [x] Find analytics router in server/routers/analytics.ts
+- [x] Check current permission middleware on analytics endpoints (lines 21, 114, 176, 288 all check role !== 'admin')
+- [x] Update analytics endpoints to allow owner role access (updated all 4 endpoints to allow owner, admin, manager roles)
+- [x] Test SMS Analytics page with owner role (verified - loads successfully with all data)
+- [x] Test Email Tracking page with owner role (verified - loads successfully with all data)

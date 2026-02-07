@@ -18,7 +18,7 @@ export const analyticsRouter = router({
         templateType: z.string().optional(),
       }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['owner', 'admin', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -111,7 +111,7 @@ export const analyticsRouter = router({
         status: z.enum(['sent', 'delivered', 'opened', 'clicked', 'bounced', 'failed']).optional(),
       }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['owner', 'admin', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -173,7 +173,7 @@ export const analyticsRouter = router({
         templateType: z.string().optional(),
       }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['owner', 'admin', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -285,7 +285,7 @@ export const analyticsRouter = router({
         provider: z.enum(['bulksms', 'textlocal']).optional(),
       }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['owner', 'admin', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
