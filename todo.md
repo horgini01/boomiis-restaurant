@@ -1522,3 +1522,7 @@
 - [x] Show route access for each role (check/x icons)
 - [x] Add role descriptions and use cases (5 roles with descriptions)
 - [x] Make it accessible from Admin Users page ("View Permissions" button)
+
+## Bug Fix - React Key Prop Warning (User Report - Feb 7)
+- [x] Fix missing "key" prop in RolePermissions component list rendering (added key to Fragment)
+- [x] Verify no React warnings in browser console

@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { rolePermissions, type Role } from "@/lib/rolePermissions";
 import { Check, X } from "lucide-react";
+import { Fragment } from "react";
 
 const roleDescriptions: Record<Role, { description: string; color: string }> = {
   owner: {
@@ -150,8 +151,8 @@ export default function RolePermissions() {
               </thead>
               <tbody>
                 {Object.entries(routeCategories).map(([category, routes]) => (
-                  <>
-                    <tr key={category} className="border-b bg-muted/50">
+                  <Fragment key={category}>
+                    <tr className="border-b bg-muted/50">
                       <td colSpan={roles.length + 1} className="p-3 font-semibold">
                         {category}
                       </td>
@@ -170,9 +171,8 @@ export default function RolePermissions() {
                         ))}
                       </tr>
                     ))}
-                  </>
-                ))}
-              </tbody>
+                  </Fragment>
+                ))}             </tbody>
             </table>
           </div>
         </CardContent>
