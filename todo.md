@@ -1997,3 +1997,12 @@
 - [x] Fix TRPCError import in adminUserManagement.ts
 - [x] Write comprehensive tests for role-based login (6 passing tests)
 - [x] Test all roles can login: admin, owner, manager, kitchen_staff, front_desk
+
+### Bug Fixes (User Reported - Feb 7 Part 7)
+- [x] Fix Kitchen Staff login redirect issue (users redirected back to login after successful authentication)
+- [x] Investigate AdminLayout access check logic
+- [x] Ensure Kitchen Staff can access /admin/dashboard route
+- [x] Test complete login flow for Kitchen Staff role
+- [x] Update AdminLogin.tsx to allow all authenticated users to proceed to dashboard
+- [x] RoleGuard component handles route-level access control based on rolePermissions.ts
+- [x] Write 5 passing tests confirming Kitchen Staff permissions (dashboard, orders, change-password access)

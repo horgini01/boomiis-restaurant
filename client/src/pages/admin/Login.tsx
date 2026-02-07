@@ -26,9 +26,9 @@ export default function AdminLogin() {
     },
   });
 
-  // If already logged in as admin/owner/manager, redirect to dashboard
+  // If already logged in, redirect to dashboard (RoleGuard will handle route-level access control)
   useEffect(() => {
-    if (!loading && user && ['admin', 'owner', 'manager'].includes(user.role)) {
+    if (!loading && user) {
       setLocation('/admin/dashboard');
     }
   }, [loading, user, setLocation]);
