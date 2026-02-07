@@ -465,6 +465,7 @@ export default function AdminUsers() {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="owner">Owner</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="manager">Manager</SelectItem>
                     <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>
@@ -544,6 +545,7 @@ export default function AdminUsers() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="owner">Owner</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
                       <SelectItem value="kitchen_staff">Kitchen Staff</SelectItem>

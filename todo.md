@@ -1738,3 +1738,11 @@
 - [x] Update frontend success message from "deactivated" to "deleted" (changed toast message)
 - [x] Update frontend confirmation dialog to warn about permanent deletion (added warning emoji and clear message)
 - [x] Test deletion functionality to verify users are removed (backend updated to hard delete, frontend shows proper warning)
+
+
+### Add Owner Role to Admin Users Dropdown
+- [x] Find role dropdown in Edit User dialog (line 546-551 in AdminUsers.tsx)
+- [x] Add "Owner" option to Edit User role dropdown (added as first option)
+- [x] Find role dropdown in Invite User dialog (line 467-472 in AdminUsers.tsx)
+- [x] Add "Owner" option to Invite User role dropdown (added as first option)
+- [x] Test assigning Owner role to a user (verified in browser - Owner appears as first option in dropdown for both Edit User and Invite User dialogs)
