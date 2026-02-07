@@ -1870,3 +1870,13 @@
 - [x] Update settings page UI with toggles for each notification type (added 5 toggles with descriptions)
 - [x] Update notification services to check settings before sending emails (added checks to reservation reminders, anomaly alerts, audit alerts, daily sales already had check)
 - [x] Test that toggles properly enable/disable notifications (server running without errors, TypeScript compilation successful)
+
+### Add Test Email Preview Buttons to Notification Settings
+- [x] Create API endpoint for sending test daily sales summary email (sendTestDailySalesEmail with sample data)
+- [x] Create API endpoint for sending test weekly performance report email (sendTestWeeklyReportEmail)
+- [x] Create API endpoint for sending test reservation reminder email (sendTestReservationReminderEmail)
+- [x] Create API endpoint for sending test anomaly alert email (sendTestAnomalyAlertEmail)
+- [x] Create API endpoint for sending test audit alert email (sendTestAuditAlertEmail)
+- [x] Add "Send Test Email" buttons next to each toggle in settings UI (added buttons for all 5 notification types)
+- [x] Add loading states and success/error toasts for test email buttons (using isSendingTestEmail state and toast notifications)
+- [x] Test all test email functionality (server running without errors, TypeScript compilation successful, all 5 test email buttons integrated)

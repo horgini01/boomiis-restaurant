@@ -2033,6 +2033,181 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    sendTestDailySalesEmail: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
+          throw new Error('Unauthorized');
+        }
+
+        const resend = getResendClient();
+        if (!resend) throw new Error('Email service not configured');
+
+        // Generate sample data for test email
+        const testData = {
+          totalRevenue: 1250.50,
+          totalOrders: 18,
+          avgOrderValue: 69.47,
+          topItems: [
+            { name: 'Jollof Rice', quantity: 12 },
+            { name: 'Suya Platter', quantity: 8 },
+            { name: 'Egusi Soup', quantity: 6 },
+          ],
+        };
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: ctx.user.email || '',
+          subject: '[TEST] Daily Sales Summary',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #d97706; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">🧪 TEST: Daily Sales Summary</h2>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">This is a preview of your daily sales email</p>
+              </div>
+              <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+                <h3>Today's Performance</h3>
+                <ul>
+                  <li><strong>Total Revenue:</strong> £${testData.totalRevenue.toFixed(2)}</li>
+                  <li><strong>Total Orders:</strong> ${testData.totalOrders}</li>
+                  <li><strong>Average Order Value:</strong> £${testData.avgOrderValue.toFixed(2)}</li>
+                </ul>
+                <h3>Top Selling Items</h3>
+                <ul>
+                  ${testData.topItems.map(item => `<li>${item.name}: ${item.quantity} orders</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          `,
+        });
+
+        return { success: true, message: 'Test email sent to ' + ctx.user.email };
+      }),
+
+    sendTestWeeklyReportEmail: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
+          throw new Error('Unauthorized');
+        }
+
+        const resend = getResendClient();
+        if (!resend) throw new Error('Email service not configured');
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: ctx.user.email || '',
+          subject: '[TEST] Weekly Performance Report',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #d97706; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">🧪 TEST: Weekly Performance Report</h2>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">This is a preview of your weekly report email</p>
+              </div>
+              <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+                <h3>Week Summary</h3>
+                <p>Sample weekly performance data would appear here with charts and insights.</p>
+              </div>
+            </div>
+          `,
+        });
+
+        return { success: true, message: 'Test email sent to ' + ctx.user.email };
+      }),
+
+    sendTestReservationReminderEmail: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
+          throw new Error('Unauthorized');
+        }
+
+        const resend = getResendClient();
+        if (!resend) throw new Error('Email service not configured');
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: ctx.user.email || '',
+          subject: '[TEST] Reservation Reminder',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #d97706; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">🧪 TEST: Reservation Reminder</h2>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">This is a preview of reservation reminder emails</p>
+              </div>
+              <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+                <p>Dear Customer,</p>
+                <p>This is a reminder that you have a reservation tomorrow at 7:00 PM for 4 people.</p>
+                <p>We look forward to seeing you!</p>
+              </div>
+            </div>
+          `,
+        });
+
+        return { success: true, message: 'Test email sent to ' + ctx.user.email };
+      }),
+
+    sendTestAnomalyAlertEmail: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
+          throw new Error('Unauthorized');
+        }
+
+        const resend = getResendClient();
+        if (!resend) throw new Error('Email service not configured');
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: ctx.user.email || '',
+          subject: '[TEST] Security Anomaly Alert',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #ef4444; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">🧪 TEST: Security Anomaly Alert</h2>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">This is a preview of security anomaly alerts</p>
+              </div>
+              <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+                <p><strong>Anomaly Type:</strong> Multiple Failed Operations</p>
+                <p><strong>User:</strong> Sample User</p>
+                <p><strong>Details:</strong> 3 failed operations detected in 5 minutes</p>
+                <p>This alert helps you monitor suspicious patterns in your system.</p>
+              </div>
+            </div>
+          `,
+        });
+
+        return { success: true, message: 'Test email sent to ' + ctx.user.email };
+      }),
+
+    sendTestAuditAlertEmail: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
+          throw new Error('Unauthorized');
+        }
+
+        const resend = getResendClient();
+        if (!resend) throw new Error('Email service not configured');
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: ctx.user.email || '',
+          subject: '[TEST] Critical Action Alert',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #f59e0b; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">🧪 TEST: Critical Action Alert</h2>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">This is a preview of critical action alerts</p>
+              </div>
+              <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+                <p><strong>Action:</strong> Settings Modification</p>
+                <p><strong>User:</strong> Sample Admin</p>
+                <p><strong>Entity:</strong> Restaurant Settings</p>
+                <p>This alert notifies you of important administrative changes.</p>
+              </div>
+            </div>
+          `,
+        });
+
+        return { success: true, message: 'Test email sent to ' + ctx.user.email };
+      }),
+
     uploadLogo: protectedProcedure
       .input(z.object({ 
         fileData: z.string(), // base64 encoded image

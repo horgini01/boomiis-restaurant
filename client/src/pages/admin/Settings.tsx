@@ -18,6 +18,26 @@ export default function Settings() {
   const [anomalyAlertsEnabled, setAnomalyAlertsEnabled] = useState(false);
   const [auditAlertsEnabled, setAuditAlertsEnabled] = useState(false);
   const [isSendingReport, setIsSendingReport] = useState(false);
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState<string | null>(null);
+
+  // Test email mutations
+  const sendTestDailySales = trpc.admin.sendTestDailySalesEmail.useMutation();
+  const sendTestWeeklyReport = trpc.admin.sendTestWeeklyReportEmail.useMutation();
+  const sendTestReservationReminder = trpc.admin.sendTestReservationReminderEmail.useMutation();
+  const sendTestAnomalyAlert = trpc.admin.sendTestAnomalyAlertEmail.useMutation();
+  const sendTestAuditAlert = trpc.admin.sendTestAuditAlertEmail.useMutation();
+
+  const handleSendTestEmail = async (type: string, mutation: any) => {
+    setIsSendingTestEmail(type);
+    try {
+      const result = await mutation.mutateAsync();
+      toast.success(result.message || 'Test email sent successfully!');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send test email');
+    } finally {
+      setIsSendingTestEmail(null);
+    }
+  };
 
   // Update local state when settings load
   if (settings && !isLoading) {
@@ -123,21 +143,42 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between space-x-4">
-                  <div className="flex-1 space-y-1">
-                    <Label htmlFor="daily-email" className="text-base font-medium">
-                      Daily Sales Summary
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive a daily email report with sales metrics, popular items, and performance data. 
-                      Sent automatically at the end of each business day.
-                    </p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="flex-1 space-y-1">
+                      <Label htmlFor="daily-email" className="text-base font-medium">
+                        Daily Sales Summary
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive a daily email report with sales metrics, popular items, and performance data. 
+                        Sent automatically at the end of each business day.
+                      </p>
+                    </div>
+                    <Switch
+                      id="daily-email"
+                      checked={dailyEmailEnabled}
+                      onCheckedChange={setDailyEmailEnabled}
+                    />
                   </div>
-                  <Switch
-                    id="daily-email"
-                    checked={dailyEmailEnabled}
-                    onCheckedChange={setDailyEmailEnabled}
-                  />
+                  <Button
+                    onClick={() => handleSendTestEmail('daily-sales', sendTestDailySales)}
+                    disabled={isSendingTestEmail === 'daily-sales'}
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                  >
+                    {isSendingTestEmail === 'daily-sales' ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="mr-2 h-4 w-4" />
+                        Send Test Email
+                      </>
+                    )}
+                  </Button>
                 </div>
 
                 <div className="pt-4 border-t">
@@ -161,21 +202,42 @@ export default function Settings() {
                 </div>
 
                 <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="flex-1 space-y-1">
-                      <Label htmlFor="weekly-email" className="text-base font-medium">
-                        Weekly Performance Report
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Send a comprehensive weekly report to your admin email with revenue, orders, customer insights, and alerts.
-                        Uses the customizable "Weekly Report" email template.
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between space-x-4">
+                      <div className="flex-1 space-y-1">
+                        <Label htmlFor="weekly-email" className="text-base font-medium">
+                          Weekly Performance Report
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Send a comprehensive weekly report to your admin email with revenue, orders, customer insights, and alerts.
+                          Uses the customizable "Weekly Report" email template.
+                        </p>
+                      </div>
+                      <Switch
+                        id="weekly-email"
+                        checked={weeklyReportEnabled}
+                        onCheckedChange={setWeeklyReportEnabled}
+                      />
                     </div>
-                    <Switch
-                      id="weekly-email"
-                      checked={weeklyReportEnabled}
-                      onCheckedChange={setWeeklyReportEnabled}
-                    />
+                    <Button
+                      onClick={() => handleSendTestEmail('weekly-report', sendTestWeeklyReport)}
+                      disabled={isSendingTestEmail === 'weekly-report'}
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      {isSendingTestEmail === 'weekly-report' ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Send Test Email
+                        </>
+                      )}
+                    </Button>
                   </div>
                   <div className="mt-3">
                     <Button
@@ -218,59 +280,122 @@ export default function Settings() {
                 </div>
 
                 <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="flex-1 space-y-1">
-                      <Label htmlFor="reservation-reminders" className="text-base font-medium">
-                        Reservation Reminders
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Automatically send email reminders to customers 24 hours before their reservation.
-                        Helps reduce no-shows and improve customer experience.
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between space-x-4">
+                      <div className="flex-1 space-y-1">
+                        <Label htmlFor="reservation-reminders" className="text-base font-medium">
+                          Reservation Reminders
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Automatically send email reminders to customers 24 hours before their reservation.
+                          Helps reduce no-shows and improve customer experience.
+                        </p>
+                      </div>
+                      <Switch
+                        id="reservation-reminders"
+                        checked={reservationRemindersEnabled}
+                        onCheckedChange={setReservationRemindersEnabled}
+                      />
                     </div>
-                    <Switch
-                      id="reservation-reminders"
-                      checked={reservationRemindersEnabled}
-                      onCheckedChange={setReservationRemindersEnabled}
-                    />
+                    <Button
+                      onClick={() => handleSendTestEmail('reservation-reminder', sendTestReservationReminder)}
+                      disabled={isSendingTestEmail === 'reservation-reminder'}
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      {isSendingTestEmail === 'reservation-reminder' ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Send Test Email
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="flex-1 space-y-1">
-                      <Label htmlFor="anomaly-alerts" className="text-base font-medium">
-                        Security Anomaly Alerts
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Receive email alerts when suspicious patterns are detected (multiple failures, after-hours changes, bulk deletions).
-                        Helps monitor security and prevent unauthorized access.
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between space-x-4">
+                      <div className="flex-1 space-y-1">
+                        <Label htmlFor="anomaly-alerts" className="text-base font-medium">
+                          Security Anomaly Alerts
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receive email alerts when suspicious patterns are detected (multiple failures, after-hours changes, bulk deletions).
+                          Helps monitor security and prevent unauthorized access.
+                        </p>
+                      </div>
+                      <Switch
+                        id="anomaly-alerts"
+                        checked={anomalyAlertsEnabled}
+                        onCheckedChange={setAnomalyAlertsEnabled}
+                      />
                     </div>
-                    <Switch
-                      id="anomaly-alerts"
-                      checked={anomalyAlertsEnabled}
-                      onCheckedChange={setAnomalyAlertsEnabled}
-                    />
+                    <Button
+                      onClick={() => handleSendTestEmail('anomaly-alert', sendTestAnomalyAlert)}
+                      disabled={isSendingTestEmail === 'anomaly-alert'}
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      {isSendingTestEmail === 'anomaly-alert' ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Send Test Email
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="flex-1 space-y-1">
-                      <Label htmlFor="audit-alerts" className="text-base font-medium">
-                        Critical Action Alerts
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Receive email notifications for critical administrative actions (user deletions, settings changes, delivery zone updates).
-                        Provides real-time oversight of important changes.
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between space-x-4">
+                      <div className="flex-1 space-y-1">
+                        <Label htmlFor="audit-alerts" className="text-base font-medium">
+                          Critical Action Alerts
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receive email notifications for critical administrative actions (user deletions, settings changes, delivery zone updates).
+                          Provides real-time oversight of important changes.
+                        </p>
+                      </div>
+                      <Switch
+                        id="audit-alerts"
+                        checked={auditAlertsEnabled}
+                        onCheckedChange={setAuditAlertsEnabled}
+                      />
                     </div>
-                    <Switch
-                      id="audit-alerts"
-                      checked={auditAlertsEnabled}
-                      onCheckedChange={setAuditAlertsEnabled}
-                    />
+                    <Button
+                      onClick={() => handleSendTestEmail('audit-alert', sendTestAuditAlert)}
+                      disabled={isSendingTestEmail === 'audit-alert'}
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      {isSendingTestEmail === 'audit-alert' ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Send Test Email
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </CardContent>
