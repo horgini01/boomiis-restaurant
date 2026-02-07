@@ -1526,3 +1526,8 @@
 ## Bug Fix - React Key Prop Warning (User Report - Feb 7)
 - [x] Fix missing "key" prop in RolePermissions component list rendering (added key to Fragment)
 - [x] Verify no React warnings in browser console
+
+## Bug Fix - Missing Sidebar Navigation (User Report - Feb 7)
+- [x] Fix Admin Users page missing sidebar navigation (wrapped with AdminLayout)
+- [x] Fix Role Permissions page missing sidebar navigation (wrapped with AdminLayout)
+- [x] Verify both pages use AdminLayout wrapper correctly

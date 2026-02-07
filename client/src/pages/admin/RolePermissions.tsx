@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { rolePermissions, type Role } from "@/lib/rolePermissions";
 import { Check, X } from "lucide-react";
 import { Fragment } from "react";
+import AdminLayout from "@/components/AdminLayout";
 
 const roleDescriptions: Record<Role, { description: string; color: string }> = {
   owner: {
@@ -97,7 +98,8 @@ export default function RolePermissions() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <AdminLayout>
+      <div className="container mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Role Permissions</h1>
         <p className="text-muted-foreground mt-2">
@@ -172,7 +174,8 @@ export default function RolePermissions() {
                       </tr>
                     ))}
                   </Fragment>
-                ))}             </tbody>
+                ))}
+              </tbody>
             </table>
           </div>
         </CardContent>
@@ -194,6 +197,7 @@ export default function RolePermissions() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

@@ -39,6 +39,7 @@ import { Search, UserPlus, MoreVertical, Shield, Users, ChefHat, UserCog, Eye } 
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import AdminLayout from "@/components/AdminLayout";
 
 type Role = "owner" | "admin" | "manager" | "kitchen_staff" | "front_desk";
 type Status = "active" | "inactive";
@@ -162,7 +163,8 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -435,6 +437,7 @@ export default function AdminUsers() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
