@@ -12,7 +12,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
+    if (!loading && (!user || !['admin', 'owner', 'manager'].includes(user.role))) {
       setLocation('/admin/login');
     }
   }, [user, loading, setLocation]);
@@ -25,7 +25,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || !['admin', 'owner', 'manager'].includes(user.role)) {
     return null;
   }
 

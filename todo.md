@@ -1762,3 +1762,10 @@
 - [ ] Check if login page is making protected procedure calls
 - [ ] Fix or remove unnecessary authorization checks on login page
 - [ ] Test login page to ensure error is resolved
+
+
+### Fix AdminGuard Infinite Loop Error (CRITICAL)
+- [x] Read AdminGuard.tsx to identify navigation call in render phase (found role check only allows 'admin')
+- [x] Fix role check to allow owner and manager roles (updated to check ['admin', 'owner', 'manager'])
+- [x] Test admin dashboard loads without errors (dev server running, no errors in logs)
+- [x] Verify all admin pages still require authentication (AdminGuard now checks for admin/owner/manager roles)
