@@ -1822,3 +1822,13 @@
 - [ ] Add audit logging to SMS template operations - DEFERRED (templates managed through settings)
 - [x] Add audit logging to delivery zone operations (saveDeliveryArea and deleteDeliveryArea with full tracking)
 - [x] Write vitest tests for new functionality (10 tests for auditAlerts service - all passing)
+
+### Implement Full-Text Search for Audit Logs
+- [x] Enhance getAuditLogs API to support full-text search across all fields
+- [x] Add search across userName, entityName, ipAddress, userAgent, and changes JSON (added entityId too)
+- [x] Implement search result highlighting in UI (yellow highlighting for user names, entity names, IPs, entity IDs)
+- [x] Add relevance scoring to prioritize exact matches (calculateRelevanceScore utility function)
+- [x] Update Audit Logs page with enhanced search UI (improved placeholder, tooltip, help text)
+- [x] Add search tips/help text for users (added to card description and input tooltip)
+- [x] Write vitest tests for search functionality (14 tests for containsSearchTerm and calculateRelevanceScore - all passing)
+- [x] Test search with various queries and edge cases (tested exact matches, partial matches, null/undefined, empty search, IP addresses, entity IDs, changes JSON, score accumulation)

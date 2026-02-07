@@ -47,10 +47,16 @@ export const auditLogsRouter = router({
       }
 
       if (input?.search) {
+        // Full-text search across multiple fields
+        const searchTerm = `%${input.search}%`;
         conditions.push(
           or(
-            like(auditLogs.entityName, `%${input.search}%`),
-            like(auditLogs.userName, `%${input.search}%`)
+            like(auditLogs.entityName, searchTerm),
+            like(auditLogs.userName, searchTerm),
+            like(auditLogs.ipAddress, searchTerm),
+            like(auditLogs.userAgent, searchTerm),
+            like(auditLogs.changes, searchTerm),
+            like(auditLogs.entityId, searchTerm)
           )!
         );
       }
@@ -191,10 +197,16 @@ export const auditLogsRouter = router({
       if (input?.action) conditions.push(eq(auditLogs.action, input.action));
       if (input?.entityType) conditions.push(eq(auditLogs.entityType, input.entityType));
       if (input?.search) {
+        // Full-text search across multiple fields
+        const searchTerm = `%${input.search}%`;
         conditions.push(
           or(
-            like(auditLogs.entityName, `%${input.search}%`),
-            like(auditLogs.userName, `%${input.search}%`)
+            like(auditLogs.entityName, searchTerm),
+            like(auditLogs.userName, searchTerm),
+            like(auditLogs.ipAddress, searchTerm),
+            like(auditLogs.userAgent, searchTerm),
+            like(auditLogs.changes, searchTerm),
+            like(auditLogs.entityId, searchTerm)
           )!
         );
       }

@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { Search, Filter, ChevronLeft, ChevronRight, Activity, Users, FileText, Download } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { highlightSearchTerm } from "@/lib/searchHighlight";
 
 export default function AuditLogs() {
   const [page, setPage] = useState(1);
@@ -141,17 +142,21 @@ export default function AuditLogs() {
               <Filter className="h-5 w-5" />
               Filters
             </CardTitle>
-            <CardDescription>Filter audit logs by action, entity type, date range, or search</CardDescription>
+            <CardDescription>
+              Filter audit logs by action, entity type, date range, or search. 
+              <span className="text-xs text-muted-foreground">Search supports: user names, entity names, IP addresses, change details, and entity IDs</span>
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search logs..."
+                  placeholder="Search users, entities, IPs..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-8"
+                  title="Search across user names, entity names, IP addresses, user agents, changes, and entity IDs"
                 />
               </div>
               <Select value={actionFilter} onValueChange={setActionFilter}>
@@ -245,7 +250,7 @@ export default function AuditLogs() {
                           </td>
                           <td className="p-3">
                             <div>
-                              <div className="font-medium">{log.userName}</div>
+                              <div className="font-medium">{highlightSearchTerm(log.userName, search)}</div>
                               <div className="text-xs text-muted-foreground">{log.userRole}</div>
                             </div>
                           </td>
@@ -256,7 +261,12 @@ export default function AuditLogs() {
                           </td>
                           <td className="p-3">
                             <div>
-                              <div className="font-medium">{log.entityName || `ID: ${log.entityId}`}</div>
+                              <div className="font-medium">
+                                {log.entityName 
+                                  ? highlightSearchTerm(log.entityName, search) 
+                                  : <>ID: {highlightSearchTerm(log.entityId, search)}</>
+                                }
+                              </div>
                               <div className="text-xs text-muted-foreground">
                                 {entityTypeLabels[log.entityType] || log.entityType}
                               </div>
@@ -283,8 +293,8 @@ export default function AuditLogs() {
                               <span className="text-muted-foreground">No changes tracked</span>
                             )}
                           </td>
-                          <td className="p-3 text-xs text-muted-foreground">
-                            {log.ipAddress || "N/A"}
+                          <td className="p-3 text-sm text-muted-foreground">
+                            {log.ipAddress ? highlightSearchTerm(log.ipAddress, search) : "N/A"}
                           </td>
                         </tr>
                       ))}
