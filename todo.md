@@ -1515,3 +1515,10 @@
 - [x] Fix Admin Users navigation item not appearing in sidebar (added /admin/users to admin role permissions)
 - [x] Verify navigation item is visible for owner/admin roles
 - [x] Test that role-based filtering is working correctly
+
+## Role Permissions Overview Page (User Request - Feb 7)
+- [x] Create role permissions overview page showing all roles and their access rights
+- [x] Display permissions in a visual matrix/table format (categorized by function)
+- [x] Show route access for each role (check/x icons)
+- [x] Add role descriptions and use cases (5 roles with descriptions)
+- [x] Make it accessible from Admin Users page ("View Permissions" button)

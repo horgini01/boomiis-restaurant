@@ -44,6 +44,7 @@ import { BlogManagement } from "./pages/admin/BlogManagement";
 import AboutContentManagement from "./pages/admin/AboutContentManagement";
 import LegalPagesManagement from "./pages/admin/LegalPagesManagement";
 import AdminUsers from "./pages/admin/AdminUsers";
+import RolePermissions from "./pages/admin/RolePermissions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import Accessibility from "./pages/Accessibility";
@@ -81,6 +82,7 @@ function Router() {
       <Route path="/admin/events" component={EventsManagement} />
       <Route path={"/admin/analytics"} component={Analytics} />
       <Route path={"/admin/users"} component={AdminUsers} />
+      <Route path={"/admin/role-permissions"} component={RolePermissions} />
       <Route path={"/admin/settings"} component={Settings} />
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/admin/email-delivery"} component={EmailDelivery} />

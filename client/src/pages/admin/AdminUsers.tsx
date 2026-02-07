@@ -35,7 +35,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, UserPlus, MoreVertical, Shield, Users, ChefHat, UserCog } from "lucide-react";
+import { Search, UserPlus, MoreVertical, Shield, Users, ChefHat, UserCog, Eye } from "lucide-react";
+import { Link } from "wouter";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -170,10 +171,18 @@ export default function AdminUsers() {
             Manage staff accounts and permissions
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invite User
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/role-permissions">
+              <Eye className="mr-2 h-4 w-4" />
+              View Permissions
+            </Link>
+          </Button>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Invite User
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
