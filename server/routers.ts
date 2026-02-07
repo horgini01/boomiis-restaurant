@@ -336,7 +336,7 @@ export const appRouter = router({
         limit: z.number().default(50),
       }).optional())
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -364,7 +364,7 @@ export const appRouter = router({
         status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -447,7 +447,7 @@ export const appRouter = router({
         return { url, fileKey };
       }),
     stats: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -696,7 +696,7 @@ export const appRouter = router({
         endDate: z.string(),
       }))
       .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -781,7 +781,7 @@ export const appRouter = router({
         endDate: z.string(),
       }))
       .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -902,7 +902,7 @@ export const appRouter = router({
         endDate: z.string(),
       }))
       .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -981,7 +981,7 @@ export const appRouter = router({
         endDate: z.string(),
       }))
       .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1057,7 +1057,7 @@ export const appRouter = router({
     // Generate weekly report data
     generateWeeklyReport: protectedProcedure
       .query(async ({ ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1202,7 +1202,7 @@ export const appRouter = router({
         })),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1230,7 +1230,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1251,7 +1251,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1266,7 +1266,7 @@ export const appRouter = router({
     deleteCategory: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1280,7 +1280,7 @@ export const appRouter = router({
     toggleCategoryActive: protectedProcedure
       .input(z.object({ id: z.number(), isActive: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1297,7 +1297,7 @@ export const appRouter = router({
         operation: z.enum(['activate', 'deactivate', 'delete']),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1330,7 +1330,7 @@ export const appRouter = router({
         quality: z.number().min(1).max(100).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1371,7 +1371,7 @@ export const appRouter = router({
         displayOrder: z.number(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1404,7 +1404,7 @@ export const appRouter = router({
         displayOrder: z.number(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1422,7 +1422,7 @@ export const appRouter = router({
     deleteMenuItem: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1544,7 +1544,7 @@ export const appRouter = router({
     toggleMenuItemAvailable: protectedProcedure
       .input(z.object({ id: z.number(), isAvailable: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1558,7 +1558,7 @@ export const appRouter = router({
     toggleMenuItemStock: protectedProcedure
       .input(z.object({ id: z.number(), outOfStock: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1576,7 +1576,7 @@ export const appRouter = router({
         priceChangePercent: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1664,7 +1664,7 @@ export const appRouter = router({
       }),
 
     getOrders: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -1702,7 +1702,7 @@ export const appRouter = router({
     }),
 
     getCompletedOrders: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -1748,7 +1748,7 @@ export const appRouter = router({
     updateOrderStatus: protectedProcedure
       .input(z.object({ orderId: z.number(), status: z.string() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1876,7 +1876,7 @@ export const appRouter = router({
       }),
 
     getReservations: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -1890,7 +1890,7 @@ export const appRouter = router({
     updateReservationStatus: protectedProcedure
       .input(z.object({ reservationId: z.number(), status: z.string() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1903,7 +1903,7 @@ export const appRouter = router({
 
     getSettings: protectedProcedure
       .query(async ({ ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1917,7 +1917,7 @@ export const appRouter = router({
     updateSetting: protectedProcedure
       .input(z.object({ settingKey: z.string(), settingValue: z.string() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -1950,7 +1950,7 @@ export const appRouter = router({
         mimeType: z.string(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2003,7 +2003,7 @@ export const appRouter = router({
     getEmailPreviews: protectedProcedure
       .input(z.object({ templateType: z.enum(['orderConfirmation', 'reservationConfirmation', 'adminOrderNotification']) }))
       .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2015,7 +2015,7 @@ export const appRouter = router({
 
     getEmailTemplates: protectedProcedure
       .query(async ({ ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2036,7 +2036,7 @@ export const appRouter = router({
         footerText: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2081,7 +2081,7 @@ export const appRouter = router({
         limit: z.number().optional().default(100),
       }))
       .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2115,7 +2115,7 @@ export const appRouter = router({
 
     getEmailStats: protectedProcedure
       .query(async ({ ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2140,7 +2140,7 @@ export const appRouter = router({
         recipientEmail: z.string().email(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2213,7 +2213,7 @@ export const appRouter = router({
         displayOrder: z.number().default(0),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2253,7 +2253,7 @@ export const appRouter = router({
     deleteDeliveryArea: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2268,7 +2268,7 @@ export const appRouter = router({
     downloadReceipt: protectedProcedure
       .input(z.object({ orderId: z.number() }))
       .query(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2533,7 +2533,7 @@ export const appRouter = router({
   // Newsletter management endpoints
   subscribers: router({
     getAll: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -2547,7 +2547,7 @@ export const appRouter = router({
     unsubscribe: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2564,7 +2564,7 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2579,7 +2579,7 @@ export const appRouter = router({
   // Email campaigns endpoints
   campaigns: router({
     getAll: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -2597,7 +2597,7 @@ export const appRouter = router({
         bodyHtml: z.string(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2616,7 +2616,7 @@ export const appRouter = router({
     send: protectedProcedure
       .input(z.object({ campaignId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2681,7 +2681,7 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2695,7 +2695,7 @@ export const appRouter = router({
 
   smsTemplates: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -2706,7 +2706,7 @@ export const appRouter = router({
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2725,7 +2725,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2750,7 +2750,7 @@ export const appRouter = router({
         phoneNumber: z.string().min(10),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2782,7 +2782,7 @@ export const appRouter = router({
 
   openingHours: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -2793,7 +2793,7 @@ export const appRouter = router({
     getByDay: protectedProcedure
       .input(z.object({ dayOfWeek: z.number().min(0).max(6) }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2812,7 +2812,7 @@ export const appRouter = router({
         isClosed: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2839,7 +2839,7 @@ export const appRouter = router({
         isClosed: z.boolean(),
       })))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2926,7 +2926,7 @@ export const appRouter = router({
         limit: z.number().default(50),
       }).optional())
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -2954,7 +2954,7 @@ export const appRouter = router({
         status: z.enum(['new', 'contacted', 'quoted', 'booked', 'cancelled']),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3026,7 +3026,7 @@ export const appRouter = router({
         responseMessage: z.string(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3208,7 +3208,7 @@ export const appRouter = router({
         limit: z.number().optional(),
       }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3236,7 +3236,7 @@ export const appRouter = router({
         id: z.number(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3257,7 +3257,7 @@ export const appRouter = router({
         id: z.number(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3299,7 +3299,7 @@ export const appRouter = router({
 
     // Admin: List all gallery images
     listAll: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -3320,7 +3320,7 @@ export const appRouter = router({
         displayOrder: z.number().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3351,7 +3351,7 @@ export const appRouter = router({
         isActive: z.boolean().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3370,7 +3370,7 @@ export const appRouter = router({
         id: z.number(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3389,7 +3389,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3449,7 +3449,7 @@ export const appRouter = router({
 
     // Admin: List all blog posts
     listAll: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') {
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
         throw new Error('Unauthorized');
       }
 
@@ -3472,7 +3472,7 @@ export const appRouter = router({
         isPublished: z.boolean().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3506,7 +3506,7 @@ export const appRouter = router({
         isPublished: z.boolean().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3534,7 +3534,7 @@ export const appRouter = router({
         id: z.number(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
           throw new Error('Unauthorized');
         }
 
@@ -3576,7 +3576,7 @@ export const appRouter = router({
   adminAbout: router({
     // About Content (Hero, Story sections)
     getAllContent: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(aboutContent);
@@ -3587,7 +3587,7 @@ export const appRouter = router({
         sectionValue: z.string(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3612,7 +3612,7 @@ export const appRouter = router({
 
     // About Values
     getAllValues: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(aboutValues);
@@ -3625,7 +3625,7 @@ export const appRouter = router({
         displayOrder: z.number().default(0),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3642,7 +3642,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3653,7 +3653,7 @@ export const appRouter = router({
     deleteValue: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3663,7 +3663,7 @@ export const appRouter = router({
 
     // Team Members
     getAllTeam: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(teamMembers);
@@ -3677,7 +3677,7 @@ export const appRouter = router({
         displayOrder: z.number().default(0),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3695,7 +3695,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3706,7 +3706,7 @@ export const appRouter = router({
     deleteTeamMember: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3716,7 +3716,7 @@ export const appRouter = router({
 
     // Awards
     getAllAwards: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(awards);
@@ -3730,7 +3730,7 @@ export const appRouter = router({
         displayOrder: z.number().default(0),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3748,7 +3748,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3759,7 +3759,7 @@ export const appRouter = router({
     deleteAward: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
@@ -3836,7 +3836,7 @@ export const appRouter = router({
     }),
 
     getAllAdmin: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       const { testimonials } = await import('../drizzle/schema');
@@ -3854,7 +3854,7 @@ export const appRouter = router({
         displayOrder: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3874,7 +3874,7 @@ export const appRouter = router({
         displayOrder: z.number(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3886,7 +3886,7 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3897,7 +3897,7 @@ export const appRouter = router({
     toggleApproval: protectedProcedure
       .input(z.object({ id: z.number(), isApproved: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3908,7 +3908,7 @@ export const appRouter = router({
     toggleFeatured: protectedProcedure
       .input(z.object({ id: z.number(), isFeatured: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3919,7 +3919,7 @@ export const appRouter = router({
     bulkApprove: protectedProcedure
       .input(z.object({ ids: z.array(z.number()) }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3935,7 +3935,7 @@ export const appRouter = router({
     bulkReject: protectedProcedure
       .input(z.object({ ids: z.array(z.number()) }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3954,7 +3954,7 @@ export const appRouter = router({
         adminResponse: z.string().min(1, 'Response cannot be empty').optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
@@ -3995,7 +3995,7 @@ export const appRouter = router({
 
     // Response Templates Management
     getTemplates: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       const { testimonialResponseTemplates } = await import('../drizzle/schema');
@@ -4006,7 +4006,7 @@ export const appRouter = router({
     }),
 
     getAllTemplates: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       const db = await getDb();
       if (!db) throw new Error('Database not available');
       const { testimonialResponseTemplates } = await import('../drizzle/schema');
@@ -4022,7 +4022,7 @@ export const appRouter = router({
         displayOrder: z.number().default(0),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonialResponseTemplates } = await import('../drizzle/schema');
@@ -4040,7 +4040,7 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonialResponseTemplates } = await import('../drizzle/schema');
@@ -4060,7 +4060,7 @@ export const appRouter = router({
     deleteTemplate: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonialResponseTemplates } = await import('../drizzle/schema');
@@ -4081,7 +4081,7 @@ export const appRouter = router({
   // ==================== Admin: Legal Pages Management ====================
   adminLegal: router({
     getAll: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
       return await getAllLegalPages();
     }),
     update: protectedProcedure
@@ -4092,7 +4092,7 @@ export const appRouter = router({
         isPublished: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
