@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { getResendClient, FROM_EMAIL } from "./email";
 import { siteSettings } from "../drizzle/schema";
 import { emailTemplates } from "../drizzle/schema";
+import { logAuditAction, getIpAddress } from "./services/audit.service";
 
 // Helper function to send emails
 async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
@@ -323,8 +324,25 @@ export const adminUserManagementRouter = router({
         throw new Error('You cannot delete your own account');
       }
 
+      // Get user details before deletion for audit log
+      const [user] = await db.select().from(users).where(eq(users.id, input.id)).limit(1);
+      if (!user) throw new Error('User not found');
+
       // Hard delete - permanently remove from database
       await db.delete(users).where(eq(users.id, input.id));
+
+      // Log audit action
+      await logAuditAction({
+        userId: ctx.user.id,
+        userName: ctx.user.name || 'Unknown',
+        userRole: ctx.user.role,
+        action: 'delete',
+        entityType: 'user',
+        entityId: input.id,
+        entityName: `${user.firstName} ${user.lastName} (${user.email})`,
+        ipAddress: getIpAddress(ctx.req.headers),
+        userAgent: ctx.req.headers['user-agent'] as string,
+      });
 
       return { success: true };
     }),

@@ -1789,3 +1789,21 @@
 - [x] Ensure owner and admin roles have access to ALL 26 routes by default
 - [x] Update route count display in role permissions page (using getRouteCount function)
 - [x] Test that permissions matrix shows all routes correctly (server restarted, no errors)
+
+### Create Comprehensive Audit Log System
+- [x] Design audit log database schema (auditLogs table with userId, action, entityType, entityId, changes, ipAddress, userAgent, timestamp)
+- [x] Add auditLogs table to drizzle schema (12 fields including userName, userRole, entityName for historical records)
+- [x] Push database schema changes (migration 0025_cuddly_iron_patriot.sql applied successfully)
+- [x] Create audit logging service (logAuditAction function with error handling)
+- [x] Add IP address extraction utility (getIpAddress handles proxies, createChangesObject for tracking field changes)
+- [x] Integrate audit logging into order operations (status updates with before/after tracking)
+- [x] Integrate audit logging into menu operations (create, update, delete for menu items with change tracking)
+- [x] Integrate audit logging into user management (delete operations with user details)
+- [ ] Integrate audit logging into settings changes (restaurant settings, email templates, SMS templates) - DEFERRED for future enhancement
+- [ ] Integrate audit logging into reservation operations (status updates, deletions) - DEFERRED for future enhancement
+- [x] Create audit log API endpoints (getAuditLogs with filtering, getFilterOptions, getAuditStats)
+- [x] Build Audit Logs admin page with table, filters, and search (includes pagination, date range, action/entity filters)
+- [x] Add Audit Logs navigation link to admin sidebar (added with FileSearch icon)
+- [x] Add route to role permissions (added to ALL_ADMIN_ROUTES, manager role has access)
+- [x] Test audit logging across different operations (tested order status updates, menu item operations, user deletions)
+- [x] Write vitest tests for audit logging (12 tests covering logAuditAction, getIpAddress, createChangesObject - all passing)

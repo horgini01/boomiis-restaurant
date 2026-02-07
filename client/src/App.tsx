@@ -48,6 +48,7 @@ import LegalPagesManagement from "./pages/admin/LegalPagesManagement";
 import AdminUsers from "./pages/admin/AdminUsers";
 import RolePermissions from "./pages/admin/RolePermissions";
 import CustomRoles from "./pages/admin/CustomRoles";
+import AuditLogs from "./pages/admin/AuditLogs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import Accessibility from "./pages/Accessibility";
@@ -87,6 +88,7 @@ function Router() {
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/admin/role-permissions"} component={RolePermissions} />
       <Route path={"/admin/custom-roles"} component={CustomRoles} />
+      <Route path={"/admin/audit-logs"} component={AuditLogs} />
       <Route path={"/admin/settings"} component={Settings} />
       <Route path={"/admin/restaurant-settings"} component={RestaurantSettings} />
       <Route path={"/admin/email-delivery"} component={EmailDelivery} />

@@ -16,10 +16,13 @@ import { optimizeAndUploadImage } from "./imageOptimization";
 import { adminUserManagementRouter } from "./adminUserManagement";
 import { customRolesRouter } from "./customRoles";
 import { analyticsRouter } from "./routers/analytics";
+import { auditLogsRouter } from "./routers/auditLogs";
+import { logAuditAction, getIpAddress, createChangesObject } from "./services/audit.service";
 
 export const appRouter = router({
   system: systemRouter,
   analytics: analyticsRouter,
+  auditLogs: auditLogsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     login: publicProcedure
@@ -1378,10 +1381,24 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        await db.insert(menuItems).values({
+        const [result] = await db.insert(menuItems).values({
           ...input,
           price: input.price.toString(),
         });
+
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action: 'create',
+          entityType: 'menu_item',
+          entityId: result.insertId,
+          entityName: input.name,
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
+
         return { success: true };
       }),
 
@@ -1411,11 +1428,30 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
+        // Get existing item for audit log
+        const [existingItem] = await db.select().from(menuItems).where(eq(menuItems.id, input.id)).limit(1);
+        if (!existingItem) throw new Error('Menu item not found');
+
         const { id, ...data } = input;
         await db.update(menuItems).set({
           ...data,
           price: data.price.toString(),
         }).where(eq(menuItems.id, id));
+
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action: 'update',
+          entityType: 'menu_item',
+          entityId: id,
+          entityName: input.name,
+          changes: createChangesObject(existingItem, { ...data, price: data.price.toString() }),
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
+
         return { success: true };
       }),
 
@@ -1429,7 +1465,25 @@ export const appRouter = router({
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
+        // Get item details before deletion for audit log
+        const [item] = await db.select().from(menuItems).where(eq(menuItems.id, input.id)).limit(1);
+        if (!item) throw new Error('Menu item not found');
+
         await db.delete(menuItems).where(eq(menuItems.id, input.id));
+
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action: 'delete',
+          entityType: 'menu_item',
+          entityId: input.id,
+          entityName: item.name,
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
+
         return { success: true };
       }),
 
@@ -1779,6 +1833,23 @@ export const appRouter = router({
           status: input.status as any,
           timeline: JSON.stringify(timeline),
         }).where(eq(orders.id, input.orderId));
+
+        // Log audit action
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action: 'status_change',
+          entityType: 'order',
+          entityId: input.orderId,
+          entityName: `Order #${order.orderNumber}`,
+          changes: createChangesObject(
+            { status: order.status },
+            { status: input.status }
+          ),
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
 
         // Send status update email to customer
         await sendOrderStatusUpdateEmail({

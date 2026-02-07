@@ -533,3 +533,24 @@ export const smsLogs = mysqlTable("sms_logs", {
 
 export type SmsLog = typeof smsLogs.$inferSelect;
 export type InsertSmsLog = typeof smsLogs.$inferInsert;
+
+/**
+ * Audit logs for tracking all admin actions
+ */
+export const auditLogs = mysqlTable("audit_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(), // ID of user who performed the action
+  userName: varchar("user_name", { length: 255 }), // Name of user (denormalized for historical record)
+  userRole: varchar("user_role", { length: 50 }), // Role of user at time of action
+  action: varchar("action", { length: 100 }).notNull(), // e.g., 'create', 'update', 'delete', 'status_change'
+  entityType: varchar("entity_type", { length: 100 }).notNull(), // e.g., 'order', 'menu_item', 'user', 'settings'
+  entityId: varchar("entity_id", { length: 100 }), // ID of affected entity (string to support composite keys)
+  entityName: varchar("entity_name", { length: 255 }), // Name/title of entity for display
+  changes: text("changes"), // JSON string of before/after values
+  ipAddress: varchar("ip_address", { length: 45 }), // IPv4 or IPv6 address
+  userAgent: text("user_agent"), // Browser/client information
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = typeof auditLogs.$inferInsert;

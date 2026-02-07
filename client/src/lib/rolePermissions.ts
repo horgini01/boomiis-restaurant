@@ -1,7 +1,7 @@
 // Role-based access control configuration
 export type Role = "owner" | "admin" | "manager" | "kitchen_staff" | "front_desk";
 
-// All available admin routes (26 total routes)
+// All available admin routes (27 total routes)
 const ALL_ADMIN_ROUTES = [
   "/admin/dashboard",
   "/admin/categories",
@@ -19,6 +19,7 @@ const ALL_ADMIN_ROUTES = [
   "/admin/analytics",
   "/admin/users",
   "/admin/custom-roles",
+  "/admin/audit-logs",
   "/admin/email-delivery",
   "/admin/newsletter-subscribers",
   "/admin/email-campaigns",
@@ -27,7 +28,7 @@ const ALL_ADMIN_ROUTES = [
   "/admin/sms-analytics",
   "/admin/restaurant-settings",
   "/admin/settings",
-  "/admin/role-permissions", // Added missing route
+  "/admin/role-permissions",
 ];
 
 // Define which routes each role can access
@@ -41,7 +42,7 @@ export const rolePermissions: Record<Role, string[]> = {
     ...ALL_ADMIN_ROUTES,
   ],
   manager: [
-    // Operations management - no system settings, user management, or custom roles (20 routes)
+    // Operations management - no system settings, user management, or custom roles (21 routes)
     "/admin/dashboard",
     "/admin/categories",
     "/admin/menu-items",
@@ -55,6 +56,7 @@ export const rolePermissions: Record<Role, string[]> = {
     "/admin/blog",
     "/admin/about-content",
     "/admin/analytics",
+    "/admin/audit-logs",
     "/admin/email-delivery",
     "/admin/email-tracking",
     "/admin/newsletter-subscribers",
@@ -113,9 +115,9 @@ export const roleLabels: Record<Role, string> = {
 
 // Role descriptions for UI
 export const roleDescriptions: Record<Role, string> = {
-  owner: "Full access to all 26 admin features including user management and critical settings",
-  admin: "Full access to all 26 admin features including user management and critical settings",
-  manager: "Manage daily operations, menu, orders, reservations, and content (20 routes)",
+  owner: "Full access to all 27 admin features including user management and critical settings",
+  admin: "Full access to all 27 admin features including user management and critical settings",
+  manager: "Manage daily operations, menu, orders, reservations, and content (21 routes)",
   kitchen_staff: "View and manage kitchen orders only (2 routes)",
   front_desk: "Manage customer interactions, reservations, and events (5 routes)",
 };
