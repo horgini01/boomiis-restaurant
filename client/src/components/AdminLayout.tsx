@@ -112,14 +112,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         const isActive = location === item.path;
         return (
           <Link key={item.path} href={item.path}>
-            <Button
-              variant={isActive ? 'default' : 'ghost'}
-              className="w-full justify-start"
+            <div
+              className={`
+                w-full flex items-center justify-start px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
+                ${isActive 
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                  : 'hover:bg-accent hover:text-accent-foreground'
+                }
+              `}
               onClick={() => setMobileMenuOpen(false)}
             >
               <Icon className="mr-2 h-4 w-4" />
               {item.label}
-            </Button>
+            </div>
           </Link>
         );
       })}

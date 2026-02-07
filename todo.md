@@ -1901,3 +1901,6 @@
 - [x] Add password validation (minimum length 8 characters, enforced in UI and API)
 - [x] Write vitest tests for password reset flow (19 tests covering all scenarios - all passing)
 - [x] Test complete password reset workflow (forgot password, reset password, change password, token validation, security)
+
+### Bug Fixes (User Reported - Feb 7)
+- [x] Fixed nested anchor tag error in AdminLayout navigation (replaced Button wrapper with styled div to prevent <a> inside <a>)
