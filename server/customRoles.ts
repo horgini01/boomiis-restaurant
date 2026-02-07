@@ -12,10 +12,11 @@ const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
   return next({ ctx });
 });
 
-// Role-based authorization helper - owners and admins can access
+// Role-based authorization helper - owners, admins, and managers can access
 const adminOrOwnerProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (!ctx.user || (ctx.user.role !== "owner" && ctx.user.role !== "admin")) {
-    throw new Error("Access denied. Only owners and admins can manage custom roles.");
+  const allowedRoles = ['admin', 'owner', 'manager'];
+  if (!ctx.user || !allowedRoles.includes(ctx.user.role)) {
+    throw new Error("Access denied. Only owners, admins, and managers can manage custom roles.");
   }
   return next({ ctx });
 });

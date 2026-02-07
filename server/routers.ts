@@ -39,7 +39,9 @@ export const appRouter = router({
           throw new Error('Invalid email or password');
         }
 
-        if (user.role !== 'admin') {
+        // Allow admin, owner, and manager roles to access admin panel
+        const allowedRoles = ['admin', 'owner', 'manager'];
+        if (!allowedRoles.includes(user.role)) {
           throw new Error('Access denied. Admin privileges required.');
         }
 

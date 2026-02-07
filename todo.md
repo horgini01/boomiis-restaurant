@@ -1955,3 +1955,11 @@
 
 ### Bug Fixes (User Reported - Feb 7 Part 3)
 - [x] Fix nested anchor tag error on admin login page (removed inner <a> tag from Link component)
+
+### Bug Fixes (User Reported - Feb 7 Part 4)
+- [x] Fix API mutation error when owner role user tries to login ("Access denied. Admin privileges required")
+- [x] Ensure login endpoint is publicly accessible without authentication (already using publicProcedure)
+- [x] Verify owner role is recognized as having admin privileges in all auth checks
+- [x] Updated login mutation to accept admin, owner, and manager roles
+- [x] Updated adminProcedure middleware to accept admin, owner, and manager roles
+- [x] Updated customRoles authorization to accept admin, owner, and manager roles
