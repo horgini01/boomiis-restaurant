@@ -9,6 +9,7 @@ export const users = mysqlTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
+  password: varchar("password", { length: 255 }), // Hashed password for email/password login
   role: mysqlEnum("role", ["user", "admin", "owner", "manager", "kitchen_staff", "front_desk"]).default("user").notNull(),
   customRoleId: int("custom_role_id"), // Reference to custom_roles table for custom role assignment
   firstName: varchar("first_name", { length: 100 }),

@@ -1963,3 +1963,11 @@
 - [x] Updated login mutation to accept admin, owner, and manager roles
 - [x] Updated adminProcedure middleware to accept admin, owner, and manager roles
 - [x] Updated customRoles authorization to accept admin, owner, and manager roles
+
+### Bug Fixes (User Reported - Feb 7 Part 5)
+- [x] Fix "user already exists" error when trying to re-invite deleted users
+- [x] Allow re-inviting inactive users (reactivate them with new details)
+- [x] Update invitation logic to check user status before rejecting duplicate emails
+- [x] Add password field to users table schema for email/password authentication
+- [x] Update verifyCredentials function to check hashed passwords from database
+- [x] Push database schema changes to production

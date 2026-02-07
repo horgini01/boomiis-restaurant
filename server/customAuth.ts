@@ -18,19 +18,22 @@ export async function verifyCredentials(email: string, password: string) {
 
   const user = result[0];
 
-  // For the default admin account, check against the default password
-  // In production, you should hash the password in the database
-  if (email === 'admin@boomiis.uk' && password === 'admin123') {
+  // For the default admin account without password in DB, check against the default password
+  if (email === 'admin@boomiis.uk' && password === 'admin123' && !user.password) {
     return user;
   }
 
-  // For other users, verify hashed password (if you implement password field in schema)
-  // const isValid = await bcrypt.compare(password, user.password);
-  // if (!isValid) {
-  //   return null;
-  // }
+  // For users with password in database, verify hashed password
+  if (user.password) {
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return null;
+    }
+    return user;
+  }
 
-  return null; // For now, only default admin works
+  // No password set for this user
+  return null;
 }
 
 export async function createPasswordHash(password: string): Promise<string> {

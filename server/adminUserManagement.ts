@@ -110,17 +110,19 @@ export const adminUserManagementRouter = router({
 
       // Check if user already exists
       const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
-      if (existing.length > 0) {
-        throw new Error('A user with this email already exists');
+      
+      // If user exists and is active, reject
+      if (existing.length > 0 && existing[0].status === 'active') {
+        throw new Error('A user with this email already exists and is active');
       }
+      
+      // If user exists but is inactive, we'll reactivate them with new details
+      const isReactivation = existing.length > 0 && existing[0].status === 'inactive';
 
       // Generate temporary password
       const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-      // Create user with inactive status (will be activated after invitation acceptance)
-      const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
       // Parse role - if it starts with "custom-", extract custom role ID
       let userRole: string;
       let customRoleId: number | null = null;
@@ -132,19 +134,38 @@ export const adminUserManagementRouter = router({
         userRole = input.role;
       }
       
-      await db.insert(users).values({
-        openId,
-        email: input.email,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        name: `${input.firstName} ${input.lastName}`,
-        role: userRole as any,
-        customRoleId,
-        phone: input.phone || null,
-        status: "inactive",
-        loginMethod: "email",
-        invitedBy: ctx.user.id,
-      });
+      if (isReactivation) {
+        // Update existing inactive user with new details
+        await db.update(users).set({
+          firstName: input.firstName,
+          lastName: input.lastName,
+          name: `${input.firstName} ${input.lastName}`,
+          role: userRole as any,
+          customRoleId,
+          phone: input.phone || null,
+          password: hashedPassword,
+          status: "inactive", // Keep inactive until they accept invitation
+          invitedBy: ctx.user.id,
+        }).where(eq(users.id, existing[0].id));
+      } else {
+        // Create new user with inactive status (will be activated after invitation acceptance)
+        const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        
+        await db.insert(users).values({
+          openId,
+          email: input.email,
+          firstName: input.firstName,
+          lastName: input.lastName,
+          name: `${input.firstName} ${input.lastName}`,
+          role: userRole as any,
+          customRoleId,
+          phone: input.phone || null,
+          status: "inactive",
+          loginMethod: "email",
+          invitedBy: ctx.user.id,
+          password: hashedPassword,
+        });
+      }
 
       // Send invitation email using custom template
       try {
