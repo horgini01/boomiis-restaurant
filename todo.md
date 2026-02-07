@@ -1455,3 +1455,10 @@
 ## Bug Fix - Stray Calendar Text (User Report - Feb 7)
 - [x] Remove awkward "January 2026" text appearing in Analytics page (fixed: used CalendarIcon instead of Calendar component)
 - [x] Verify no other stray calendar elements are visible
+
+## Bug Fix - PDF Export OKLCH Error (User Report - Feb 7)
+- [x] Fix html2canvas error: "Attempting to parse an unsupported color function oklch"
+- [x] Replaced client-side html2canvas with server-side PDFKit (same approach as receipt generation)
+- [x] Created generateAnalyticsPDF endpoint using PDFKit for reliable PDF generation
+- [x] Added activeTab state tracking to Tabs component for PDF export
+- [x] Test PDF export functionality with all analytics tabs (tested Sales and Events tabs successfully)

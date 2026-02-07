@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { trpc } from '@/lib/trpc';
 import { Loader2, TrendingUp, DollarSign, ShoppingCart, Clock, Users, Award, Download, Calendar as CalendarIcon, CheckCircle, XCircle, AlertCircle, RefreshCw, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 import { useMemo, useState, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// PDF generation moved to server-side using PDFKit
 import { format, startOfDay, subDays, eachDayOfInterval, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import {
   LineChart,
@@ -33,6 +33,7 @@ type DateRange = 'last7' | 'last30' | 'last90' | 'thisMonth' | 'lastMonth' | 'cu
 
 export default function Analytics() {
   const [dateRange, setDateRange] = useState<DateRange>('last30');
+  const [activeTab, setActiveTab] = useState<string>('sales');
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>(undefined);
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>(undefined);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
@@ -84,6 +85,7 @@ export default function Analytics() {
   const { data: menuPerformance, isLoading: menuLoading } = trpc.admin.menuPerformance.useQuery({ startDate, endDate });
   const { data: reservationAnalytics, isLoading: reservationLoading } = trpc.admin.reservationAnalytics.useQuery({ startDate, endDate });
   const { data: eventCateringAnalytics, isLoading: eventCateringLoading } = trpc.admin.eventCateringAnalytics.useQuery({ startDate, endDate });
+  const generatePDFMutation = trpc.admin.generateAnalyticsPDF.useMutation();
 
   const handleRefresh = async () => {
     await Promise.all([
@@ -97,45 +99,99 @@ export default function Analytics() {
   };
 
   const exportToPDF = async () => {
-    if (!contentRef.current) return;
-    
     setIsExportingPDF(true);
+    toast.loading('Generating PDF report...', { id: 'pdf-export' });
+    
     try {
-      const canvas = await html2canvas(contentRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#000000',
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-      
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Prepare data for server-side PDF generation
+      const currentData = activeTab === 'sales' ? analyticsData :
+                         activeTab === 'customers' ? customerInsights :
+                         activeTab === 'menu' ? menuPerformance :
+                         activeTab === 'reservations' ? reservationAnalytics :
+                         eventCateringAnalytics;
+
+      if (!currentData) {
+        throw new Error('No data available for PDF export');
       }
+
+      // Extract metrics based on active tab
+      const metrics: Record<string, any> = {};
+      const charts: Array<{ title: string; data: any[] }> = [];
+
+      if (activeTab === 'sales' && analyticsData) {
+        metrics['Total Revenue'] = `£${analyticsData.totalRevenue}`;
+        metrics['Total Orders'] = analyticsData.totalOrders;
+        metrics['Avg Order Value'] = `£${analyticsData.avgOrderValue}`;
+        charts.push(
+          { title: 'Daily Sales Trend', data: analyticsData.dailySales || [] },
+          { title: 'Order Type Distribution', data: analyticsData.orderTypeData || [] },
+          { title: 'Peak Ordering Times', data: analyticsData.peakTimesData || [] }
+        );
+      } else if (activeTab === 'customers' && customerInsights) {
+        metrics['Total Customers'] = customerInsights.totalCustomers;
+        metrics['New Customers'] = customerInsights.newCustomers;
+        metrics['Repeat Rate'] = customerInsights.repeatRate;
+        charts.push(
+          { title: 'Top Customers', data: customerInsights.topCustomers || [] }
+        );
+      } else if (activeTab === 'menu' && menuPerformance) {
+        metrics['Total Items Sold'] = menuPerformance.totalItemsSold;
+        metrics['Avg Items/Order'] = menuPerformance.avgItemsPerOrder;
+        metrics['Never Ordered'] = menuPerformance.neverOrdered.length;
+        charts.push(
+          { title: 'Revenue by Category', data: menuPerformance.categoryRevenue || [] },
+          { title: 'Top Selling Items', data: menuPerformance.topItems || [] }
+        );
+      } else if (activeTab === 'reservations' && reservationAnalytics) {
+        metrics['Total Reservations'] = reservationAnalytics.totalReservations;
+        metrics['Avg Party Size'] = reservationAnalytics.avgPartySize;
+        metrics['Cancellation Rate'] = reservationAnalytics.cancellationRate;
+        metrics['Confirmed'] = reservationAnalytics.statusBreakdown.confirmed;
+        charts.push(
+          { title: 'Busiest Days of Week', data: reservationAnalytics.busiestDays || [] },
+          { title: 'Peak Booking Times', data: reservationAnalytics.peakTimes || [] }
+        );
+      } else if (activeTab === 'events' && eventCateringAnalytics) {
+        metrics['Total Inquiries'] = eventCateringAnalytics.totalInquiries;
+        metrics['Conversion Rate'] = eventCateringAnalytics.conversionRate;
+        metrics['Avg Guests'] = eventCateringAnalytics.avgGuestCount;
+        charts.push(
+          { title: 'Monthly Trend', data: eventCateringAnalytics.monthlyTrend || [] },
+          { title: 'Status Breakdown', data: eventCateringAnalytics.statusBreakdown ? Object.entries(eventCateringAnalytics.statusBreakdown).map(([k, v]) => ({ name: k, value: v })) : [] }
+        );
+      }
+
+      // Call server-side PDF generation
+      const result = await generatePDFMutation.mutateAsync({
+        dateRange: dateRange === 'custom' && customStartDate && customEndDate
+          ? `${format(customStartDate, 'MMM dd, yyyy')} - ${format(customEndDate, 'MMM dd, yyyy')}`
+          : dateRange.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+        tab: activeTab.charAt(0).toUpperCase() + activeTab.slice(1),
+        metrics,
+        charts,
+      });
+
+      // Download the PDF
+      const blob = new Blob(
+        [Uint8Array.from(atob(result.pdf), c => c.charCodeAt(0))],
+        { type: 'application/pdf' }
+      );
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
-      pdf.save(`analytics-report-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+      toast.success('PDF report downloaded successfully!', { id: 'pdf-export' });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('[PDF Export] Error generating PDF:', error);
+      toast.error(`Failed to generate PDF: ${error instanceof Error ? error.message : 'Unknown error'}`, { id: 'pdf-export' });
     } finally {
       setIsExportingPDF(false);
+      console.log('[PDF Export] Export process finished');
     }
   };
 
@@ -332,7 +388,7 @@ export default function Analytics() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <Tabs defaultValue="sales" className="w-full">
+              <Tabs defaultValue="sales" value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-5 mb-8">
                 <TabsTrigger value="sales">Sales Overview</TabsTrigger>
                 <TabsTrigger value="customers">Customer Insights</TabsTrigger>

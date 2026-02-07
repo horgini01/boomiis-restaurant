@@ -1171,6 +1171,36 @@ export const appRouter = router({
         };
       }),
 
+    generateAnalyticsPDF: protectedProcedure
+      .input(z.object({
+        dateRange: z.string(),
+        tab: z.string(),
+        metrics: z.record(z.string(), z.any()),
+        charts: z.array(z.object({
+          title: z.string(),
+          data: z.array(z.any()),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new Error('Unauthorized');
+        }
+
+        const { generateAnalyticsReportPDF } = await import('./pdf-analytics');
+        const pdfBuffer = await generateAnalyticsReportPDF({
+          dateRange: input.dateRange,
+          tab: input.tab,
+          metrics: input.metrics,
+          charts: input.charts,
+        });
+
+        // Return base64 encoded PDF
+        return {
+          pdf: pdfBuffer.toString('base64'),
+          filename: `analytics-${input.tab}-${new Date().toISOString().split('T')[0]}.pdf`,
+        };
+      }),
+
     createCategory: protectedProcedure
       .input(z.object({
         name: z.string(),
