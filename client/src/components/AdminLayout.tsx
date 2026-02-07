@@ -31,8 +31,12 @@ import {
   Shield,
   FileSearch,
   Lock,
+  ChevronLeft,
+  ChevronRight,
+  Pin,
+  PinOff,
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { canAccessRoute, type Role } from '@/lib/rolePermissions';
 import { canAccessRouteWithCustomRole } from '@/lib/customRolePermissions';
@@ -48,6 +52,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { restaurantName } = useSettings();
   
+  // Sidebar state management with localStorage
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('adminSidebarCollapsed');
+      return saved === 'true';
+    }
+    return false;
+  });
+  
+  const [isPinned, setIsPinned] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('adminSidebarPinned');
+      return saved !== 'false'; // Default to pinned
+    }
+    return true;
+  });
+  
   // Fetch custom roles for navigation filtering
   const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
   
@@ -57,6 +78,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       window.location.href = '/admin/login';
     },
   });
+
+  // Save sidebar state to localStorage
+  useEffect(() => {
+    localStorage.setItem('adminSidebarCollapsed', String(isCollapsed));
+  }, [isCollapsed]);
+  
+  useEffect(() => {
+    localStorage.setItem('adminSidebarPinned', String(isPinned));
+  }, [isPinned]);
 
   const allNavItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -114,22 +144,31 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <Link key={item.path} href={item.path}>
             <div
               className={`
-                w-full flex items-center justify-start px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
+                w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer
                 ${isActive 
                   ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
                   : 'hover:bg-accent hover:text-accent-foreground'
                 }
               `}
               onClick={() => setMobileMenuOpen(false)}
+              title={isCollapsed ? item.label : undefined}
             >
-              <Icon className="mr-2 h-4 w-4" />
-              {item.label}
+              <Icon className={`h-4 w-4 ${isCollapsed ? '' : 'mr-2'} flex-shrink-0`} />
+              {!isCollapsed && <span className="truncate">{item.label}</span>}
             </div>
           </Link>
         );
       })}
     </>
   );
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+  
+  const togglePin = () => {
+    setIsPinned(!isPinned);
+  };
 
   return (
     <RoleGuard>
@@ -150,33 +189,81 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside
         className={`
           ${mobileMenuOpen ? 'flex' : 'hidden'} md:flex
-          flex-col w-full md:w-64 bg-secondary/20 border-r border-border
+          flex-col ${isCollapsed ? 'md:w-20' : 'md:w-64'} bg-secondary/20 border-r border-border
           fixed md:sticky top-0 h-screen z-50 md:z-0
+          transition-all duration-300 ease-in-out
+          ${mobileMenuOpen ? 'w-64' : ''}
         `}
       >
-        <div className="p-6 border-b border-border hidden md:block">
-          <h1 className="text-2xl font-bold text-primary">{restaurantName} Admin</h1>
-          <p className="text-sm text-muted-foreground mt-1">Restaurant Management</p>
+        {/* Header with collapse/pin controls */}
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold text-primary truncate">{restaurantName} Admin</h1>
+              <p className="text-xs text-muted-foreground truncate">Restaurant Management</p>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-1 ml-auto">
+            {/* Pin/Unpin button - desktop only */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={togglePin}
+              className="h-8 w-8 hidden md:flex"
+              title={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
+            >
+              {isPinned ? <Pin className="h-4 w-4" /> : <PinOff className="h-4 w-4" />}
+            </Button>
+            
+            {/* Collapse/Expand button - desktop only */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleCollapse}
+              className="h-8 w-8 hidden md:flex"
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        {/* Scrollable Navigation */}
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           <NavLinks />
         </nav>
 
+        {/* User info and logout */}
         <div className="p-4 border-t border-border">
-          <div className="mb-4 p-3 rounded-lg bg-background/50">
-            <p className="text-sm font-medium">{user?.name || 'Admin'}</p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
-          </div>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => logoutMutation.mutate()}
-            disabled={logoutMutation.isPending}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+          {!isCollapsed ? (
+            <>
+              <div className="mb-4 p-3 rounded-lg bg-background/50">
+                <p className="text-sm font-medium truncate">{user?.name || 'Admin'}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-full"
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </aside>
 
