@@ -2022,3 +2022,10 @@
 - [x] Prevent inactive users from logging in or show appropriate error message
 - [x] Added status check in verifyCredentials to block inactive users from authenticating
 - [x] Inactive users now see clear error: "Your account has been deactivated. Please contact an administrator."
+
+### Bug Fixes (User Reported - Feb 8 Part 2)
+- [x] Fix persistent infinite redirect loop - inactive user still logged in and causing "Maximum update depth exceeded" error
+- [x] Fix "Unauthorized" API query errors on dashboard
+- [x] Add session validation to check user status and automatically logout inactive users
+- [x] Added status check in createContext to validate user status on every request
+- [x] Inactive users are now treated as unauthenticated and redirected to login

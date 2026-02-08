@@ -15,6 +15,12 @@ export async function createContext(
 
   try {
     user = await sdk.authenticateRequest(opts.req);
+    
+    // Check if authenticated user's account is still active
+    if (user && user.status !== 'active') {
+      console.log(`[Auth] Rejecting session for inactive user: ${user.email} (status: ${user.status})`);
+      user = null; // Treat inactive users as unauthenticated
+    }
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;
