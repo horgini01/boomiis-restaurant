@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { htmlToPlainText, getEmailHeaders, isValidEmail, calculateSpamScore } from './emailUtils';
 import { format } from 'date-fns';
 import { ENV } from './_core/env';
 import { getDb } from './db';
@@ -489,11 +490,20 @@ export async function sendAdminOrderNotification(data: OrderEmailData) {
     // Get admin emails from settings
     const adminEmails = await getAdminEmails();
     
+    // Generate plain text version
+    const plainText = htmlToPlainText(html);
+
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: adminEmails, // Send to all admin emails
       subject: `🔔 New Order #${data.orderNumber} - £${data.total.toFixed(2)}`,
       html,
+      text: plainText,
+      replyTo: data.customerEmail, // Allow admin to reply directly to customer
+      headers: getEmailHeaders({
+        entityRefId: data.orderNumber,
+        isMarketing: false,
+      }),
     });
 
     if (error) {
@@ -1357,11 +1367,32 @@ export async function sendOrderStatusUpdateEmail(data: {
       </html>
     `;
 
+    // Validate email address
+    if (!isValidEmail(data.customerEmail)) {
+      console.error('[Email] Invalid email address:', data.customerEmail);
+      return { success: false, error: 'Invalid email address' };
+    }
+
+    // Generate plain text version
+    const plainText = htmlToPlainText(html);
+
+    // Calculate spam score (for monitoring)
+    const spamCheck = calculateSpamScore(`Order Confirmation - #${data.orderNumber}`, html);
+    if (spamCheck.score > 50) {
+      console.warn('[Email] High spam score detected:', spamCheck.score, spamCheck.issues);
+    }
+
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.customerEmail,
-      subject: `${statusInfo.title} - Order #${data.orderNumber}`,
+      subject: `Order Confirmation - #${data.orderNumber}`,
       html,
+      text: plainText,
+      replyTo: 'hello@boomiis.uk',
+      headers: getEmailHeaders({
+        entityRefId: data.orderNumber,
+        isMarketing: false,
+      }),
     });
 
     if (error) {
