@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { ChefsSpecials } from '@/components/ChefsSpecials';
 import { TestimonialsCarousel } from '@/components/TestimonialsCarousel';
+import CookieConsent from '@/components/CookieConsent';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -274,6 +275,7 @@ export default function Home() {
       </main>
 
       <Footer />
+      <CookieConsent />
     </div>
   );
 }

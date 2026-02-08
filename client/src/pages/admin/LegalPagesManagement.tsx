@@ -46,6 +46,12 @@ export default function LegalPagesManagement() {
     isPublished: true,
   });
 
+  const [cookieForm, setCookieForm] = useState({
+    title: '',
+    content: '',
+    isPublished: true,
+  });
+
   // Load data when it arrives
   useState(() => {
     if (legalPages.length > 0) {
@@ -76,6 +82,15 @@ export default function LegalPagesManagement() {
           isPublished: accessibility.isPublished,
         });
       }
+
+      const cookie = legalPages.find((p: any) => p.pageType === 'cookie-policy');
+      if (cookie) {
+        setCookieForm({
+          title: cookie.title,
+          content: cookie.content,
+          isPublished: cookie.isPublished,
+        });
+      }
     }
   });
 
@@ -97,6 +112,13 @@ export default function LegalPagesManagement() {
     await updateMutation.mutateAsync({
       pageType: 'accessibility',
       ...accessibilityForm,
+    });
+  };
+
+  const handleSaveCookie = async () => {
+    await updateMutation.mutateAsync({
+      pageType: 'cookie-policy',
+      ...cookieForm,
     });
   };
 
@@ -281,6 +303,61 @@ export default function LegalPagesManagement() {
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
                 ) : (
                   <><Save className="w-4 h-4 mr-2" /> Save Accessibility Statement</>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Cookie Policy */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Cookie Policy
+                  </CardTitle>
+                  <CardDescription>Manage your cookie policy content</CardDescription>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="cookiePublished"
+                    checked={cookieForm.isPublished}
+                    onCheckedChange={(checked) => setCookieForm({ ...cookieForm, isPublished: checked })}
+                  />
+                  <Label htmlFor="cookiePublished">Published</Label>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="cookieTitle">Page Title</Label>
+                <Input
+                  id="cookieTitle"
+                  value={cookieForm.title}
+                  onChange={(e) => setCookieForm({ ...cookieForm, title: e.target.value })}
+                  placeholder="Cookie Policy"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cookieContent">Content (Markdown supported)</Label>
+                <Textarea
+                  id="cookieContent"
+                  value={cookieForm.content}
+                  onChange={(e) => setCookieForm({ ...cookieForm, content: e.target.value })}
+                  placeholder="Enter cookie policy content here..."
+                  rows={15}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Use Markdown formatting: **bold**, *italic*, # Heading, - List items
+                </p>
+              </div>
+              <Button onClick={handleSaveCookie} disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                ) : (
+                  <><Save className="w-4 h-4 mr-2" /> Save Cookie Policy</>
                 )}
               </Button>
             </CardContent>

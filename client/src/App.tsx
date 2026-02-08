@@ -54,6 +54,7 @@ import AuditLogs from "./pages/admin/AuditLogs";
 import ChangePassword from "./pages/admin/ChangePassword";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
+import CookiePolicy from "./pages/CookiePolicy";
 import Accessibility from "./pages/Accessibility";
 import Kitchen from "./pages/Kitchen";
 
@@ -77,6 +78,7 @@ function Router() {
       <Route path="/blog" component={Blog} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-conditions" component={TermsConditions} />
+      <Route path="/cookie-policy" component={CookiePolicy} />
       <Route path="/accessibility" component={Accessibility} />
       <Route path="/submit-testimonial" component={SubmitTestimonial} />
       <Route path="/admin/login" component={AdminLogin} />

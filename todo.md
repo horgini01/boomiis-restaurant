@@ -2128,3 +2128,15 @@
 - [x] Add "Send Test Email" button for review requests
 - [x] Create test email mutation for review requests
 - [x] Remove redundant "Save Settings" button from review request section
+
+### Weekly Report Template Fix (User Reported - Feb 8)
+- [x] Fix "Weekly report template not found" error in Email Templates settings
+
+### Legal Compliance (User Requested - Feb 8)
+- [x] Check if Privacy Policy page exists with GDPR compliance (EXISTS)
+- [x] Check if Terms & Conditions page exists with refund/cancellation policies (EXISTS)
+- [x] Check if Accessibility Statement exists (EXISTS)
+- [x] Create Cookie Policy page and database entry
+- [x] Create CookiePolicy.tsx frontend page
+- [x] Add cookie consent banner to homepage
+- [x] Update LegalPagesManagement to include Cookie Policy editor
