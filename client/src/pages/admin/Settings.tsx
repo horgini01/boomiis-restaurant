@@ -16,6 +16,7 @@ export default function Settings() {
   const [reservationRemindersEnabled, setReservationRemindersEnabled] = useState(false);
   const [anomalyAlertsEnabled, setAnomalyAlertsEnabled] = useState(false);
   const [auditAlertsEnabled, setAuditAlertsEnabled] = useState(false);
+  const [reviewRequestsEnabled, setReviewRequestsEnabled] = useState(true);
   const [isSendingReport, setIsSendingReport] = useState(false);
   const [isSendingTestEmail, setIsSendingTestEmail] = useState<string | null>(null);
 
@@ -69,6 +70,12 @@ export default function Settings() {
     if (auditAlertsEnabled !== auditEnabled) {
       setAuditAlertsEnabled(auditEnabled);
     }
+
+    const reviewRequestsSetting = settings.find((s: any) => s.settingKey === 'review_requests_enabled');
+    const reviewRequestsEnabledValue = reviewRequestsSetting?.settingValue !== 'false'; // Default to true
+    if (reviewRequestsEnabled !== reviewRequestsEnabledValue) {
+      setReviewRequestsEnabled(reviewRequestsEnabledValue);
+    }
   }
 
   const updateSettingMutation = trpc.admin.updateSetting.useMutation({
@@ -102,6 +109,10 @@ export default function Settings() {
       await updateSettingMutation.mutateAsync({
         settingKey: 'audit_alerts_enabled',
         settingValue: auditAlertsEnabled ? 'true' : 'false',
+      });
+      await updateSettingMutation.mutateAsync({
+        settingKey: 'review_requests_enabled',
+        settingValue: reviewRequestsEnabled ? 'true' : 'false',
       });
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -178,6 +189,25 @@ export default function Settings() {
                       </>
                     )}
                   </Button>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="flex-1 space-y-1">
+                      <Label htmlFor="review-requests" className="text-base font-medium">
+                        Customer Review Requests
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically send review request emails to customers 24 hours after their order is completed.
+                        Helps gather feedback and build social proof.
+                      </p>
+                    </div>
+                    <Switch
+                      id="review-requests"
+                      checked={reviewRequestsEnabled}
+                      onCheckedChange={setReviewRequestsEnabled}
+                    />
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t">

@@ -91,6 +91,8 @@ export const orders = mysqlTable("orders", {
   paymentIntentId: varchar("payment_intent_id", { length: 255 }).unique(),
   specialInstructions: text("special_instructions"),
   smsOptIn: boolean("sms_opt_in").default(true).notNull(), // Customer consent to receive SMS notifications (GDPR)
+  reviewRequestSent: boolean("review_request_sent").default(false).notNull(), // Track if review request email was sent
+  reviewRequestSentAt: timestamp("review_request_sent_at"), // When the review request was sent
   timeline: text("timeline"), // JSON array of {status, timestamp} objects tracking status changes
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

@@ -2114,3 +2114,11 @@
 
 ### UI Cleanup (User Requested - Feb 8)
 - [x] Remove redundant Email Preview tab from Restaurant Information settings page
+
+### Review Request Automation (User Requested - Feb 8)
+- [x] Create review request email template
+- [x] Implement email sending function for review requests
+- [x] Create scheduled job to check orders completed 24 hours ago
+- [x] Add database field to track if review request was sent
+- [x] Add admin toggle setting in Email Notifications settings page
+- [x] Test automated review request sending
