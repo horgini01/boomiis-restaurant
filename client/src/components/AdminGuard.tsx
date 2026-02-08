@@ -11,8 +11,10 @@ export default function AdminGuard({ children }: AdminGuardProps) {
   const [, setLocation] = useLocation();
   const { user, loading } = useAuth();
 
+  // Only check authentication, not roles
+  // Role-based access control is handled by RoleGuard based on rolePermissions.ts
   useEffect(() => {
-    if (!loading && (!user || !['admin', 'owner', 'manager'].includes(user.role))) {
+    if (!loading && !user) {
       setLocation('/admin/login');
     }
   }, [user, loading, setLocation]);
@@ -25,7 +27,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  if (!user || !['admin', 'owner', 'manager'].includes(user.role)) {
+  if (!user) {
     return null;
   }
 

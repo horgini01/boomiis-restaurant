@@ -384,12 +384,7 @@ export const appRouter = router({
         status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
         limit: z.number().default(50),
       }).optional())
-      .query(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { desc } = await import('drizzle-orm');
@@ -412,12 +407,7 @@ export const appRouter = router({
         id: z.number(),
         status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get reservation details for notifications
@@ -474,12 +464,7 @@ export const appRouter = router({
         fileName: z.string(),
         mimeType: z.string(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
-          throw new Error('Admin access required');
-        }
-
-        const { storagePut } = await import('./storage');
+      .mutation(async ({ input, ctx }) => {        const { storagePut } = await import('./storage');
         
         // Convert base64 to buffer
         const base64Data = input.file.replace(/^data:image\/\w+;base64,/, '');
@@ -495,12 +480,7 @@ export const appRouter = router({
         
         return { url, fileKey };
       }),
-    stats: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();
+    stats: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 
       const menuItemsResult = await db.select().from(menuItems);
@@ -728,12 +708,7 @@ export const appRouter = router({
         startDate: z.string(),
         endDate: z.string(),
       }))
-      .query(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get paid orders in date range
@@ -813,12 +788,7 @@ export const appRouter = router({
         startDate: z.string(),
         endDate: z.string(),
       }))
-      .query(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get paid orders in date range
@@ -934,12 +904,7 @@ export const appRouter = router({
         startDate: z.string(),
         endDate: z.string(),
       }))
-      .query(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get reservations in date range
@@ -1013,12 +978,7 @@ export const appRouter = router({
         startDate: z.string(),
         endDate: z.string(),
       }))
-      .query(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get event inquiries in date range
@@ -1089,12 +1049,7 @@ export const appRouter = router({
 
     // Generate weekly report data
     generateWeeklyReport: protectedProcedure
-      .query(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Calculate date range (last 7 days)
@@ -1234,12 +1189,7 @@ export const appRouter = router({
           data: z.array(z.any()),
         })),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const { generateAnalyticsReportPDF } = await import('./pdf-analytics');
+      .mutation(async ({ ctx, input }) => {        const { generateAnalyticsReportPDF } = await import('./pdf-analytics');
         const pdfBuffer = await generateAnalyticsReportPDF({
           dateRange: input.dateRange,
           tab: input.tab,
@@ -1262,12 +1212,7 @@ export const appRouter = router({
         displayOrder: z.number(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.insert(menuCategories).values(input);
@@ -1283,12 +1228,7 @@ export const appRouter = router({
         displayOrder: z.number(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { id, ...data } = input;
@@ -1298,12 +1238,7 @@ export const appRouter = router({
 
     deleteCategory: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(menuCategories).where(eq(menuCategories.id, input.id));
@@ -1312,12 +1247,7 @@ export const appRouter = router({
 
     toggleCategoryActive: protectedProcedure
       .input(z.object({ id: z.number(), isActive: z.boolean() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.update(menuCategories).set({ isActive: input.isActive }).where(eq(menuCategories.id, input.id));
@@ -1329,12 +1259,7 @@ export const appRouter = router({
         categoryIds: z.array(z.number()),
         operation: z.enum(['activate', 'deactivate', 'delete']),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { categoryIds, operation } = input;
@@ -1362,12 +1287,7 @@ export const appRouter = router({
         filename: z.string(),
         quality: z.number().min(1).max(100).optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        try {
+      .mutation(async ({ ctx, input }) => {        try {
           // Convert base64 to buffer
           const base64Data = input.imageBase64.replace(/^data:image\/\w+;base64,/, '');
           const imageBuffer = Buffer.from(base64Data, 'base64');
@@ -1403,12 +1323,7 @@ export const appRouter = router({
         isChefSpecial: z.boolean(),
         displayOrder: z.number(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const [result] = await db.insert(menuItems).values({
@@ -1450,12 +1365,7 @@ export const appRouter = router({
         isChefSpecial: z.boolean(),
         displayOrder: z.number(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get existing item for audit log
@@ -1487,12 +1397,7 @@ export const appRouter = router({
 
     deleteMenuItem: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get item details before deletion for audit log
@@ -1522,12 +1427,7 @@ export const appRouter = router({
         itemIds: z.array(z.number()),
         priceChange: z.number(), // percentage change, e.g., 10 for 10% increase, -5 for 5% decrease
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
-          throw new Error('Admin access required');
-        }
-
-        const { itemIds, priceChange } = input;
+      .mutation(async ({ input, ctx }) => {        const { itemIds, priceChange } = input;
         
         const db = await getDb();
         if (!db) throw new Error('Database not available');
@@ -1551,12 +1451,7 @@ export const appRouter = router({
         itemIds: z.array(z.number()),
         isAvailable: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
-          throw new Error('Admin access required');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { itemIds, isAvailable } = input;
@@ -1574,12 +1469,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
-          throw new Error('Admin access required');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const [item] = await db.select().from(menuItems).where(eq(menuItems.id, input.id)).limit(1);
@@ -1614,12 +1504,7 @@ export const appRouter = router({
       }),
 
     getMenuItems: protectedProcedure
-      .query(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user?.role || '')) {
-          throw new Error('Admin access required');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         return await db.select().from(menuItems).orderBy(menuItems.displayOrder);
@@ -1627,12 +1512,7 @@ export const appRouter = router({
 
     toggleMenuItemAvailable: protectedProcedure
       .input(z.object({ id: z.number(), isAvailable: z.boolean() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.update(menuItems).set({ isAvailable: input.isAvailable }).where(eq(menuItems.id, input.id));
@@ -1641,12 +1521,7 @@ export const appRouter = router({
 
     toggleMenuItemStock: protectedProcedure
       .input(z.object({ id: z.number(), outOfStock: z.boolean() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.update(menuItems).set({ outOfStock: input.outOfStock }).where(eq(menuItems.id, input.id));
@@ -1659,12 +1534,7 @@ export const appRouter = router({
         operation: z.enum(['priceChange', 'makeAvailable', 'makeUnavailable', 'markInStock', 'markOutOfStock', 'delete', 'duplicate']),
         priceChangePercent: z.number().optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { itemIds, operation, priceChangePercent } = input;
@@ -1747,12 +1617,7 @@ export const appRouter = router({
         return { success: true, updatedCount: itemIds.length };
       }),
 
-    getOrders: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();
+    getOrders: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 
       // Get all orders
@@ -1785,12 +1650,7 @@ export const appRouter = router({
       return ordersWithItems;
     }),
 
-    getCompletedOrders: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();  
+    getCompletedOrders: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();  
       if (!db) throw new Error('Database not available');
 
       // Get orders completed in last 24 hours
@@ -1831,12 +1691,7 @@ export const appRouter = router({
 
     updateOrderStatus: protectedProcedure
       .input(z.object({ orderId: z.number(), status: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get order details before updating
@@ -1976,12 +1831,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    getReservations: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();
+    getReservations: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 
       const reservationsResult = await db.select().from(reservations);
@@ -1990,12 +1840,7 @@ export const appRouter = router({
 
     updateReservationStatus: protectedProcedure
       .input(z.object({ reservationId: z.number(), status: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.update(reservations).set({ status: input.status as any }).where(eq(reservations.id, input.reservationId));
@@ -2003,12 +1848,7 @@ export const appRouter = router({
       }),
 
     getSettings: protectedProcedure
-      .query(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const settings = await db.select().from(siteSettings);
@@ -2017,12 +1857,7 @@ export const appRouter = router({
 
     updateSetting: protectedProcedure
       .input(z.object({ settingKey: z.string(), settingValue: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Check if setting exists
@@ -2064,12 +1899,7 @@ export const appRouter = router({
       }),
 
     sendTestDailySalesEmail: protectedProcedure
-      .mutation(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const resend = getResendClient();
+      .mutation(async ({ ctx }) => {        const resend = getResendClient();
         if (!resend) throw new Error('Email service not configured');
 
         // Generate sample data for test email
@@ -2114,12 +1944,7 @@ export const appRouter = router({
       }),
 
     sendTestWeeklyReportEmail: protectedProcedure
-      .mutation(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const resend = getResendClient();
+      .mutation(async ({ ctx }) => {        const resend = getResendClient();
         if (!resend) throw new Error('Email service not configured');
 
         await resend.emails.send({
@@ -2144,12 +1969,7 @@ export const appRouter = router({
       }),
 
     sendTestReservationReminderEmail: protectedProcedure
-      .mutation(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const resend = getResendClient();
+      .mutation(async ({ ctx }) => {        const resend = getResendClient();
         if (!resend) throw new Error('Email service not configured');
 
         await resend.emails.send({
@@ -2175,12 +1995,7 @@ export const appRouter = router({
       }),
 
     sendTestAnomalyAlertEmail: protectedProcedure
-      .mutation(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const resend = getResendClient();
+      .mutation(async ({ ctx }) => {        const resend = getResendClient();
         if (!resend) throw new Error('Email service not configured');
 
         await resend.emails.send({
@@ -2207,12 +2022,7 @@ export const appRouter = router({
       }),
 
     sendTestAuditAlertEmail: protectedProcedure
-      .mutation(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const resend = getResendClient();
+      .mutation(async ({ ctx }) => {        const resend = getResendClient();
         if (!resend) throw new Error('Email service not configured');
 
         await resend.emails.send({
@@ -2244,12 +2054,7 @@ export const appRouter = router({
         fileName: z.string(),
         mimeType: z.string(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Convert base64 to buffer
@@ -2297,24 +2102,14 @@ export const appRouter = router({
 
     getEmailPreviews: protectedProcedure
       .input(z.object({ templateType: z.enum(['orderConfirmation', 'reservationConfirmation', 'adminOrderNotification']) }))
-      .query(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const { generateEmailPreviews } = await import('./email');
+      .query(async ({ ctx, input }) => {        const { generateEmailPreviews } = await import('./email');
         const previews = await generateEmailPreviews();
         
         return { html: previews[input.templateType] };
       }),
 
     getEmailTemplates: protectedProcedure
-      .query(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { emailTemplates } = await import('../drizzle/schema');
@@ -2330,12 +2125,7 @@ export const appRouter = router({
         headerColor: z.string(),
         footerText: z.string().optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { emailTemplates } = await import('../drizzle/schema');
@@ -2375,12 +2165,7 @@ export const appRouter = router({
         status: z.string().optional(),
         limit: z.number().optional().default(100),
       }))
-      .query(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { emailLogs } = await import('../drizzle/schema');
@@ -2409,12 +2194,7 @@ export const appRouter = router({
       }),
 
     getEmailStats: protectedProcedure
-      .query(async ({ ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { emailLogs } = await import('../drizzle/schema');
@@ -2434,12 +2214,7 @@ export const appRouter = router({
         templateType: z.string(),
         recipientEmail: z.string().email(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const { generateEmailPreviews } = await import('./email');
+      .mutation(async ({ ctx, input }) => {        const { generateEmailPreviews } = await import('./email');
         const previews = await generateEmailPreviews();
         
         let html = '';
@@ -2507,12 +2282,7 @@ export const appRouter = router({
         radiusMeters: z.number().optional(),
         displayOrder: z.number().default(0),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const action = input.id ? 'update' : 'create';
@@ -2575,12 +2345,7 @@ export const appRouter = router({
 
     deleteDeliveryArea: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get area details before deletion for audit log
@@ -2607,12 +2372,7 @@ export const appRouter = router({
 
     downloadReceipt: protectedProcedure
       .input(z.object({ orderId: z.number() }))
-      .query(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Fetch order details
@@ -2872,12 +2632,7 @@ export const appRouter = router({
 
   // Newsletter management endpoints
   subscribers: router({
-    getAll: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();
+    getAll: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 
       const allSubscribers = await db.select().from(subscribers).orderBy(sql`${subscribers.subscribedAt} DESC`);
@@ -2886,12 +2641,7 @@ export const appRouter = router({
 
     unsubscribe: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.update(subscribers)
@@ -2903,12 +2653,7 @@ export const appRouter = router({
 
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(subscribers).where(eq(subscribers.id, input.id));
@@ -2918,12 +2663,7 @@ export const appRouter = router({
 
   // Email campaigns endpoints
   campaigns: router({
-    getAll: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();
+    getAll: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 
       const allCampaigns = await db.select().from(emailCampaigns).orderBy(sql`${emailCampaigns.createdAt} DESC`);
@@ -2936,12 +2676,7 @@ export const appRouter = router({
         subject: z.string(),
         bodyHtml: z.string(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const [campaign] = await db.insert(emailCampaigns).values({
@@ -2955,12 +2690,7 @@ export const appRouter = router({
 
     send: protectedProcedure
       .input(z.object({ campaignId: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get campaign details
@@ -3020,12 +2750,7 @@ export const appRouter = router({
 
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(emailCampaigns).where(eq(emailCampaigns.id, input.id));
@@ -3034,23 +2759,13 @@ export const appRouter = router({
   }),
 
   smsTemplates: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const templates = await getAllSmsTemplates();
+    list: protectedProcedure.query(async ({ ctx }) => {      const templates = await getAllSmsTemplates();
       return templates;
     }),
 
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .query(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const template = await getSmsTemplateById(input.id);
+      .query(async ({ input, ctx }) => {        const template = await getSmsTemplateById(input.id);
         if (!template) {
           throw new Error('Template not found');
         }
@@ -3064,12 +2779,7 @@ export const appRouter = router({
         message: z.string().min(1),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.update(smsTemplates)
@@ -3089,12 +2799,7 @@ export const appRouter = router({
         templateId: z.number(),
         phoneNumber: z.string().min(10),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get template
@@ -3121,23 +2826,13 @@ export const appRouter = router({
   }),
 
   openingHours: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const hours = await getAllOpeningHours();
+    list: protectedProcedure.query(async ({ ctx }) => {      const hours = await getAllOpeningHours();
       return hours;
     }),
 
     getByDay: protectedProcedure
       .input(z.object({ dayOfWeek: z.number().min(0).max(6) }))
-      .query(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const hours = await getOpeningHoursByDay(input.dayOfWeek);
+      .query(async ({ input, ctx }) => {        const hours = await getOpeningHoursByDay(input.dayOfWeek);
         if (!hours) {
           throw new Error('Opening hours not found for this day');
         }
@@ -3151,12 +2846,7 @@ export const appRouter = router({
         closeTime: z.string().regex(/^\d{2}:\d{2}$/),
         isClosed: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.update(openingHours)
@@ -3178,12 +2868,7 @@ export const appRouter = router({
         closeTime: z.string().regex(/^\d{2}:\d{2}$/),
         isClosed: z.boolean(),
       })))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Update each day's hours
@@ -3265,12 +2950,7 @@ export const appRouter = router({
         status: z.enum(['new', 'contacted', 'quoted', 'booked', 'cancelled']).optional(),
         limit: z.number().default(50),
       }).optional())
-      .query(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { desc } = await import('drizzle-orm');
@@ -3293,12 +2973,7 @@ export const appRouter = router({
         id: z.number(),
         status: z.enum(['new', 'contacted', 'quoted', 'booked', 'cancelled']),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get inquiry details for notifications
@@ -3365,12 +3040,7 @@ export const appRouter = router({
         id: z.number(),
         responseMessage: z.string(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Get inquiry details
@@ -3547,12 +3217,7 @@ export const appRouter = router({
         status: z.enum(['pending', 'approved', 'all']).optional(),
         limit: z.number().optional(),
       }))
-      .query(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .query(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         let query = db.select().from(menuItemReviews);
@@ -3575,12 +3240,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db
@@ -3596,12 +3256,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db
@@ -3638,12 +3293,7 @@ export const appRouter = router({
       }),
 
     // Admin: List all gallery images
-    listAll: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();
+    listAll: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 
       const results = await db.select().from(galleryImages).orderBy(desc(galleryImages.createdAt));
@@ -3659,12 +3309,7 @@ export const appRouter = router({
         category: z.enum(['ambiance', 'dishes', 'events', 'team']),
         displayOrder: z.number().optional(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.insert(galleryImages).values({
@@ -3690,12 +3335,7 @@ export const appRouter = router({
         displayOrder: z.number().optional(),
         isActive: z.boolean().optional(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { id, ...updates } = input;
@@ -3709,12 +3349,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(galleryImages).where(eq(galleryImages.id, input.id));
@@ -3728,12 +3363,7 @@ export const appRouter = router({
         id: z.number(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db
@@ -3788,12 +3418,7 @@ export const appRouter = router({
       }),
 
     // Admin: List all blog posts
-    listAll: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
-      const db = await getDb();
+    listAll: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 
       const results = await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt));
@@ -3811,12 +3436,7 @@ export const appRouter = router({
         authorId: z.number(),
         isPublished: z.boolean().optional(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.insert(blogPosts).values({
@@ -3845,12 +3465,7 @@ export const appRouter = router({
         authorId: z.number().optional(),
         isPublished: z.boolean().optional(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { id, ...updates } = input;
@@ -3873,12 +3488,7 @@ export const appRouter = router({
       .input(z.object({
         id: z.number(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-          throw new Error('Unauthorized');
-        }
-
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(blogPosts).where(eq(blogPosts.id, input.id));
@@ -3915,9 +3525,7 @@ export const appRouter = router({
   // ==================== Admin: About Content Management ====================
   adminAbout: router({
     // About Content (Hero, Story sections)
-    getAllContent: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      const db = await getDb();
+    getAllContent: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(aboutContent);
     }),
@@ -3926,9 +3534,7 @@ export const appRouter = router({
         sectionKey: z.string(),
         sectionValue: z.string(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Check if section exists
@@ -3951,9 +3557,7 @@ export const appRouter = router({
       }),
 
     // About Values
-    getAllValues: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      const db = await getDb();
+    getAllValues: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(aboutValues);
     }),
@@ -3964,9 +3568,7 @@ export const appRouter = router({
         icon: z.string(),
         displayOrder: z.number().default(0),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.insert(aboutValues).values(input);
@@ -3981,9 +3583,7 @@ export const appRouter = router({
         displayOrder: z.number(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { id, ...data } = input;
@@ -3992,9 +3592,7 @@ export const appRouter = router({
       }),
     deleteValue: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(aboutValues).where(eq(aboutValues.id, input.id));
@@ -4002,9 +3600,7 @@ export const appRouter = router({
       }),
 
     // Team Members
-    getAllTeam: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      const db = await getDb();
+    getAllTeam: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(teamMembers);
     }),
@@ -4016,9 +3612,7 @@ export const appRouter = router({
         imageUrl: z.string().optional(),
         displayOrder: z.number().default(0),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.insert(teamMembers).values(input);
@@ -4034,9 +3628,7 @@ export const appRouter = router({
         displayOrder: z.number(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { id, ...data } = input;
@@ -4045,9 +3637,7 @@ export const appRouter = router({
       }),
     deleteTeamMember: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(teamMembers).where(eq(teamMembers.id, input.id));
@@ -4055,9 +3645,7 @@ export const appRouter = router({
       }),
 
     // Awards
-    getAllAwards: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      const db = await getDb();
+    getAllAwards: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
       return await db.select().from(awards);
     }),
@@ -4069,9 +3657,7 @@ export const appRouter = router({
         year: z.number().optional(),
         displayOrder: z.number().default(0),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.insert(awards).values(input);
@@ -4087,9 +3673,7 @@ export const appRouter = router({
         displayOrder: z.number(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         const { id, ...data } = input;
@@ -4098,9 +3682,7 @@ export const appRouter = router({
       }),
     deleteAward: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         await db.delete(awards).where(eq(awards.id, input.id));
@@ -4175,9 +3757,7 @@ export const appRouter = router({
         .limit(6);
     }),
 
-    getAllAdmin: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      const db = await getDb();
+    getAllAdmin: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
       const { testimonials } = await import('../drizzle/schema');
       return await db.select().from(testimonials).orderBy(testimonials.createdAt);
@@ -4193,9 +3773,7 @@ export const appRouter = router({
         isFeatured: z.boolean().optional(),
         displayOrder: z.number().optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         await db.insert(testimonials).values(input);
@@ -4213,9 +3791,7 @@ export const appRouter = router({
         isFeatured: z.boolean(),
         displayOrder: z.number(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         const { id, ...data } = input;
@@ -4225,9 +3801,7 @@ export const appRouter = router({
 
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         await db.delete(testimonials).where(eq(testimonials.id, input.id));
@@ -4236,9 +3810,7 @@ export const appRouter = router({
 
     toggleApproval: protectedProcedure
       .input(z.object({ id: z.number(), isApproved: z.boolean() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         await db.update(testimonials).set({ isApproved: input.isApproved }).where(eq(testimonials.id, input.id));
@@ -4247,9 +3819,7 @@ export const appRouter = router({
 
     toggleFeatured: protectedProcedure
       .input(z.object({ id: z.number(), isFeatured: z.boolean() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         await db.update(testimonials).set({ isFeatured: input.isFeatured }).where(eq(testimonials.id, input.id));
@@ -4258,9 +3828,7 @@ export const appRouter = router({
 
     bulkApprove: protectedProcedure
       .input(z.object({ ids: z.array(z.number()) }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         const { inArray } = await import('drizzle-orm');
@@ -4274,9 +3842,7 @@ export const appRouter = router({
 
     bulkReject: protectedProcedure
       .input(z.object({ ids: z.array(z.number()) }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         const { inArray } = await import('drizzle-orm');
@@ -4293,9 +3859,7 @@ export const appRouter = router({
         id: z.number(),
         adminResponse: z.string().min(1, 'Response cannot be empty').optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonials } = await import('../drizzle/schema');
         
@@ -4334,9 +3898,7 @@ export const appRouter = router({
       }),
 
     // Response Templates Management
-    getTemplates: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      const db = await getDb();
+    getTemplates: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
       const { testimonialResponseTemplates } = await import('../drizzle/schema');
       return await db.select()
@@ -4345,9 +3907,7 @@ export const appRouter = router({
         .orderBy(testimonialResponseTemplates.displayOrder);
     }),
 
-    getAllTemplates: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      const db = await getDb();
+    getAllTemplates: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
       const { testimonialResponseTemplates } = await import('../drizzle/schema');
       return await db.select()
@@ -4361,9 +3921,7 @@ export const appRouter = router({
         content: z.string().min(1, 'Template content is required'),
         displayOrder: z.number().default(0),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonialResponseTemplates } = await import('../drizzle/schema');
         
@@ -4379,9 +3937,7 @@ export const appRouter = router({
         displayOrder: z.number(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonialResponseTemplates } = await import('../drizzle/schema');
         
@@ -4399,9 +3955,7 @@ export const appRouter = router({
 
     deleteTemplate: protectedProcedure
       .input(z.object({ id: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
         const { testimonialResponseTemplates } = await import('../drizzle/schema');
         
@@ -4420,9 +3974,7 @@ export const appRouter = router({
 
   // ==================== Admin: Legal Pages Management ====================
   adminLegal: router({
-    getAll: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-      return await getAllLegalPages();
+    getAll: protectedProcedure.query(async ({ ctx }) => {      return await getAllLegalPages();
     }),
     update: protectedProcedure
       .input(z.object({
@@ -4431,9 +3983,7 @@ export const appRouter = router({
         content: z.string(),
         isPublished: z.boolean(),
       }))
-      .mutation(async ({ input, ctx }) => {
-        if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) throw new Error('Unauthorized');
-        const db = await getDb();
+      .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
         // Check if page exists

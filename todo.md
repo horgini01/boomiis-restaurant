@@ -2058,3 +2058,14 @@
 - [x] Removed role checks from todaySnapshot, alerts, recentActivity, statsWithTrends procedures
 - [x] Removed conditional fetching from all dashboard queries in frontend
 - [x] Removed conditional fetching from RoleGuard custom roles query
+
+### Bug Fixes (User Reported - Feb 8 Part 7)
+- [x] Remove ALL hardcoded role checks like ['owner', 'admin', 'manager'] from entire codebase
+- [x] Make rolePermissions.ts the SINGLE source of truth for all permission decisions
+- [x] Search backend procedures for hardcoded role checks and remove them
+- [x] Search frontend components for hardcoded role checks and remove them
+- [x] Permission model: ONLY check rolePermissions.ts dynamically, never hardcode role names
+- [x] Removed 50+ hardcoded role checks from server/routers.ts
+- [x] Replaced adminProcedure with protectedProcedure in systemRouter.ts
+- [x] Updated AdminGuard to only check authentication, not roles
+- [x] RoleGuard handles all permission checks based on rolePermissions.ts
