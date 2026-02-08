@@ -26,6 +26,7 @@ export default function Settings() {
   const sendTestReservationReminder = trpc.admin.sendTestReservationReminderEmail.useMutation();
   const sendTestAnomalyAlert = trpc.admin.sendTestAnomalyAlertEmail.useMutation();
   const sendTestAuditAlert = trpc.admin.sendTestAuditAlertEmail.useMutation();
+  const sendTestReviewRequest = trpc.admin.sendTestReviewRequestEmail.useMutation();
 
   const handleSendTestEmail = async (type: string, mutation: any) => {
     setIsSendingTestEmail(type);
@@ -109,10 +110,6 @@ export default function Settings() {
       await updateSettingMutation.mutateAsync({
         settingKey: 'audit_alerts_enabled',
         settingValue: auditAlertsEnabled ? 'true' : 'false',
-      });
-      await updateSettingMutation.mutateAsync({
-        settingKey: 'review_requests_enabled',
-        settingValue: reviewRequestsEnabled ? 'true' : 'false',
       });
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -205,26 +202,36 @@ export default function Settings() {
                     <Switch
                       id="review-requests"
                       checked={reviewRequestsEnabled}
-                      onCheckedChange={setReviewRequestsEnabled}
+                      onCheckedChange={async (checked) => {
+                        setReviewRequestsEnabled(checked);
+                        try {
+                          await updateSettingMutation.mutateAsync({
+                            settingKey: 'review_requests_enabled',
+                            settingValue: checked ? 'true' : 'false',
+                          });
+                        } catch (error) {
+                          // Error already handled by mutation
+                          setReviewRequestsEnabled(!checked); // Revert on error
+                        }
+                      }}
                     />
                   </div>
-                </div>
-
-                <div className="pt-4 border-t">
                   <Button
-                    onClick={handleSave}
-                    disabled={updateSettingMutation.isPending}
+                    onClick={() => handleSendTestEmail('review-request', sendTestReviewRequest)}
+                    disabled={isSendingTestEmail === 'review-request'}
+                    variant="outline"
+                    size="sm"
                     className="w-full sm:w-auto"
                   >
-                    {updateSettingMutation.isPending ? (
+                    {isSendingTestEmail === 'review-request' ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
+                        Sending...
                       </>
                     ) : (
                       <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save Settings
+                        <Mail className="mr-2 h-4 w-4" />
+                        Send Test Email
                       </>
                     )}
                   </Button>

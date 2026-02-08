@@ -2053,6 +2053,35 @@ export const appRouter = router({
         return { success: true, message: 'Test email sent to ' + ctx.user.email };
       }),
 
+    sendTestReviewRequestEmail: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        
+        const resend = getResendClient();
+        if (!resend) throw new Error('Email service not configured');
+
+        // Create sample order data for test email
+        const testOrder = {
+          id: 99999,
+          orderNumber: 'TEST-' + Date.now(),
+          customerName: ctx.user.name || 'Test Customer',
+          customerEmail: ctx.user.email || '',
+          total: '45.99',
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24 hours ago
+          items: [
+            { menuItemName: 'Jollof Rice', quantity: 2, price: '12.99' },
+            { menuItemName: 'Suya Platter', quantity: 1, price: '19.99' },
+          ],
+        };
+
+        // Import and use the review request email function
+        const { sendReviewRequestEmail } = await import('./reviewRequestEmail');
+        await sendReviewRequestEmail(testOrder as any);
+
+        return { success: true, message: 'Test review request email sent to ' + ctx.user.email };
+      }),
+
     uploadLogo: protectedProcedure
       .input(z.object({ 
         fileData: z.string(), // base64 encoded image

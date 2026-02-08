@@ -2122,3 +2122,9 @@
 - [x] Add database field to track if review request was sent
 - [x] Add admin toggle setting in Email Notifications settings page
 - [x] Test automated review request sending
+
+### Review Request Settings Fix (User Reported - Feb 8)
+- [x] Make review request toggle save immediately on change (like other settings)
+- [x] Add "Send Test Email" button for review requests
+- [x] Create test email mutation for review requests
+- [x] Remove redundant "Save Settings" button from review request section
