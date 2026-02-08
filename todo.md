@@ -2082,3 +2082,11 @@
 - [x] Allow ALL users with passwords to change their passwords regardless of loginMethod
 - [x] Removed isPasswordAccount check and conditional rendering
 - [x] All authenticated users can now access password change form
+
+### Feature Request (User Requested - Feb 8 Part 10)
+- [x] Add show/hide password toggle to Admin Login page
+- [x] Match the same eye icon style used in Change Password page
+- [x] Improve UX by allowing users to verify password input
+- [x] Added Eye/EyeOff icons from lucide-react
+- [x] Added showPassword state and toggle button
+- [x] Password field type switches between "text" and "password"
