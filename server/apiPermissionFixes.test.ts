@@ -35,4 +35,20 @@ describe("API Permission Fixes", () => {
     expect(dashboardContent).toContain("trpc.admin.todaySnapshot.useQuery(undefined, {");
     expect(dashboardContent).toContain("enabled: !!canViewStats");
   });
+
+  it("should verify alerts query is conditional", () => {
+    const dashboardContent = readFileSync("./client/src/pages/admin/Dashboard.tsx", "utf-8");
+    
+    // Check that alerts has enabled option
+    expect(dashboardContent).toContain("trpc.admin.alerts.useQuery(undefined, {");
+    expect(dashboardContent).toContain("enabled: !!canViewStats");
+  });
+
+  it("should verify recentActivity query is conditional", () => {
+    const dashboardContent = readFileSync("./client/src/pages/admin/Dashboard.tsx", "utf-8");
+    
+    // Check that recentActivity has enabled option
+    expect(dashboardContent).toContain("trpc.admin.recentActivity.useQuery(undefined, {");
+    expect(dashboardContent).toContain("enabled: !!canViewStats");
+  });
 });

@@ -2043,3 +2043,9 @@
 - [x] Identify which other API queries are failing with unauthorized errors
 - [x] Added conditional fetching for statsWithTrends and todaySnapshot based on user role
 - [x] Added conditional fetching for getAllCustomRoles only for owner/admin/manager roles
+
+### Bug Fixes (User Reported - Feb 8 Part 5)
+- [x] Fix "Unauthorized" error from admin.recentActivity query on kitchen staff dashboard
+- [x] Fix "Unauthorized" error from admin.alerts query (if applicable)
+- [x] Add conditional fetching for all dashboard queries based on user permissions
+- [x] All dashboard queries (stats, snapshot, alerts, recentActivity) now conditional on canViewStats

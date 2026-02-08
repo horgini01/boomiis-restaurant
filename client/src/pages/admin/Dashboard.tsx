@@ -19,8 +19,12 @@ export default function AdminDashboard() {
   const { data: snapshot, isLoading: snapshotLoading } = trpc.admin.todaySnapshot.useQuery(undefined, {
     enabled: !!canViewStats,
   });
-  const { data: alerts, isLoading: alertsLoading } = trpc.admin.alerts.useQuery();
-  const { data: activity, isLoading: activityLoading, refetch: refetchActivity } = trpc.admin.recentActivity.useQuery();
+  const { data: alerts, isLoading: alertsLoading } = trpc.admin.alerts.useQuery(undefined, {
+    enabled: !!canViewStats,
+  });
+  const { data: activity, isLoading: activityLoading, refetch: refetchActivity } = trpc.admin.recentActivity.useQuery(undefined, {
+    enabled: !!canViewStats,
+  });
 
   // Auto-refresh activity feed every 30 seconds
   useEffect(() => {
