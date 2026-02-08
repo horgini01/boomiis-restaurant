@@ -2075,3 +2075,10 @@
 - [x] Remove hardcoded role check from custom roles backend procedure
 - [x] Custom roles query should respect rolePermissions.ts like all other procedures
 - [x] Changed getAllCustomRoles from adminOrOwnerProcedure to protectedProcedure
+
+### Bug Fixes (User Reported - Feb 8 Part 9)
+- [x] Fix ChangePassword page blocking users with loginMethod "email"
+- [x] Remove incorrect "Your account uses email authentication" message
+- [x] Allow ALL users with passwords to change their passwords regardless of loginMethod
+- [x] Removed isPasswordAccount check and conditional rendering
+- [x] All authenticated users can now access password change form

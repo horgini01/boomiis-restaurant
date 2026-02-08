@@ -63,9 +63,6 @@ export default function ChangePassword() {
     });
   };
 
-  // Check if user is using password-based authentication
-  const isPasswordAccount = user?.loginMethod === "password";
-
   return (
     
       <AdminLayout>
@@ -77,16 +74,7 @@ export default function ChangePassword() {
             </p>
           </div>
 
-          {!isPasswordAccount ? (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Password change is only available for accounts using password authentication.
-                Your account uses {user?.loginMethod || "OAuth"} authentication.
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Card>
+          <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lock className="h-5 w-5" />
@@ -257,7 +245,6 @@ export default function ChangePassword() {
                 </form>
               </CardContent>
             </Card>
-          )}
         </div>
       </AdminLayout>
     
