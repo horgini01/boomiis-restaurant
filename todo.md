@@ -2035,3 +2035,11 @@
 - [x] Locate where AdminGuard is being used and causing redirect loop
 - [x] Remove AdminGuard from all 19 admin pages (RoleGuard handles all permissions properly)
 - [x] Kitchen staff can now access dashboard and orders without redirect loop
+
+### Bug Fixes (User Reported - Feb 8 Part 4)
+- [x] Fix "Unauthorized" API query error on kitchen staff dashboard
+- [x] Fix "Access denied. Only owners, admins, and managers can manage custom roles" error
+- [x] Make custom roles query handle permission errors gracefully (kitchen staff doesn't need custom roles)
+- [x] Identify which other API queries are failing with unauthorized errors
+- [x] Added conditional fetching for statsWithTrends and todaySnapshot based on user role
+- [x] Added conditional fetching for getAllCustomRoles only for owner/admin/manager roles

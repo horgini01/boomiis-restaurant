@@ -5,10 +5,20 @@ import { Loader2, UtensilsCrossed, ShoppingBag, CalendarCheck, TrendingUp, ChefH
 import { useEffect } from 'react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
+import { useAuth } from '@/_core/hooks/useAuth';
 
 export default function AdminDashboard() {
-  const { data: stats, isLoading: statsLoading } = trpc.admin.statsWithTrends.useQuery();
-  const { data: snapshot, isLoading: snapshotLoading } = trpc.admin.todaySnapshot.useQuery();
+  const { user } = useAuth();
+  
+  // Only fetch stats and snapshot for admin/owner/manager roles
+  const canViewStats = user && ['owner', 'admin', 'manager'].includes(user.role);
+  
+  const { data: stats, isLoading: statsLoading } = trpc.admin.statsWithTrends.useQuery(undefined, {
+    enabled: !!canViewStats,
+  });
+  const { data: snapshot, isLoading: snapshotLoading } = trpc.admin.todaySnapshot.useQuery(undefined, {
+    enabled: !!canViewStats,
+  });
   const { data: alerts, isLoading: alertsLoading } = trpc.admin.alerts.useQuery();
   const { data: activity, isLoading: activityLoading, refetch: refetchActivity } = trpc.admin.recentActivity.useQuery();
 
