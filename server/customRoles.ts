@@ -23,7 +23,7 @@ const adminOrOwnerProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 export const customRolesRouter = router({
   // Get all custom roles with their permissions
-  getAllCustomRoles: adminOrOwnerProcedure.query(async ({ ctx }) => {
+  getAllCustomRoles: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
     if (!db) throw new Error('Database not available');
 

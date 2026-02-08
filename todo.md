@@ -2069,3 +2069,9 @@
 - [x] Replaced adminProcedure with protectedProcedure in systemRouter.ts
 - [x] Updated AdminGuard to only check authentication, not roles
 - [x] RoleGuard handles all permission checks based on rolePermissions.ts
+
+### Bug Fixes (User Reported - Feb 8 Part 8)
+- [x] Fix "Access denied. Only owners, admins, and managers can manage custom roles" error on change-password page
+- [x] Remove hardcoded role check from custom roles backend procedure
+- [x] Custom roles query should respect rolePermissions.ts like all other procedures
+- [x] Changed getAllCustomRoles from adminOrOwnerProcedure to protectedProcedure
