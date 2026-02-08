@@ -519,10 +519,6 @@ export const appRouter = router({
     }),
 
     todaySnapshot: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
@@ -605,10 +601,6 @@ export const appRouter = router({
     }),
 
     alerts: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
@@ -635,10 +627,6 @@ export const appRouter = router({
     }),
 
     recentActivity: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
@@ -683,10 +671,6 @@ export const appRouter = router({
     }),
 
     statsWithTrends: protectedProcedure.query(async ({ ctx }) => {
-      if (!['admin', 'owner', 'manager'].includes(ctx.user.role)) {
-        throw new Error('Unauthorized');
-      }
-
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 

@@ -15,11 +15,8 @@ export default function RoleGuard({ children, requiredRoles }: RoleGuardProps) {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   
-  // Only fetch custom roles if user has permission (owner, admin, manager)
-  const canManageCustomRoles = !!user && ['owner', 'admin', 'manager'].includes(user.role);
-  const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery(undefined, {
-    enabled: canManageCustomRoles,
-  });
+  // Fetch custom roles for permission checking
+  const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
   
   // Update custom roles cache when data changes
   useEffect(() => {

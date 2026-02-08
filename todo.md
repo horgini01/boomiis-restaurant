@@ -2049,3 +2049,12 @@
 - [x] Fix "Unauthorized" error from admin.alerts query (if applicable)
 - [x] Add conditional fetching for all dashboard queries based on user permissions
 - [x] All dashboard queries (stats, snapshot, alerts, recentActivity) now conditional on canViewStats
+
+### Bug Fixes (User Reported - Feb 8 Part 6)
+- [x] Remove incorrect conditional fetching from dashboard queries
+- [x] Kitchen staff should see full dashboard data since they have route permission
+- [x] Update backend procedures to allow kitchen staff access to stats, alerts, activity
+- [x] Permission model: route-level permission (RoleGuard) is sufficient, no additional API restrictions needed
+- [x] Removed role checks from todaySnapshot, alerts, recentActivity, statsWithTrends procedures
+- [x] Removed conditional fetching from all dashboard queries in frontend
+- [x] Removed conditional fetching from RoleGuard custom roles query
