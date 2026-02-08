@@ -148,11 +148,11 @@ export const adminUserManagementRouter = router({
           customRoleId,
           phone: input.phone || null,
           password: hashedPassword,
-          status: "inactive", // Keep inactive until they accept invitation
+          status: "active", // Set to active so they can login immediately with emailed credentials
           invitedBy: ctx.user.id,
         }).where(eq(users.id, existing[0].id));
       } else {
-        // Create new user with inactive status (will be activated after invitation acceptance)
+        // Create new user with active status so they can login immediately with emailed credentials
         const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
         
         await db.insert(users).values({
@@ -164,7 +164,7 @@ export const adminUserManagementRouter = router({
           role: userRole as any,
           customRoleId,
           phone: input.phone || null,
-          status: "inactive",
+          status: "active",
           loginMethod: "email",
           invitedBy: ctx.user.id,
           password: hashedPassword,

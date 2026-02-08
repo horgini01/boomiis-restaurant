@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Lock, CheckCircle2, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 
 export default function ChangePassword() {
   const { user } = useAuth();
@@ -135,30 +136,8 @@ export default function ChangePassword() {
                       </button>
                     </div>
 
-                    {/* Password Requirements */}
-                    {newPassword && (
-                      <div className="mt-3 p-3 bg-muted/30 rounded-lg space-y-2">
-                        <p className="text-sm font-medium">Password must contain:</p>
-                        <div className="space-y-1">
-                          <div className={`flex items-center gap-2 text-sm ${hasMinLength ? "text-green-600" : "text-muted-foreground"}`}>
-                            {hasMinLength ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                            <span>At least 8 characters</span>
-                          </div>
-                          <div className={`flex items-center gap-2 text-sm ${hasLowercase ? "text-green-600" : "text-muted-foreground"}`}>
-                            {hasLowercase ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                            <span>One lowercase letter (a-z)</span>
-                          </div>
-                          <div className={`flex items-center gap-2 text-sm ${hasUppercase ? "text-green-600" : "text-muted-foreground"}`}>
-                            {hasUppercase ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                            <span>One uppercase letter (A-Z)</span>
-                          </div>
-                          <div className={`flex items-center gap-2 text-sm ${hasNumber ? "text-green-600" : "text-muted-foreground"}`}>
-                            {hasNumber ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-                            <span>One number (0-9)</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    {/* Password Strength Indicator */}
+                    <PasswordStrengthIndicator password={newPassword} />
                   </div>
 
                   {/* Confirm Password */}

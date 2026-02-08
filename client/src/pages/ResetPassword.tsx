@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link } from "wouter";
 import { Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 
 export default function ResetPassword() {
   const [, navigate] = useLocation();
@@ -176,7 +177,7 @@ export default function ResetPassword() {
                   minLength={8}
                 />
               </div>
-              <p className="text-xs text-gray-500">Must be at least 8 characters long</p>
+              <PasswordStrengthIndicator password={newPassword} />
             </div>
             <div className="space-y-2">
               <label htmlFor="confirmPassword" className="text-sm font-medium">

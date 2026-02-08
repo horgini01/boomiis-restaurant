@@ -31,6 +31,7 @@ export const appRouter = router({
       .input(z.object({
         email: z.string().email(),
         password: z.string().min(1),
+        rememberMe: z.boolean().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const user = await verifyCredentials(input.email, input.password);
@@ -42,10 +43,14 @@ export const appRouter = router({
         // Allow all roles to login - navigation will be filtered based on permissions
         // No role restriction needed here
 
-        // Create session token
+        // Create session token with appropriate expiry
+        const expiresInMs = input.rememberMe 
+          ? 30 * 24 * 60 * 60 * 1000  // 30 days if remember me is checked
+          : 24 * 60 * 60 * 1000;       // 1 day if not checked
+        
         const token = await sdk.createSessionToken(user.openId, {
           name: user.name || '',
-          expiresInMs: 365 * 24 * 60 * 60 * 1000, // 1 year
+          expiresInMs,
         });
 
         // Set session cookie

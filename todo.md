@@ -2095,3 +2095,9 @@
 - [x] Fix forgot password blocking users with loginMethod "email"
 - [x] Remove incorrect "Password reset is only available for accounts using password authentication" error
 - [x] Allow ALL users with passwords to reset their passwords regardless of loginMethod
+
+### Authentication Enhancements (User Requested - Feb 8 Part 12)
+- [x] Set new user status to "active" by default when admins create accounts
+- [x] Add "Remember Me" checkbox to admin login page to extend session duration
+- [x] Add password strength indicator to password reset page
+- [x] Add password strength indicator to change password page
