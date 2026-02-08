@@ -1,5 +1,4 @@
 import { useState } from "react";
-import AdminGuard from "@/components/AdminGuard";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -68,7 +67,7 @@ export default function ChangePassword() {
   const isPasswordAccount = user?.loginMethod === "password";
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div className="container max-w-4xl py-8">
           <div className="mb-6">
@@ -261,6 +260,6 @@ export default function ChangePassword() {
           )}
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

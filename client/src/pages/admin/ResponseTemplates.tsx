@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,7 +113,7 @@ export default function ResponseTemplates() {
   };
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -284,6 +283,6 @@ export default function ResponseTemplates() {
           </Card>
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

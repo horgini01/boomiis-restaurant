@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,7 +68,7 @@ export default function ReservationsManagement() {
   };
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -233,6 +232,6 @@ export default function ReservationsManagement() {
           )}
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

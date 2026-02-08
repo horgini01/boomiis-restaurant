@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -59,18 +58,18 @@ export default function EmailDelivery() {
 
   if (isLoading) {
     return (
-      <AdminGuard>
+      
         <AdminLayout>
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </AdminLayout>
-      </AdminGuard>
+      
     );
   }
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div>
           <h1 className="text-4xl font-bold mb-8">📧 Email Delivery Tracking</h1>
@@ -236,6 +235,6 @@ export default function EmailDelivery() {
           </Card>
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

@@ -1,4 +1,3 @@
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -283,7 +282,7 @@ export default function Analytics() {
   };
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div>
           <div className="flex items-center justify-between mb-8">
@@ -1012,6 +1011,6 @@ export default function Analytics() {
           </div>
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

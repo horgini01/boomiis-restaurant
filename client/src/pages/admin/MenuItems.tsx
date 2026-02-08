@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -211,7 +210,7 @@ export default function MenuItemsManagement() {
   };
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div>
           <div className="flex items-center justify-between mb-8">
@@ -798,6 +797,6 @@ export default function MenuItemsManagement() {
           )}
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

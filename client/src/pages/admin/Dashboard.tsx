@@ -1,4 +1,3 @@
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { trpc } from '@/lib/trpc';
@@ -38,7 +37,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div>
           <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
@@ -291,6 +290,6 @@ export default function AdminDashboard() {
           )}
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

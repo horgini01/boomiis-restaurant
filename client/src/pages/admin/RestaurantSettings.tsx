@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import AdminGuard from "@/components/AdminGuard";
 import AdminLayout from "@/components/AdminLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -190,18 +189,18 @@ export default function RestaurantSettings() {
 
   if (isLoading) {
     return (
-      <AdminGuard>
+      
         <AdminLayout>
           <div className="flex items-center justify-center h-96">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         </AdminLayout>
-      </AdminGuard>
+      
     );
   }
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div>
           <div className="flex items-center justify-between mb-6">
@@ -567,6 +566,6 @@ export default function RestaurantSettings() {
           </Tabs>
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

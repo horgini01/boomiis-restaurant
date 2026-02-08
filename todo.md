@@ -2029,3 +2029,9 @@
 - [x] Add session validation to check user status and automatically logout inactive users
 - [x] Added status check in createContext to validate user status on every request
 - [x] Inactive users are now treated as unauthenticated and redirected to login
+
+### Bug Fixes (User Reported - Feb 8 Part 3)
+- [x] Fix infinite redirect loop for active kitchen_staff user - AdminGuard is blocking access to dashboard
+- [x] Locate where AdminGuard is being used and causing redirect loop
+- [x] Remove AdminGuard from all 19 admin pages (RoleGuard handles all permissions properly)
+- [x] Kitchen staff can now access dashboard and orders without redirect loop

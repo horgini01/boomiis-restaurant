@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -111,18 +110,18 @@ export default function Settings() {
 
   if (isLoading) {
     return (
-      <AdminGuard>
+      
         <AdminLayout>
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </AdminLayout>
-      </AdminGuard>
+      
     );
   }
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div>
           <h1 className="text-4xl font-bold mb-2">Settings</h1>
@@ -403,6 +402,6 @@ export default function Settings() {
           </div>
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

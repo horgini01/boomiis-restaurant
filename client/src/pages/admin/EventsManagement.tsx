@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -89,7 +88,7 @@ export default function EventsManagement() {
   };
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -358,6 +357,6 @@ export default function EventsManagement() {
           </DialogContent>
         </Dialog>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

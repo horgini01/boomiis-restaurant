@@ -1,4 +1,3 @@
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -293,7 +292,7 @@ export default function OrdersManagement() {
   }, [orders, searchQuery, sortBy, sortOrder, dateFrom, dateTo]);
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div>
           <div className="flex items-center justify-between mb-8">
@@ -1038,6 +1037,6 @@ export default function OrdersManagement() {
           </DialogContent>
         </Dialog>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

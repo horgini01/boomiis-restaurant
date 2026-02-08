@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import AdminLayout from '@/components/AdminLayout';
-import AdminGuard from '@/components/AdminGuard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -103,18 +102,18 @@ export default function LegalPagesManagement() {
 
   if (isLoading) {
     return (
-      <AdminGuard>
+      
         <AdminLayout>
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
           </div>
         </AdminLayout>
-      </AdminGuard>
+      
     );
   }
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div className="space-y-6">
           <div>
@@ -288,6 +287,6 @@ export default function LegalPagesManagement() {
           </Card>
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

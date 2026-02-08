@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -120,18 +119,18 @@ export default function SMSTemplates() {
 
   if (isLoading) {
     return (
-      <AdminGuard>
+      
         <AdminLayout>
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </AdminLayout>
-      </AdminGuard>
+      
     );
   }
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div className="space-y-6">
           <div>
@@ -375,6 +374,6 @@ export default function SMSTemplates() {
           </div>
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }

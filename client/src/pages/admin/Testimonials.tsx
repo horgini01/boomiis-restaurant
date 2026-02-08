@@ -1,5 +1,4 @@
 import { useState, Fragment } from 'react';
-import AdminGuard from '@/components/AdminGuard';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -260,7 +259,7 @@ export default function TestimonialsManagement() {
   };
 
   return (
-    <AdminGuard>
+    
       <AdminLayout>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -662,6 +661,6 @@ export default function TestimonialsManagement() {
           )}
         </div>
       </AdminLayout>
-    </AdminGuard>
+    
   );
 }
