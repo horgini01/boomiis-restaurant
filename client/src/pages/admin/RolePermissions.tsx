@@ -63,6 +63,7 @@ const routeCategories = {
     "/admin/audit-logs",
     "/admin/settings",
     "/admin/restaurant-settings",
+    "/admin/change-password",
   ],
   "Communications": [
     "/admin/email-delivery",
@@ -99,6 +100,7 @@ const routeLabels: Record<string, string> = {
   "/admin/sms-analytics": "SMS Analytics",
   "/admin/restaurant-settings": "Restaurant Info",
   "/admin/settings": "Settings",
+  "/admin/change-password": "Change Password",
 };
 
 export default function RolePermissions() {

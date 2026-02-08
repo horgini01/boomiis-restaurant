@@ -18,6 +18,11 @@ export async function verifyCredentials(email: string, password: string) {
 
   const user = result[0];
 
+  // Check if user account is active
+  if (user.status !== 'active') {
+    throw new Error('Your account has been deactivated. Please contact an administrator.');
+  }
+
   // For the default admin account without password in DB, check against the default password
   if (email === 'admin@boomiis.uk' && password === 'admin123' && !user.password) {
     return user;

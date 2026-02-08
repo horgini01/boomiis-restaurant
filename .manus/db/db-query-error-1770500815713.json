@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, email, firstName, lastName, role, status FROM users WHERE email = 'damysho2002@yahoo.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, email, firstName, lastName, role, status FROM users WHERE email = 'damysho2002@yahoo.com';",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'firstname' in 'field list'"
+  ]
+}

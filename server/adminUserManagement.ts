@@ -341,6 +341,7 @@ export const adminUserManagementRouter = router({
   deleteAdminUser: ownerProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
+      console.log(`[DELETE USER] Mutation called - User ID: ${input.id}, Caller: ${ctx.user.email} (Role: ${ctx.user.role})`);
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
@@ -353,8 +354,19 @@ export const adminUserManagementRouter = router({
       const [user] = await db.select().from(users).where(eq(users.id, input.id)).limit(1);
       if (!user) throw new Error('User not found');
 
+      console.log(`[User Deletion] Attempting to delete user ID: ${input.id}, Email: ${user.email}`);
+
       // Hard delete - permanently remove from database
-      await db.delete(users).where(eq(users.id, input.id));
+      const deleteResult = await db.delete(users).where(eq(users.id, input.id));
+      console.log(`[User Deletion] Delete result:`, deleteResult);
+
+      // Verify deletion
+      const [verifyUser] = await db.select().from(users).where(eq(users.id, input.id)).limit(1);
+      if (verifyUser) {
+        console.error(`[User Deletion] FAILED - User still exists after deletion attempt`);
+        throw new Error('Failed to delete user from database');
+      }
+      console.log(`[User Deletion] SUCCESS - User ${input.id} deleted successfully`);
 
       // Log audit action
       await logAuditAction({
@@ -405,6 +417,7 @@ export const adminUserManagementRouter = router({
       userIds: z.array(z.number()).min(1, "At least one user must be selected"),
     }))
     .mutation(async ({ input, ctx }) => {
+      console.log(`[BULK DELETE] Mutation called - User IDs: ${input.userIds.join(', ')}, Caller: ${ctx.user.email} (Role: ${ctx.user.role})`);
       const db = await getDb();
       if (!db) throw new Error('Database not available');
 
@@ -413,15 +426,40 @@ export const adminUserManagementRouter = router({
         throw new Error('You cannot delete your own account');
       }
 
-      // Soft delete by setting status to inactive
-      await db
-        .update(users)
-        .set({ status: "inactive" })
-        .where(inArray(users.id, input.userIds));
+      // Get user details before deletion for audit log
+      const usersToDelete = await db.select().from(users).where(inArray(users.id, input.userIds));
+      console.log(`[BULK DELETE] Found ${usersToDelete.length} users to delete`);
+
+      // Hard delete - permanently remove from database
+      const deleteResult = await db.delete(users).where(inArray(users.id, input.userIds));
+      console.log(`[BULK DELETE] Delete result:`, deleteResult);
+
+      // Verify deletion
+      const remainingUsers = await db.select().from(users).where(inArray(users.id, input.userIds));
+      if (remainingUsers.length > 0) {
+        console.error(`[BULK DELETE] FAILED - ${remainingUsers.length} user(s) still exist after deletion attempt`);
+        throw new Error(`Failed to delete ${remainingUsers.length} user(s) from database`);
+      }
+      console.log(`[BULK DELETE] SUCCESS - ${usersToDelete.length} user(s) deleted successfully`);
+
+      // Log audit actions for each deleted user
+      for (const user of usersToDelete) {
+        await logAuditAction({
+          userId: ctx.user.id,
+          userName: ctx.user.name || 'Unknown',
+          userRole: ctx.user.role,
+          action: 'delete',
+          entityType: 'user',
+          entityId: user.id,
+          entityName: `${user.firstName || ''} ${user.lastName || ''} (${user.email})`.trim(),
+          ipAddress: getIpAddress(ctx.req.headers),
+          userAgent: ctx.req.headers['user-agent'] as string,
+        });
+      }
 
       return { 
         success: true, 
-        message: `${input.userIds.length} user(s) deleted successfully` 
+        message: `${usersToDelete.length} user(s) deleted successfully` 
       };
     }),
 });

@@ -1,7 +1,7 @@
 // Role-based access control configuration
 export type Role = "owner" | "admin" | "manager" | "kitchen_staff" | "front_desk";
 
-// All available admin routes (27 total routes)
+// All available admin routes (28 total routes)
 const ALL_ADMIN_ROUTES = [
   "/admin/dashboard",
   "/admin/categories",
@@ -29,6 +29,7 @@ const ALL_ADMIN_ROUTES = [
   "/admin/restaurant-settings",
   "/admin/settings",
   "/admin/role-permissions",
+  "/admin/change-password",
 ];
 
 // Define which routes each role can access
@@ -118,9 +119,9 @@ export const roleLabels: Record<Role, string> = {
 
 // Role descriptions for UI
 export const roleDescriptions: Record<Role, string> = {
-  owner: "Full access to all 27 admin features including user management and critical settings",
-  admin: "Full access to all 27 admin features including user management and critical settings",
-  manager: "Manage daily operations, menu, orders, reservations, and content (21 routes)",
-  kitchen_staff: "View and manage kitchen orders only (3 routes including password change)",
-  front_desk: "Manage customer interactions, reservations, and events (6 routes including password change)",
+  owner: "Full access to all 28 admin features including user management and critical settings",
+  admin: "Full access to all 28 admin features including user management and critical settings",
+  manager: "Manage daily operations, menu, orders, reservations, and content (22 routes)",
+  kitchen_staff: "View and manage kitchen orders only (3 routes: Dashboard, Orders, Change Password)",
+  front_desk: "Manage customer interactions, reservations, and events (6 routes)",
 };

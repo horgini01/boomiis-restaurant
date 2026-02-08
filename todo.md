@@ -2006,3 +2006,19 @@
 - [x] Update AdminLogin.tsx to allow all authenticated users to proceed to dashboard
 - [x] RoleGuard component handles route-level access control based on rolePermissions.ts
 - [x] Write 5 passing tests confirming Kitchen Staff permissions (dashboard, orders, change-password access)
+
+### Bug Fixes (User Reported - Feb 7 Part 8)
+- [x] Fix user deletion not working (shows success message but user not deleted from database)
+- [x] Added comprehensive logging and verification to deleteAdminUser mutation
+- [x] Add change password link to admin sidebar navigation
+- [x] Added /admin/change-password to ALL_ADMIN_ROUTES so all roles can access it
+- [x] Update role permissions matrix to reflect all current admin routes
+- [x] Added change-password route to RolePermissions.tsx matrix display
+- [x] Updated role descriptions to show correct route counts (28 total routes)
+
+### Bug Fixes (User Reported - Feb 8 Part 1)
+- [x] Fix infinite redirect loop when inactive kitchen staff user tries to access /admin/dashboard
+- [x] Investigate AdminGuard and RoleGuard redirect logic causing "Maximum update depth exceeded" error
+- [x] Prevent inactive users from logging in or show appropriate error message
+- [x] Added status check in verifyCredentials to block inactive users from authenticating
+- [x] Inactive users now see clear error: "Your account has been deactivated. Please contact an administrator."

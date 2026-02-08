@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, email, first_name, last_name, role, status FROM users WHERE email = 'damysho2002@yahoo.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, email, first_name, last_name, role, status FROM users WHERE email = 'damysho2002@yahoo.com';",
+  "rows": [
+    {
+      "id": "1890617",
+      "email": "damysho2002@yahoo.com",
+      "first_name": "Damilola ",
+      "last_name": "Sobowole-Oginni",
+      "role": "admin",
+      "status": "inactive"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tfirst_name\tlast_name\trole\tstatus\n1890617\tdamysho2002@yahoo.com\tDamilola \tSobowole-Oginni\tadmin\tinactive\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}
