@@ -2090,3 +2090,8 @@
 - [x] Added Eye/EyeOff icons from lucide-react
 - [x] Added showPassword state and toggle button
 - [x] Password field type switches between "text" and "password"
+
+### Bug Fixes (User Reported - Feb 8 Part 11)
+- [x] Fix forgot password blocking users with loginMethod "email"
+- [x] Remove incorrect "Password reset is only available for accounts using password authentication" error
+- [x] Allow ALL users with passwords to reset their passwords regardless of loginMethod

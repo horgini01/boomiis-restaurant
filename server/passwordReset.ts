@@ -42,13 +42,7 @@ export const passwordResetRouter = router({
 
       const foundUser = user[0];
 
-      // Only allow password reset for password-based accounts
-      if (foundUser.loginMethod !== "password") {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Password reset is only available for accounts using password authentication.",
-        });
-      }
+      // All users with passwords can reset them (loginMethod doesn't matter)
 
       // Generate secure random token
       const token = crypto.randomBytes(32).toString("hex");
@@ -207,13 +201,7 @@ export const passwordResetRouter = router({
         });
       }
 
-      // Only allow for password-based accounts
-      if (ctx.user.loginMethod !== "password") {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Password change is only available for accounts using password authentication.",
-        });
-      }
+      // All users with passwords can change them (loginMethod doesn't matter)
 
       // Verify current password
       const user = await db.select().from(users).where(eq(users.id, ctx.user.id)).limit(1);
