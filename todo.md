@@ -2111,3 +2111,6 @@
 - [x] Add email warm-up strategy for new domain (documented)
 - [x] Create email deliverability monitoring system (spam score checking)
 - [x] Document email best practices for future campaigns
+
+### UI Cleanup (User Requested - Feb 8)
+- [x] Remove redundant Email Preview tab from Restaurant Information settings page
