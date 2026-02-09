@@ -115,7 +115,7 @@ export default function Checkout() {
 
   const subscribeNewsletterMutation = trpc.newsletter.subscribe.useMutation();
 
-  const createOrderMutation = trpc.orders.create.useMutation({
+  const createCheckoutMutation = trpc.payment.createCheckoutSession.useMutation({
     onSuccess: async (data: any) => {
       // Subscribe to newsletter if checkbox was checked
       if (subscribeToNewsletter) {
@@ -131,29 +131,16 @@ export default function Checkout() {
         }
       }
 
-      // Create Stripe checkout session
-      try {
-        const checkoutSession = await createCheckoutMutation.mutateAsync({
-          orderId: data.orderId,
-          customerEmail: formData.customerEmail,
-          customerName: formData.customerName,
-        });
-
-        if (checkoutSession.url) {
-          // Redirect to Stripe checkout
-          toast.success('Redirecting to payment...');
-          window.location.href = checkoutSession.url;
-        }
-      } catch (error: any) {
-        toast.error('Failed to create payment session');
+      if (data.url) {
+        // Redirect to Stripe checkout
+        toast.success('Redirecting to payment...');
+        window.location.href = data.url;
       }
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to place order');
+      toast.error(error.message || 'Failed to create payment session');
     },
   });
-
-  const createCheckoutMutation = trpc.payment.createCheckoutSession.useMutation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,16 +161,21 @@ export default function Checkout() {
       ? deliveryWindow?.earliestTime || ''
       : formData.preferredTime;
 
-    createOrderMutation.mutate({
+    // Get menu item names from cart items
+    const itemsWithNames = items.map(item => ({
+      menuItemId: item.id,
+      menuItemName: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
+    // Create Stripe checkout session directly (order will be created after payment)
+    createCheckoutMutation.mutate({
       ...formData,
       preferredTime: finalPreferredTime,
       orderType,
       smsOptIn, // Customer's SMS notification preference
-      items: items.map(item => ({
-        menuItemId: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
+      items: itemsWithNames,
     });
   };
 
@@ -195,7 +187,7 @@ export default function Checkout() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Full-page loading overlay */}
-      {(createOrderMutation.isPending || createCheckoutMutation.isPending) && (
+      {createCheckoutMutation.isPending && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-card p-8 rounded-lg shadow-lg flex flex-col items-center space-y-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -479,9 +471,9 @@ export default function Checkout() {
                       type="submit"
                       size="lg"
                       className="w-full"
-                      disabled={createOrderMutation.isPending}
+                       disabled={createCheckoutMutation.isPending}
                     >
-                      {createOrderMutation.isPending ? (
+                       {createCheckoutMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Processing...

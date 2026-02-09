@@ -41,146 +41,179 @@ export async function handleStripeWebhook(req: Request, res: Response) {
       case 'checkout.session.completed': {
         console.log('[Webhook] checkout.session.completed event received');
         const session = event.data.object;
-        const orderId = parseInt(session.metadata?.orderId || '0');
-        console.log(`[Webhook] Processing order ID: ${orderId}, payment status: ${session.payment_status}`);
+        const paymentIntentId = session.payment_intent as string;
+        
+        console.log(`[Webhook] Payment intent ID: ${paymentIntentId}, payment status: ${session.payment_status}`);
 
-        if (orderId && session.payment_status === 'paid') {
+        if (session.payment_status === 'paid' && paymentIntentId) {
           const db = await getDb();
-          if (db) {
-            await db.update(orders)
-              .set({ 
-                paymentStatus: 'paid',
-                status: 'confirmed',
-                paymentIntentId: session.payment_intent as string,
-              })
-              .where(eq(orders.id, orderId));
+          if (!db) {
+            console.error('[Webhook] Database not available');
+            return res.status(500).send('Database not available');
+          }
 
-            console.log(`[Webhook] Order ${orderId} marked as paid`);
+          // IDEMPOTENCY CHECK: Check if order already exists for this payment intent
+          const existingOrder = await db.select().from(orders).where(eq(orders.paymentIntentId, paymentIntentId)).limit(1);
+          
+          if (existingOrder.length > 0) {
+            console.log(`[Webhook] Order already exists for payment intent ${paymentIntentId}, skipping duplicate creation`);
+            return res.json({ received: true, message: 'Order already processed' });
+          }
 
-            // Send email notifications
+          // Extract order data from session metadata
+          const metadata = session.metadata;
+          if (!metadata || !metadata.customerName || !metadata.items) {
+            console.error('[Webhook] Missing required metadata in session');
+            return res.status(400).send('Missing order data in session metadata');
+          }
+
+          // Parse items from JSON string
+          let orderItemsData;
+          try {
+            orderItemsData = JSON.parse(metadata.items);
+          } catch (err) {
+            console.error('[Webhook] Failed to parse items from metadata:', err);
+            return res.status(400).send('Invalid items data in metadata');
+          }
+
+          // Generate order number
+          const orderNumber = `BO-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+          // Convert preferred time to timestamp if provided
+          let scheduledFor = null;
+          if (metadata.preferredTime) {
             try {
-              // Fetch order details
-              const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
-
-              if (order) {
-                // Fetch order items with menu item details
-                const items = await db
-                  .select({
-                    quantity: orderItems.quantity,
-                    price: orderItems.price,
-                    name: menuItems.name,
-                  })
-                  .from(orderItems)
-                  .leftJoin(menuItems, eq(orderItems.menuItemId, menuItems.id))
-                  .where(eq(orderItems.orderId, orderId));
-
-                const emailData = {
-                  orderNumber: order.orderNumber,
-                  customerName: order.customerName,
-                  customerEmail: order.customerEmail,
-                  customerPhone: order.customerPhone,
-                  orderType: order.orderType,
-                  scheduledFor: order.scheduledFor || undefined,
-                  items: items.map((item: any) => ({
-                    name: item.name || 'Unknown Item',
-                    quantity: item.quantity,
-                    price: parseFloat(item.price),
-                  })),
-                  subtotal: parseFloat(order.subtotal),
-                  deliveryFee: parseFloat(order.deliveryFee),
-                  total: parseFloat(order.total),
-                  deliveryAddress: order.deliveryAddress || undefined,
-                  deliveryPostcode: order.deliveryPostcode || undefined,
-                  specialInstructions: order.specialInstructions || undefined,
-                  paymentIntentId: session.payment_intent as string,
-                };
-
-                // Send customer confirmation email
-                await sendOrderConfirmationEmail(emailData);
-
-                // Send admin notification email
-                await sendAdminOrderNotification(emailData);
-                
-                // Send admin SMS notification
-                try {
-                  const { sendAdminNewOrderSMS } = await import('../services/sms.service');
-                  // Get admin phone from environment or settings
-                  const adminPhone = process.env.ADMIN_PHONE;
-                  if (adminPhone) {
-                    await sendAdminNewOrderSMS(
-                      adminPhone,
-                      order.orderNumber,
-                      emailData.total,
-                      order.orderType
-                    );
-                  }
-                } catch (adminSmsError: any) {
-                  console.error('[Webhook] Failed to send admin SMS notification:', adminSmsError.message);
-                }
-              }
-            } catch (emailError: any) {
-              console.error('[Webhook] Failed to send email notifications:', emailError.message);
-              // Don't fail the webhook if email fails
-            }
-
-            // Send SMS notification to customer (separate try-catch)
-            console.log('[Webhook] About to send SMS notification');
-            try {
-              const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
-              if (order && order.customerPhone) {
-                console.log(`[Webhook] Sending SMS to ${order.customerPhone}`);
-                const { sendOrderStatusSMS } = await import('../services/sms.service');
-                await sendOrderStatusSMS(
-                  order.customerName,
-                  order.customerPhone,
-                  order.orderNumber,
-                  'order_confirmed',
-                  30, // estimated minutes
-                  order.smsOptIn ?? true // Customer's SMS preference (default true for existing orders)
-                );
-              } else {
-                console.log('[Webhook] No customer phone number, skipping SMS');
-              }
-            } catch (smsError: any) {
-              console.error('[Webhook] Failed to send SMS notification:', smsError.message);
-              // Don't fail the webhook if SMS fails
+              const [hours, minutes] = metadata.preferredTime.split(':').map(Number);
+              const now = new Date();
+              const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+              const ukYear = ukTime.getFullYear();
+              const ukMonth = ukTime.getMonth();
+              const ukDate = ukTime.getDate();
+              scheduledFor = new Date(ukYear, ukMonth, ukDate, hours, minutes, 0, 0);
+            } catch (err) {
+              console.error('[Webhook] Failed to parse preferredTime:', err);
             }
           }
-        }
-        break;
-      }
 
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object;
-        const orderId = parseInt(paymentIntent.metadata?.orderId || '0');
+          // Create order in database
+          const [result] = await db.insert(orders).values({
+            orderNumber,
+            customerName: metadata.customerName,
+            customerEmail: metadata.customerEmail,
+            customerPhone: metadata.customerPhone,
+            orderType: metadata.orderType as 'delivery' | 'pickup',
+            deliveryAddress: metadata.deliveryAddress || null,
+            deliveryPostcode: metadata.deliveryPostcode || null,
+            scheduledFor,
+            subtotal: metadata.subtotal,
+            deliveryFee: metadata.deliveryFee,
+            total: metadata.total,
+            status: 'confirmed', // Order is confirmed immediately after payment
+            paymentStatus: 'paid',
+            paymentIntentId,
+            specialInstructions: metadata.specialInstructions || null,
+            smsOptIn: metadata.smsOptIn === 'true',
+          });
 
-        if (orderId) {
-          const db = await getDb();
-          if (db) {
-            await db.update(orders)
-              .set({ paymentStatus: 'paid', status: 'confirmed' })
-              .where(eq(orders.id, orderId));
+          const orderId = result.insertId;
+          console.log(`[Webhook] Created order ${orderNumber} (ID: ${orderId})`);
 
-            console.log(`[Webhook] Payment succeeded for order ${orderId}`);
+          // Insert order items
+          for (const item of orderItemsData) {
+            await db.insert(orderItems).values({
+              orderId,
+              menuItemId: item.menuItemId,
+              menuItemName: item.menuItemName,
+              quantity: item.quantity,
+              price: item.price.toString(),
+              subtotal: (item.price * item.quantity).toString(),
+            });
           }
+
+          console.log(`[Webhook] Inserted ${orderItemsData.length} order items`);
+
+          // Prepare email data
+          const emailData = {
+            orderNumber,
+            customerName: metadata.customerName,
+            customerEmail: metadata.customerEmail,
+            customerPhone: metadata.customerPhone,
+            orderType: metadata.orderType as 'delivery' | 'pickup',
+            scheduledFor: scheduledFor || undefined,
+            items: orderItemsData.map((item: any) => ({
+              name: item.menuItemName,
+              quantity: item.quantity,
+              price: parseFloat(item.price),
+            })),
+            subtotal: parseFloat(metadata.subtotal),
+            deliveryFee: parseFloat(metadata.deliveryFee),
+            total: parseFloat(metadata.total),
+            deliveryAddress: metadata.deliveryAddress || undefined,
+            deliveryPostcode: metadata.deliveryPostcode || undefined,
+            specialInstructions: metadata.specialInstructions || undefined,
+            paymentIntentId,
+          };
+
+          // Send customer confirmation email
+          try {
+            await sendOrderConfirmationEmail(emailData);
+            console.log(`[Webhook] Sent customer confirmation email to ${metadata.customerEmail}`);
+          } catch (emailError: any) {
+            console.error('[Webhook] Failed to send customer email:', emailError.message);
+          }
+
+          // Send admin notification email
+          try {
+            await sendAdminOrderNotification(emailData);
+            console.log(`[Webhook] Sent admin notification email`);
+          } catch (emailError: any) {
+            console.error('[Webhook] Failed to send admin email:', emailError.message);
+          }
+
+          // Send admin SMS notification
+          try {
+            const { sendAdminNewOrderSMS } = await import('../services/sms.service');
+            const adminPhone = process.env.ADMIN_PHONE;
+            if (adminPhone) {
+              await sendAdminNewOrderSMS(
+                adminPhone,
+                orderNumber,
+                parseFloat(metadata.total),
+                metadata.orderType as 'delivery' | 'pickup'
+              );
+              console.log(`[Webhook] Sent admin SMS notification`);
+            }
+          } catch (smsError: any) {
+            console.error('[Webhook] Failed to send admin SMS:', smsError.message);
+          }
+
+          // Send customer SMS notification
+          try {
+            if (metadata.smsOptIn === 'true' && metadata.customerPhone) {
+              const { sendOrderStatusSMS } = await import('../services/sms.service');
+              await sendOrderStatusSMS(
+                metadata.customerName,
+                metadata.customerPhone,
+                orderNumber,
+                'order_confirmed',
+                30, // estimated minutes
+                true
+              );
+              console.log(`[Webhook] Sent customer SMS notification to ${metadata.customerPhone}`);
+            }
+          } catch (smsError: any) {
+            console.error('[Webhook] Failed to send customer SMS:', smsError.message);
+          }
+
+          console.log(`[Webhook] Successfully processed order ${orderNumber}`);
         }
         break;
       }
 
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object;
-        const orderId = parseInt(paymentIntent.metadata?.orderId || '0');
-
-        if (orderId) {
-          const db = await getDb();
-          if (db) {
-            await db.update(orders)
-              .set({ paymentStatus: 'failed' })
-              .where(eq(orders.id, orderId));
-
-            console.log(`[Webhook] Payment failed for order ${orderId}`);
-          }
-        }
+        console.log(`[Webhook] Payment failed for payment intent ${paymentIntent.id}`);
+        // No order to update since we don't create orders until payment succeeds
         break;
       }
 

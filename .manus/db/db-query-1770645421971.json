@@ -1,0 +1,13 @@
+{
+  "query": "-- First, check how many orphaned pending orders exist\nSELECT COUNT(*) as orphaned_count \nFROM orders \nWHERE payment_status = 'pending' \nAND payment_intent_id IS NULL \nAND created_at < '2026-02-09 13:00:00';\n\n-- Delete orphaned pending orders (those without payment intent and created before the fix)\nDELETE FROM orders \nWHERE payment_status = 'pending' \nAND payment_intent_id IS NULL \nAND created_at < '2026-02-09 13:00:00';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute -- First, check how many orphaned pending orders exist\nSELECT COUNT(*) as orphaned_count \nFROM orders \nWHERE payment_status = 'pending' \nAND payment_intent_id IS NULL \nAND created_at < '2026-02-09 13:00:00';\n\n-- Delete orphaned pending orders (those without payment intent and created before the fix)\nDELETE FROM orders \nWHERE payment_status = 'pending' \nAND payment_intent_id IS NULL \nAND created_at < '2026-02-09 13:00:00';",
+  "rows": [
+    {
+      "orphaned_count": "93"
+    }
+  ],
+  "messages": [],
+  "stdout": "orphaned_count\n93\n",
+  "stderr": "",
+  "execution_time_ms": 427
+}

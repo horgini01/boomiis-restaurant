@@ -2457,84 +2457,91 @@ export const appRouter = router({
   payment: router({
     createCheckoutSession: publicProcedure
       .input(z.object({
-        orderId: z.number(),
-        customerEmail: z.string().email(),
         customerName: z.string(),
+        customerEmail: z.string().email(),
+        customerPhone: z.string(),
+        orderType: z.enum(['delivery', 'pickup']),
+        deliveryAddress: z.string().optional(),
+        deliveryPostcode: z.string().optional(),
+        specialInstructions: z.string().optional(),
+        preferredTime: z.string().optional(),
+        smsOptIn: z.boolean().optional().default(true),
+        items: z.array(z.object({
+          menuItemId: z.number(),
+          menuItemName: z.string(),
+          quantity: z.number(),
+          price: z.number(),
+        })),
       }))
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        // Get order details
-        const [order] = await db.select().from(orders).where(eq(orders.id, input.orderId));
-        if (!order) {
-          throw new Error('Order not found');
-        }
+        // Calculate totals
+        const subtotal = input.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const deliveryFee = input.orderType === 'delivery' ? 3.99 : 0;
+        const total = subtotal + deliveryFee;
 
-        // Get order items
-        const items = await db.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, input.orderId));
-
-        // Create Stripe checkout session
-        const origin = ctx.req.headers.origin || 'http://localhost:3000';
-        const session = await stripe.checkout.sessions.create({
-          payment_method_types: ['card'],
-          line_items: items.map(item => ({
+        // Build line items for Stripe
+        const lineItems = [
+          ...input.items.map(item => ({
             price_data: {
               currency: 'gbp',
               product_data: {
                 name: item.menuItemName,
               },
-              unit_amount: Math.round(parseFloat(item.price) * 100), // Convert to pence
+              unit_amount: Math.round(item.price * 100), // Convert to pence
             },
             quantity: item.quantity,
           })),
-          // Add delivery fee if applicable
-          ...(parseFloat(order.deliveryFee) > 0 ? {
-            line_items: [
-              ...items.map(item => ({
-                price_data: {
-                  currency: 'gbp',
-                  product_data: {
-                    name: item.menuItemName,
-                  },
-                  unit_amount: Math.round(parseFloat(item.price) * 100),
-                },
-                quantity: item.quantity,
-              })),
-              {
-                price_data: {
-                  currency: 'gbp',
-                  product_data: {
-                    name: 'Delivery Fee',
-                  },
-                  unit_amount: Math.round(parseFloat(order.deliveryFee) * 100),
-                },
-                quantity: 1,
+        ];
+
+        // Add delivery fee if applicable
+        if (deliveryFee > 0) {
+          lineItems.push({
+            price_data: {
+              currency: 'gbp',
+              product_data: {
+                name: 'Delivery Fee',
               },
-            ],
-          } : {}),
+              unit_amount: Math.round(deliveryFee * 100),
+            },
+            quantity: 1,
+          });
+        }
+
+        // Store all order data in Stripe metadata (will be used by webhook to create order)
+        const orderData = {
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          customerPhone: input.customerPhone,
+          orderType: input.orderType,
+          deliveryAddress: input.deliveryAddress || '',
+          deliveryPostcode: input.deliveryPostcode || '',
+          specialInstructions: input.specialInstructions || '',
+          preferredTime: input.preferredTime || '',
+          smsOptIn: input.smsOptIn ? 'true' : 'false',
+          subtotal: subtotal.toFixed(2),
+          deliveryFee: deliveryFee.toFixed(2),
+          total: total.toFixed(2),
+          items: JSON.stringify(input.items), // Store items as JSON string
+        };
+
+        // Create Stripe checkout session
+        const origin = ctx.req.headers.origin || 'http://localhost:3000';
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: lineItems,
           mode: 'payment',
           success_url: `${origin}/order-success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${origin}/checkout?cancelled=true`,
           customer_email: input.customerEmail,
-          client_reference_id: input.orderId.toString(),
-          metadata: {
-            orderId: input.orderId.toString(),
-            customerEmail: input.customerEmail,
-            customerName: input.customerName,
-          },
+          metadata: orderData,
           allow_promotion_codes: true,
           payment_intent_data: {
-            metadata: {
-              orderId: input.orderId.toString(),
-            },
+            metadata: orderData,
           },
         });
-
-        // Update order with payment intent ID
-        await db.update(orders)
-          .set({ paymentIntentId: session.payment_intent as string })
-          .where(eq(orders.id, input.orderId));
 
         return {
           sessionId: session.id,
@@ -2555,111 +2562,36 @@ export const appRouter = router({
           const db = await getDb();
           if (!db) throw new Error('Database not available');
 
-          const orderId = parseInt(session.client_reference_id || '0');
-          if (orderId) {
-            // Get payment intent ID
-            const paymentIntentId = typeof session.payment_intent === 'string' 
-              ? session.payment_intent 
-              : session.payment_intent?.id;
+          // Get payment intent ID
+          const paymentIntentId = typeof session.payment_intent === 'string' 
+            ? session.payment_intent 
+            : session.payment_intent?.id;
 
-            // Update order with payment info
-            await db.update(orders)
-              .set({ 
-                paymentStatus: 'paid', 
-                status: 'confirmed',
-                paymentIntentId: paymentIntentId || null,
-              })
-              .where(eq(orders.id, orderId));
-
-            // Fetch complete order details for email
-            const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
-            const items = await db.select({
-              name: orderItemsTable.menuItemName,
-              quantity: orderItemsTable.quantity,
-              price: orderItemsTable.price,
-              subtotal: orderItemsTable.subtotal,
-            }).from(orderItemsTable).where(eq(orderItemsTable.orderId, orderId));
-
+          if (paymentIntentId) {
+            // Find order by payment intent ID (order was created by webhook)
+            const [order] = await db.select().from(orders).where(eq(orders.paymentIntentId, paymentIntentId)).limit(1);
+            
             if (order) {
-              // Send confirmation emails
-              const { sendOrderConfirmationEmail, sendAdminOrderNotification } = await import('./email');
-              
-              try {
-                await sendOrderConfirmationEmail({
-                  customerEmail: order.customerEmail,
-                  customerName: order.customerName,
-                  customerPhone: order.customerPhone,
-                  orderNumber: order.orderNumber,
-                  orderType: order.orderType,
-                  scheduledFor: order.scheduledFor || undefined,
-                  items: items.map(item => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: parseFloat(item.price),
-                  })),
-                  subtotal: parseFloat(order.subtotal),
-                  deliveryFee: parseFloat(order.deliveryFee),
-                  total: parseFloat(order.total),
-                  deliveryAddress: order.deliveryAddress || undefined,
-                  deliveryPostcode: order.deliveryPostcode || undefined,
-                  specialInstructions: order.specialInstructions || undefined,
-                });
-                console.log('[Payment] Order confirmation email sent');
-              } catch (error) {
-                console.error('[Payment] Failed to send order confirmation:', error);
-              }
-
-              try {
-                await sendAdminOrderNotification({
-                  orderNumber: order.orderNumber,
-                  customerName: order.customerName,
-                  customerEmail: order.customerEmail,
-                  customerPhone: order.customerPhone,
-                  orderType: order.orderType,
-                  subtotal: parseFloat(order.subtotal),
-                  deliveryFee: parseFloat(order.deliveryFee),
-                  total: parseFloat(order.total),
-                  items: items.map(item => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: parseFloat(item.price),
-                  })),
-                  deliveryAddress: order.deliveryAddress || undefined,
-                  deliveryPostcode: order.deliveryPostcode || undefined,
-                  specialInstructions: order.specialInstructions || undefined,
-                });
-                console.log('[Payment] Admin notification email sent');
-              } catch (error) {
-                console.error('[Payment] Failed to send admin notification:', error);
-              }
-
-              // Send SMS notification to customer
-              try {
-                if (order.customerPhone) {
-                  const { sendOrderStatusSMS } = await import('./services/sms.service');
-                  console.log(`[Payment] Sending SMS to ${order.customerPhone}`);
-                  await sendOrderStatusSMS(
-                    order.customerName,
-                    order.customerPhone,
-                    order.orderNumber,
-                    'order_confirmed',
-                    30, // estimated minutes
-                    order.smsOptIn ?? true // Customer's SMS preference (default true for existing orders)
-                  );
-                  console.log('[Payment] SMS notification sent');
-                } else {
-                  console.log('[Payment] No customer phone, skipping SMS');
-                }
-              } catch (error) {
-                console.error('[Payment] Failed to send SMS notification:', error);
-              }
+              return {
+                paymentStatus: 'paid',
+                orderNumber: order.orderNumber,
+                orderId: order.id,
+              };
             }
           }
+
+          // If order not found yet (webhook might be delayed), return payment status only
+          return {
+            paymentStatus: 'paid',
+            orderNumber: null,
+            orderId: null,
+          };
         }
 
         return {
           paymentStatus: session.payment_status,
-          customerEmail: session.customer_email,
+          orderNumber: null,
+          orderId: null,
         };
       }),
   }),

@@ -9,13 +9,12 @@ import { trpc } from '@/lib/trpc';
 import { useCart } from '@/contexts/CartContext';
 
 export default function OrderSuccess() {
-  const params = useParams();
-  const orderNumber = params.orderNumber;
   const searchString = useSearch();
   const [, setLocation] = useLocation();
   const { clearCart } = useCart();
   const [isVerifying, setIsVerifying] = useState(true);
   const [paymentVerified, setPaymentVerified] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
 
   // Extract session_id from URL query params
   const sessionId = new URLSearchParams(searchString).get('session_id');
@@ -25,6 +24,8 @@ export default function OrderSuccess() {
     { 
       enabled: !!sessionId,
       retry: false,
+      // Poll every 2 seconds until order is created
+      refetchInterval: orderNumber ? false : 2000,
     }
   );
 
@@ -32,6 +33,9 @@ export default function OrderSuccess() {
     if (sessionId && verifyPaymentQuery.data) {
       if (verifyPaymentQuery.data.paymentStatus === 'paid') {
         setPaymentVerified(true);
+        if (verifyPaymentQuery.data.orderNumber) {
+          setOrderNumber(verifyPaymentQuery.data.orderNumber);
+        }
         clearCart();
         console.log('[OrderSuccess] Cart cleared after successful payment');
       }

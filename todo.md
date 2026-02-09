@@ -2153,3 +2153,15 @@
 - [x] Ensure no test keys are hardcoded anywhere in the codebase
 - [x] User updated live keys in Management UI (for production deployment)
 - [x] Ready to test live payments on published site
+
+### Critical Bug - Order Flow Refactoring (User Reported - Feb 9)
+- [x] Remove order creation from checkout flow (orders.create procedure)
+- [x] Refactor createCheckoutSession to pass cart data in Stripe metadata
+- [x] Refactor Stripe webhook to create order from session metadata after payment
+- [x] Add idempotency check using Stripe payment intent ID to prevent duplicates
+- [x] Move email notifications to webhook (only after successful payment)
+- [x] Move SMS notifications to webhook (only after successful payment)
+- [x] Update frontend checkout to work without pre-creating order
+- [x] Update order success page to fetch order by payment intent ID
+- [ ] Test complete flow: checkout → payment → order creation → notifications
+- [x] Clean up orphaned pending orders from old flow (1 order deleted)
