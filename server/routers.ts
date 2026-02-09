@@ -1740,10 +1740,12 @@ export const appRouter = router({
           timestamp: new Date().toISOString(),
         });
 
-        // Update order status and timeline
+        // Update order status, timeline, and track who made the change
         await db.update(orders).set({ 
           status: input.status as any,
           timeline: JSON.stringify(timeline),
+          lastUpdatedBy: ctx.user.id,
+          lastUpdatedByName: ctx.user.name || 'Unknown Admin',
         }).where(eq(orders.id, input.orderId));
 
         // Log audit action

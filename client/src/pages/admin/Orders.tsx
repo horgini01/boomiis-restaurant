@@ -203,6 +203,7 @@ export default function OrdersManagement() {
       'Delivery Address',
       'Postcode',
       'Special Instructions',
+      'Last Updated By',
     ];
 
     const csvRows = filteredAndSortedOrders.map(order => [
@@ -219,6 +220,7 @@ export default function OrdersManagement() {
       order.deliveryAddress || '',
       order.deliveryPostcode || '',
       order.specialInstructions || '',
+      order.lastUpdatedByName || '',
     ]);
 
     const csvContent = [
@@ -226,7 +228,9 @@ export default function OrdersManagement() {
       ...csvRows.map(row => row.map(cell => `"${cell}"`).join(',')),
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Add UTF-8 BOM to fix currency symbol encoding (£ instead of Â£)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -522,6 +526,7 @@ export default function OrdersManagement() {
                           <TableHead>Payment</TableHead>
                           <TableHead>Stripe ID</TableHead>
                           <TableHead>Date</TableHead>
+                          <TableHead>Last Updated By</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -609,6 +614,9 @@ export default function OrdersManagement() {
                             </TableCell>
                             <TableCell className="text-muted-foreground">
                               {format(new Date(order.createdAt), 'MMM dd, yyyy h:mm a')}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {order.lastUpdatedByName || '-'}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-2">

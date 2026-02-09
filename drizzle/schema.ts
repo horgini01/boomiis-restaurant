@@ -94,6 +94,8 @@ export const orders = mysqlTable("orders", {
   reviewRequestSent: boolean("review_request_sent").default(false).notNull(), // Track if review request email was sent
   reviewRequestSentAt: timestamp("review_request_sent_at"), // When the review request was sent
   timeline: text("timeline"), // JSON array of {status, timestamp} objects tracking status changes
+  lastUpdatedBy: int("last_updated_by"), // User ID of admin who last updated the order status
+  lastUpdatedByName: varchar("last_updated_by_name", { length: 200 }), // Name of admin who last updated the order status
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

@@ -2204,3 +2204,16 @@
 - [x] Verify all contact fields (address, phone, email) are dynamic
 - [x] Test order receipt generation with real restaurant data
 - [x] Test email sending to verify footer shows correct contact info
+
+### Fix Currency Encoding in Order Export (User Reported - Feb 9)
+- [x] Find where order export generates CSV with currency symbols
+- [x] Fix character encoding to show £ instead of Â£ (added UTF-8 BOM)
+- [x] Test export to verify correct currency symbol display
+
+### Add Order Audit Trail - Last Updated By User (User Requested - Feb 9)
+- [x] Add lastUpdatedBy field to orders table schema
+- [x] Add lastUpdatedByName field to orders table schema (for display)
+- [x] Update order status change mutations to record admin user who made the change
+- [x] Display "Last Updated By" column in admin orders list
+- [x] Include "Last Updated By" in order export CSV
+- [x] Test with multiple admin users to verify tracking works correctly
