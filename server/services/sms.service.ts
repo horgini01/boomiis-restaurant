@@ -512,9 +512,10 @@ export async function sendAdminNewOrderSMS(
   let message: string;
   if (template && template.isActive) {
     // Use custom template with variable replacement
+    // Match variable names to template placeholders: {{total}}, {{orderNumber}}, {{orderType}}
     message = replaceTemplateVariables(template.message, {
       orderNumber,
-      orderTotal: orderTotal.toFixed(2),
+      total: orderTotal.toFixed(2),
       orderType,
     });
   } else {

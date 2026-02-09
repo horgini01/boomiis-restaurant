@@ -2170,3 +2170,9 @@
 - [x] Update webhook to fetch admin phone from restaurant settings table
 - [x] Remove dependency on ADMIN_PHONE environment variable
 - [ ] Test admin SMS notification with live order
+
+### Admin SMS Template Fix (User Reported - Feb 9)
+- [x] Fix restaurant name placeholder showing as "??" (removed undefined placeholder)
+- [x] Fix total amount placeholder showing as "{{total}}" (changed orderTotal to total in code)
+- [x] Ensure all SMS variables are properly replaced with actual values
+- [ ] Test admin SMS notification formatting on live site

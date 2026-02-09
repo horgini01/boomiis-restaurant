@@ -1,0 +1,19 @@
+{
+  "query": "SELECT * FROM sms_templates WHERE template_type = 'admin_new_order';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM sms_templates WHERE template_type = 'admin_new_order';",
+  "rows": [
+    {
+      "id": "30001",
+      "template_type": "admin_new_order",
+      "template_name": "Admin: New Order Alert",
+      "message": "🔔 New Order #{{orderNumber}}! Total: £{{total}} | Type: {{orderType}}. Check admin panel for details.",
+      "is_active": "1",
+      "created_at": "2026-02-07 13:06:14",
+      "updated_at": "2026-02-07 13:06:14"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttemplate_type\ttemplate_name\tmessage\tis_active\tcreated_at\tupdated_at\n30001\tadmin_new_order\tAdmin: New Order Alert\t🔔 New Order #{{orderNumber}}! Total: £{{total}} | Type: {{orderType}}. Check admin panel for details.\t1\t2026-02-07 13:06:14\t2026-02-07 13:06:14\n",
+  "stderr": "",
+  "execution_time_ms": 404
+}
