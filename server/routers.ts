@@ -1852,7 +1852,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    getSettings: protectedProcedure
+    getSettings: publicProcedure
       .query(async ({ ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 

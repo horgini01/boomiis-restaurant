@@ -2140,3 +2140,8 @@
 - [x] Create CookiePolicy.tsx frontend page
 - [x] Add cookie consent banner to homepage
 - [x] Update LegalPagesManagement to include Cookie Policy editor
+
+### Checkout Authentication Fix (User Reported - Feb 9)
+- [x] Fix "Please login (10001)" error on checkout page
+- [x] Allow guest checkout without requiring authentication
+- [x] Ensure checkout works for non-logged-in customers
