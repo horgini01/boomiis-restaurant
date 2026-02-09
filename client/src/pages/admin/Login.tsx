@@ -132,19 +132,7 @@ export default function AdminLogin() {
             </Button>
           </form>
           
-          <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-            <p className="text-xs text-muted-foreground text-center font-medium mb-2">
-              Default Admin Credentials
-            </p>
-            <p className="text-xs text-muted-foreground text-center">
-              Email: <span className="font-mono">admin@boomiis.uk</span>
-            </p>
-            <p className="text-xs text-muted-foreground text-center">
-              Password: <span className="font-mono">admin123</span>
-            </p>
-          </div>
-          
-          <p className="text-xs text-muted-foreground text-center mt-4">
+          <p className="text-xs text-muted-foreground text-center mt-6">
             Only authorized administrators can access this area
           </p>
         </CardContent>

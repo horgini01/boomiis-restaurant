@@ -2190,3 +2190,8 @@
 - [x] Update sendTestSMS mutation to handle all new template types
 - [x] Update generatePreview function to include all new variables
 - [x] Test all SMS templates to ensure placeholders are replaced correctly
+
+### Remove Default Admin Credentials from Login Page (SECURITY - User Requested - Feb 9)
+- [x] Find admin login page component
+- [x] Remove "Default Admin Credentials" section showing email and password
+- [x] Verify login page no longer displays sensitive credentials
