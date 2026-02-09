@@ -2195,3 +2195,12 @@
 - [x] Find admin login page component
 - [x] Remove "Default Admin Credentials" section showing email and password
 - [x] Verify login page no longer displays sensitive credentials
+
+### Fix Hardcoded Restaurant Contact Information (User Reported - Feb 9)
+- [x] Find order receipt generation code with hardcoded address and phone
+- [x] Find email footer template with hardcoded contact details
+- [x] Update order receipt to fetch restaurant settings from database
+- [x] Update email footer to fetch restaurant settings from database
+- [x] Verify all contact fields (address, phone, email) are dynamic
+- [x] Test order receipt generation with real restaurant data
+- [x] Test email sending to verify footer shows correct contact info

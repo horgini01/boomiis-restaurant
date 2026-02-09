@@ -39,6 +39,7 @@ export default function OrdersManagement() {
   const { data: orders, isLoading } = trpc.admin.getOrders.useQuery(undefined, {
     refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
+  const { data: settings } = trpc.admin.getSettings.useQuery();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -761,9 +762,9 @@ export default function OrdersManagement() {
                         </head>
                         <body>
                           <div class="header">
-                            <h1>Boomiis Restaurant</h1>
+                            <h1>${settings?.find(s => s.settingKey === 'restaurant_name')?.settingValue || 'Boomiis Restaurant'}</h1>
                             <p>Authentic West African Cuisine</p>
-                            <p>123 High Street, London, UK SW1A 1AA | +44 20 1234 5678</p>
+                            <p>${settings?.find(s => s.settingKey === 'contact_address')?.settingValue || '123 High Street, London, UK SW1A 1AA'} | ${settings?.find(s => s.settingKey === 'contact_phone')?.settingValue || '+44 20 1234 5678'}</p>
                           </div>
                           
                           <div class="section">
@@ -868,7 +869,7 @@ export default function OrdersManagement() {
                           
                           <div class="footer">
                             <p>Thank you for your order!</p>
-                            <p>For any questions, please contact us at +44 20 1234 5678</p>
+                            <p>For any questions, please contact us at ${settings?.find(s => s.settingKey === 'contact_phone')?.settingValue || '+44 20 1234 5678'}</p>
                           </div>
                           
                           <script>

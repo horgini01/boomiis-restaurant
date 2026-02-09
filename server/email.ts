@@ -1259,6 +1259,12 @@ export async function sendOrderStatusUpdateEmail(data: {
   }
   
   try {
+    // Fetch restaurant settings
+    const settings = await getRestaurantSettings();
+    const restaurantName = settings?.restaurant_name || 'Boomiis Restaurant';
+    const contactAddress = settings?.contact_address || '123 High Street, London, UK SW1A 1AA';
+    const contactPhone = settings?.contact_phone || '+44 20 1234 5678';
+    const contactEmail = settings?.contact_email || 'hello@boomiis.uk';
     // Status-specific messages
     const statusMessages: Record<string, { title: string; message: string; color: string }> = {
       confirmed: {
@@ -1350,17 +1356,18 @@ export async function sendOrderStatusUpdateEmail(data: {
               ${data.status === 'ready' && data.orderType === 'pickup' ? `
                 <p style="background: #fef3c7; padding: 15px; border-radius: 5px; border-left: 4px solid #f59e0b;">
                   <strong>📍 Pickup Location:</strong><br>
-                  Boomiis Restaurant<br>
-                  123 High Street, London, UK SW1A 1AA
+                  ${restaurantName}<br>
+                  ${contactAddress}
                 </p>
               ` : ''}
               
               <p>If you have any questions about your order, please don't hesitate to contact us.</p>
             </div>
             <div class="footer">
-              <p>Boomiis Restaurant - Authentic West African Cuisine</p>
-              <p>123 High Street, London, UK SW1A 1AA</p>
-              <p>+44 20 1234 5678</p>
+              <p>${restaurantName} - Authentic West African Cuisine</p>
+              <p>${contactAddress}</p>
+              <p>${contactPhone}</p>
+              <p>${contactEmail}</p>
             </div>
           </div>
         </body>

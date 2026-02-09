@@ -1,0 +1,22 @@
+{
+  "query": "SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('contact_address', 'contact_phone', 'contact_email', 'admin_phone', 'admin_email', 'restaurant_address');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('contact_address', 'contact_phone', 'contact_email', 'admin_phone', 'admin_email', 'restaurant_address');",
+  "rows": [
+    {
+      "setting_key": "contact_address",
+      "setting_value": "Apartment 2A Riviera Heights  Laburnum Row. Torquay, Devon,  TQ2 5FA"
+    },
+    {
+      "setting_key": "contact_phone",
+      "setting_value": "+447456183646"
+    },
+    {
+      "setting_key": "contact_email",
+      "setting_value": "hello@boomiis.uk"
+    }
+  ],
+  "messages": [],
+  "stdout": "setting_key\tsetting_value\ncontact_address\tApartment 2A Riviera Heights  Laburnum Row. Torquay, Devon,  TQ2 5FA\ncontact_phone\t+447456183646\ncontact_email\thello@boomiis.uk\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

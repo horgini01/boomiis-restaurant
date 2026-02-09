@@ -71,7 +71,7 @@ export async function generateOrderReceiptPDF(
         .fontSize(10)
         .font("Helvetica")
         .text(
-          `${settingsMap.address || "123 High Street"} | ${settingsMap.phone || "+44 20 1234 5678"} | ${settingsMap.email || "hello@boomiis.uk"}`,
+          `${settingsMap.contact_address || "123 High Street"} | ${settingsMap.contact_phone || "+44 20 1234 5678"} | ${settingsMap.contact_email || "hello@boomiis.uk"}`,
           { align: "center" }
         );
 
