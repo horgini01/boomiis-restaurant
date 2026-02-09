@@ -2145,3 +2145,11 @@
 - [x] Fix "Please login (10001)" error on checkout page
 - [x] Allow guest checkout without requiring authentication
 - [x] Ensure checkout works for non-logged-in customers
+
+### Stripe Live Mode Fix (User Reported - Feb 9)
+- [x] Check where Stripe is initialized in the code
+- [x] Verify STRIPE_SECRET_KEY is reading from environment variables (not hardcoded)
+- [x] Confirm live keys are properly set in Management UI → Settings → Secrets
+- [x] Ensure no test keys are hardcoded anywhere in the codebase
+- [x] User updated live keys in Management UI (for production deployment)
+- [x] Ready to test live payments on published site
