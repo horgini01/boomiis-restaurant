@@ -2176,3 +2176,8 @@
 - [x] Fix total amount placeholder showing as "{{total}}" (changed orderTotal to total in code)
 - [x] Ensure all SMS variables are properly replaced with actual values
 - [ ] Test admin SMS notification formatting on live site
+
+### Update SMS Template Variables Documentation (User Requested - Feb 9)
+- [x] Update SMS Templates admin page to show all available variables for each template type
+- [x] Add admin template variables (partySize, date, time, eventType, guestCount, eventDate, total, orderType)
+- [x] Organize variables by template category (customer order, admin notifications, reservations, events)

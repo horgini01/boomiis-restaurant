@@ -97,6 +97,12 @@ export default function SMSTemplates() {
         return 'Sent when an order is delayed beyond expected time';
       case 'order_cancelled':
         return 'Sent when an order is cancelled';
+      case 'admin_new_order':
+        return 'Sent to admin when a new order is placed';
+      case 'admin_new_reservation':
+        return 'Sent to admin when a customer books a table';
+      case 'admin_catering_quote':
+        return 'Sent to admin when a customer requests a catering quote';
       default:
         return '';
     }
@@ -105,9 +111,21 @@ export default function SMSTemplates() {
   // Generate preview with sample data
   const generatePreview = (message: string) => {
     return message
+      // Customer order variables
       .replace(/\{\{customerName\}\}/g, 'John Smith')
-      .replace(/\{\{orderNumber\}\}/g, 'ORD-12345')
-      .replace(/\{\{estimatedMinutes\}\}/g, '30');
+      .replace(/\{\{orderNumber\}\}/g, 'BO-12345')
+      .replace(/\{\{estimatedMinutes\}\}/g, '30')
+      // Admin order variables
+      .replace(/\{\{total\}\}/g, '45.99')
+      .replace(/\{\{orderType\}\}/g, 'delivery')
+      // Reservation variables
+      .replace(/\{\{partySize\}\}/g, '4')
+      .replace(/\{\{date\}\}/g, '15/02/2026')
+      .replace(/\{\{time\}\}/g, '19:00')
+      // Catering variables
+      .replace(/\{\{eventType\}\}/g, 'Wedding Reception')
+      .replace(/\{\{guestCount\}\}/g, '50')
+      .replace(/\{\{eventDate\}\}/g, '20/03/2026');
   };
 
   // Calculate SMS segments (160 chars per segment for standard SMS)
@@ -144,11 +162,42 @@ export default function SMSTemplates() {
             <Info className="h-4 w-4" />
             <AlertDescription>
               <strong>Available template variables:</strong>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li><code className="bg-muted px-1 rounded">{'{{customerName}}'}</code> - Customer's name</li>
-                <li><code className="bg-muted px-1 rounded">{'{{orderNumber}}'}</code> - Order number</li>
-                <li><code className="bg-muted px-1 rounded">{'{{estimatedMinutes}}'}</code> - Estimated delivery time in minutes</li>
-              </ul>
+              <div className="mt-3 space-y-3">
+                <div>
+                  <p className="font-semibold text-sm mb-1">Customer Order Templates:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li><code className="bg-muted px-1 rounded">{'{{customerName}}'}</code> - Customer's name</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{orderNumber}}'}</code> - Order number</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{estimatedMinutes}}'}</code> - Estimated delivery time in minutes</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm mb-1">Admin Order Notifications:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li><code className="bg-muted px-1 rounded">{'{{orderNumber}}'}</code> - Order number</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{total}}'}</code> - Order total amount</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{orderType}}'}</code> - delivery or pickup</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm mb-1">Admin Reservation Notifications:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li><code className="bg-muted px-1 rounded">{'{{customerName}}'}</code> - Customer's name</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{partySize}}'}</code> - Number of guests</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{date}}'}</code> - Reservation date</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{time}}'}</code> - Reservation time</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm mb-1">Admin Catering Quote Notifications:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li><code className="bg-muted px-1 rounded">{'{{customerName}}'}</code> - Customer's name</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{eventType}}'}</code> - Type of event</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{guestCount}}'}</code> - Number of guests</li>
+                    <li><code className="bg-muted px-1 rounded">{'{{eventDate}}'}</code> - Event date</li>
+                  </ul>
+                </div>
+              </div>
             </AlertDescription>
           </Alert>
 

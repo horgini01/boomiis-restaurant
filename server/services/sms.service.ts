@@ -775,18 +775,25 @@ export async function sendAdminNewReservationSMS(
   // Try to get custom template from database
   const template = await getSmsTemplateByType('admin_new_reservation');
   
+  console.log('[SMS Debug] Template fetched:', template);
+  console.log('[SMS Debug] Variables:', { customerName, partySize, date, time });
+  
   let message: string;
   if (template && template.isActive) {
     // Use custom template with variable replacement
+    const beforeReplace = template.message;
     message = replaceTemplateVariables(template.message, {
       customerName,
       partySize,
       date,
       time,
     });
+    console.log('[SMS Debug] Before replace:', beforeReplace);
+    console.log('[SMS Debug] After replace:', message);
   } else {
     // Fallback to default message
     message = `[Boomiis] New Reservation! ${customerName} booked table for ${partySize} guests on ${date} at ${time}. Check admin panel.`;
+    console.log('[SMS Debug] Using fallback message:', message);
   }
   
   const result = await sendSMS({
