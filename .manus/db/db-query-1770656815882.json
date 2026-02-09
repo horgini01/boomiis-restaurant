@@ -1,0 +1,85 @@
+{
+  "query": "SELECT id, template_type, template_name FROM sms_templates ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, template_type, template_name FROM sms_templates ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "template_type": "order_ready",
+      "template_name": "Order Ready for Pickup"
+    },
+    {
+      "id": "2",
+      "template_type": "out_for_delivery",
+      "template_name": "Order Out for Delivery"
+    },
+    {
+      "id": "3",
+      "template_type": "order_confirmed",
+      "template_name": "Order Confirmed"
+    },
+    {
+      "id": "4",
+      "template_type": "order_preparing",
+      "template_name": "Order Being Prepared"
+    },
+    {
+      "id": "5",
+      "template_type": "order_delivered",
+      "template_name": "Order Delivered"
+    },
+    {
+      "id": "6",
+      "template_type": "order_delayed",
+      "template_name": "Order Delayed"
+    },
+    {
+      "id": "7",
+      "template_type": "order_cancelled",
+      "template_name": "Order Cancelled"
+    },
+    {
+      "id": "30001",
+      "template_type": "admin_new_order",
+      "template_name": "Admin: New Order Alert"
+    },
+    {
+      "id": "30002",
+      "template_type": "admin_weekly_report",
+      "template_name": "Admin: Weekly Sales Report"
+    },
+    {
+      "id": "30003",
+      "template_type": "newsletter_confirmation",
+      "template_name": "Newsletter Subscription Confirmed"
+    },
+    {
+      "id": "30004",
+      "template_type": "event_confirmation",
+      "template_name": "Event Booking Confirmed"
+    },
+    {
+      "id": "30005",
+      "template_type": "event_inquiry_response",
+      "template_name": "Event Inquiry Response"
+    },
+    {
+      "id": "30006",
+      "template_type": "catering_quote_request",
+      "template_name": "Catering Quote Request Received"
+    },
+    {
+      "id": "60001",
+      "template_type": "admin_new_reservation",
+      "template_name": "Admin New Reservation Alert"
+    },
+    {
+      "id": "60002",
+      "template_type": "admin_catering_quote",
+      "template_name": "Admin Catering Quote Request"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttemplate_type\ttemplate_name\n1\torder_ready\tOrder Ready for Pickup\n2\tout_for_delivery\tOrder Out for Delivery\n3\torder_confirmed\tOrder Confirmed\n4\torder_preparing\tOrder Being Prepared\n5\torder_delivered\tOrder Delivered\n6\torder_delayed\tOrder Delayed\n7\torder_cancelled\tOrder Cancelled\n30001\tadmin_new_order\tAdmin: New Order Alert\n30002\tadmin_weekly_report\tAdmin: Weekly Sales Report\n30003\tnewsletter_confirmation\tNewsletter Subscription Confirmed\n30004\tevent_confirmation\tEvent Booking Confirmed\n30005\tevent_inquiry_response\tEvent Inquiry Response\n30006\tcatering_quote_request\tCatering Quote Request Received\n60001\tadmin_new_reservation\tAdmin New Reservation Alert\n60002\tadmin_catering_quote\tAdmin Catering Quote Request\n",
+  "stderr": "",
+  "execution_time_ms": 115
+}

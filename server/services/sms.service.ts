@@ -595,7 +595,7 @@ export async function sendNewsletterConfirmationSMS(
     // Use custom template with variable replacement
     message = replaceTemplateVariables(template.message, {
       customerName,
-      customerEmail,
+      email: customerEmail,
     });
   } else {
     // Fallback to default message
@@ -849,5 +849,84 @@ export async function sendAdminCateringQuoteRequestSMS(
     console.log(`[SMS] Admin catering quote notification sent to ${adminPhone} via ${result.provider}`);
   } else {
     console.error(`[SMS] Failed to send admin catering quote notification: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS for weekly sales report (admin notification)
+ * @param adminPhone - Admin's phone number (E.164 format)
+ * @param totalOrders - Total number of orders
+ * @param totalRevenue - Total revenue amount
+ * @param topItem - Top selling item name
+ */
+export async function sendWeeklySalesReportSMS(
+  adminPhone: string,
+  totalOrders: number,
+  totalRevenue: number,
+  topItem: string
+): Promise<void> {
+  const template = await getSmsTemplateByType('admin_weekly_report');
+  
+  let message: string;
+  if (template && template.isActive) {
+    message = replaceTemplateVariables(template.message, {
+      totalOrders,
+      totalRevenue,
+      topItem,
+    });
+  } else {
+    message = `Weekly Report: ${totalOrders} orders, £${totalRevenue} revenue. Top item: ${topItem}. Full report sent to email.`;
+  }
+  
+  const result = await sendSMS({
+    to: adminPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Weekly sales report sent to ${adminPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send weekly sales report: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS confirmation for catering quote request received (customer notification)
+ * @param customerPhone - Customer's phone number (E.164 format)
+ * @param customerName - Customer's name
+ * @param eventType - Type of event
+ * @param eventDate - Event date
+ * @param guestCount - Number of guests
+ */
+export async function sendCateringQuoteReceivedSMS(
+  customerPhone: string,
+  customerName: string,
+  eventType: string,
+  eventDate: string,
+  guestCount: number
+): Promise<void> {
+  const template = await getSmsTemplateByType('catering_quote_received');
+  
+  let message: string;
+  if (template && template.isActive) {
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      eventType,
+      eventDate,
+      guestCount,
+    });
+  } else {
+    message = `Hi ${customerName}! We received your catering quote request for ${eventType} on ${eventDate} (${guestCount} guests). We'll send you a detailed quote via email within 24 hours!`;
+  }
+  
+  const result = await sendSMS({
+    to: customerPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Catering quote received confirmation sent to ${customerPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send catering quote confirmation: ${result.error}`);
   }
 }

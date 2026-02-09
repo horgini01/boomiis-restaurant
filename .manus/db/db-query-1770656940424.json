@@ -1,0 +1,70 @@
+{
+  "query": "SELECT template_type, template_name FROM sms_templates ORDER BY template_type;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT template_type, template_name FROM sms_templates ORDER BY template_type;",
+  "rows": [
+    {
+      "template_type": "admin_catering_quote",
+      "template_name": "Admin Catering Quote Request"
+    },
+    {
+      "template_type": "admin_new_order",
+      "template_name": "Admin: New Order Alert"
+    },
+    {
+      "template_type": "admin_new_reservation",
+      "template_name": "Admin New Reservation Alert"
+    },
+    {
+      "template_type": "admin_weekly_report",
+      "template_name": "Admin: Weekly Sales Report"
+    },
+    {
+      "template_type": "catering_quote_request",
+      "template_name": "Catering Quote Request Received"
+    },
+    {
+      "template_type": "event_confirmation",
+      "template_name": "Event Booking Confirmed"
+    },
+    {
+      "template_type": "event_inquiry_response",
+      "template_name": "Event Inquiry Response"
+    },
+    {
+      "template_type": "newsletter_confirmation",
+      "template_name": "Newsletter Subscription Confirmed"
+    },
+    {
+      "template_type": "order_cancelled",
+      "template_name": "Order Cancelled"
+    },
+    {
+      "template_type": "order_confirmed",
+      "template_name": "Order Confirmed"
+    },
+    {
+      "template_type": "order_delayed",
+      "template_name": "Order Delayed"
+    },
+    {
+      "template_type": "order_delivered",
+      "template_name": "Order Delivered"
+    },
+    {
+      "template_type": "order_preparing",
+      "template_name": "Order Being Prepared"
+    },
+    {
+      "template_type": "order_ready",
+      "template_name": "Order Ready for Pickup"
+    },
+    {
+      "template_type": "out_for_delivery",
+      "template_name": "Order Out for Delivery"
+    }
+  ],
+  "messages": [],
+  "stdout": "template_type\ttemplate_name\nadmin_catering_quote\tAdmin Catering Quote Request\nadmin_new_order\tAdmin: New Order Alert\nadmin_new_reservation\tAdmin New Reservation Alert\nadmin_weekly_report\tAdmin: Weekly Sales Report\ncatering_quote_request\tCatering Quote Request Received\nevent_confirmation\tEvent Booking Confirmed\nevent_inquiry_response\tEvent Inquiry Response\nnewsletter_confirmation\tNewsletter Subscription Confirmed\norder_cancelled\tOrder Cancelled\norder_confirmed\tOrder Confirmed\norder_delayed\tOrder Delayed\norder_delivered\tOrder Delivered\norder_preparing\tOrder Being Prepared\norder_ready\tOrder Ready for Pickup\nout_for_delivery\tOrder Out for Delivery\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

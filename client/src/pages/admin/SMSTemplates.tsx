@@ -122,10 +122,18 @@ export default function SMSTemplates() {
       .replace(/\{\{partySize\}\}/g, '4')
       .replace(/\{\{date\}\}/g, '15/02/2026')
       .replace(/\{\{time\}\}/g, '19:00')
-      // Catering variables
+      // Catering/Event variables
       .replace(/\{\{eventType\}\}/g, 'Wedding Reception')
+      .replace(/\{\{cateringType\}\}/g, 'Wedding Reception')
       .replace(/\{\{guestCount\}\}/g, '50')
-      .replace(/\{\{eventDate\}\}/g, '20/03/2026');
+      .replace(/\{\{eventDate\}\}/g, '20/03/2026')
+      .replace(/\{\{responseMessage\}\}/g, 'We can accommodate your event! Check your email for details.')
+      // Newsletter variables
+      .replace(/\{\{email\}\}/g, 'john.smith@example.com')
+      // Weekly report variables
+      .replace(/\{\{totalOrders\}\}/g, '127')
+      .replace(/\{\{totalRevenue\}\}/g, '2849.50')
+      .replace(/\{\{topItem\}\}/g, 'Jollof Rice Special');
   };
 
   // Calculate SMS segments (160 chars per segment for standard SMS)

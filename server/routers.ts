@@ -2799,43 +2799,90 @@ export const appRouter = router({
         // Format phone number
         const formattedPhone = formatPhoneNumberE164(input.phoneNumber);
 
-        // Handle admin templates differently (they need different variables)
-        if (template.templateType === 'admin_new_reservation') {
-          const { sendAdminNewReservationSMS } = await import('./services/sms.service');
-          await sendAdminNewReservationSMS(
-            formattedPhone,
-            'Test User',
-            4, // partySize
-            '15/02/2026', // date
-            '19:00' // time
-          );
-        } else if (template.templateType === 'admin_catering_quote') {
-          const { sendAdminCateringQuoteRequestSMS } = await import('./services/sms.service');
-          await sendAdminCateringQuoteRequestSMS(
-            formattedPhone,
-            'Test User',
-            'Wedding Reception', // eventType
-            50, // guestCount
-            '20/03/2026' // eventDate
-          );
-        } else if (template.templateType === 'admin_new_order') {
-          const { sendAdminNewOrderSMS } = await import('./services/sms.service');
-          await sendAdminNewOrderSMS(
-            formattedPhone,
-            'BO-TEST123',
-            45.99, // orderTotal
-            'delivery' // orderType
-          );
-        } else {
-          // Customer templates - use existing function
-          await sendOrderStatusSMS(
-            'Test User', // customerName
-            formattedPhone,
-            'TEST-12345', // orderNumber
-            template.templateType,
-            30, // estimatedMinutes
-            true // smsOptIn (always true for test)
-          );
+        // Handle different template types with appropriate test data
+        switch (template.templateType) {
+          case 'admin_new_reservation': {
+            const { sendAdminNewReservationSMS } = await import('./services/sms.service');
+            await sendAdminNewReservationSMS(
+              formattedPhone,
+              'John Smith',
+              4, // partySize
+              '15/02/2026', // date
+              '19:00' // time
+            );
+            break;
+          }
+          case 'admin_catering_quote': {
+            const { sendAdminCateringQuoteRequestSMS } = await import('./services/sms.service');
+            await sendAdminCateringQuoteRequestSMS(
+              formattedPhone,
+              'John Smith',
+              'Wedding Reception', // eventType
+              50, // guestCount
+              '20/03/2026' // eventDate
+            );
+            break;
+          }
+          case 'admin_new_order': {
+            const { sendAdminNewOrderSMS } = await import('./services/sms.service');
+            await sendAdminNewOrderSMS(
+              formattedPhone,
+              'BO-12345',
+              45.99, // orderTotal
+              'delivery' // orderType
+            );
+            break;
+          }
+          case 'admin_weekly_report': {
+            const { sendAdminWeeklyReportSMS } = await import('./services/sms.service');
+            await sendAdminWeeklyReportSMS(
+              formattedPhone,
+              127, // totalOrders
+              2849.50, // totalRevenue
+              'Jollof Rice Special' // topItem
+            );
+            break;
+          }
+          case 'catering_quote_request': {
+            const { sendCateringQuoteRequestSMS } = await import('./services/sms.service');
+            await sendCateringQuoteRequestSMS(
+              'John Smith',
+              formattedPhone,
+              'Wedding Reception', // cateringType
+              50, // guestCount
+              new Date('2026-03-20') // eventDate
+            );
+            break;
+          }
+          case 'event_inquiry_response': {
+            const { sendEventInquiryResponseSMS } = await import('./services/sms.service');
+            await sendEventInquiryResponseSMS(
+              formattedPhone,
+              'John Smith',
+              'Wedding Reception', // eventType
+              'We can accommodate your event! Check your email for details.' // responseMessage
+            );
+            break;
+          }
+          case 'newsletter_confirmation': {
+            const { sendNewsletterConfirmationSMS } = await import('./services/sms.service');
+            await sendNewsletterConfirmationSMS(
+              'John Smith',
+              formattedPhone,
+              'john.smith@example.com' // customerEmail
+            );
+            break;
+          }
+          default:
+            // Customer order templates - use existing function
+            await sendOrderStatusSMS(
+              'John Smith', // customerName
+              formattedPhone,
+              'BO-12345', // orderNumber
+              template.templateType,
+              30, // estimatedMinutes
+              true // smsOptIn (always true for test)
+            );
         }
 
         return { success: true };

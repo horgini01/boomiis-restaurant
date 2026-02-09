@@ -1,0 +1,13 @@
+{
+  "query": "SELECT message FROM sms_templates WHERE template_type = 'newsletter_confirmation';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT message FROM sms_templates WHERE template_type = 'newsletter_confirmation';",
+  "rows": [
+    {
+      "message": "Hi {{customerName}}! You're now subscribed to Boomiis Restaurant newsletter ({{email}}). Stay tuned for exclusive offers!"
+    }
+  ],
+  "messages": [],
+  "stdout": "message\nHi {{customerName}}! You're now subscribed to Boomiis Restaurant newsletter ({{email}}). Stay tuned for exclusive offers!\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

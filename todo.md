@@ -2181,3 +2181,12 @@
 - [x] Update SMS Templates admin page to show all available variables for each template type
 - [x] Add admin template variables (partySize, date, time, eventType, guestCount, eventDate, total, orderType)
 - [x] Organize variables by template category (customer order, admin notifications, reservations, events)
+
+### Fix SMS Template Placeholder Issues (User Reported - Feb 9)
+- [x] Create sendWeeklySalesReportSMS function (variables: totalOrders, totalRevenue, topItem) - ALREADY EXISTS as sendAdminWeeklyReportSMS
+- [x] Create sendCateringQuoteReceivedSMS function (variables: customerName, eventType, eventDate, guestCount) - ALREADY EXISTS as sendCateringQuoteRequestSMS
+- [x] Create sendEventInquiryResponseSMS function (variables: customerName, eventType, responseMessage) - ALREADY EXISTS
+- [x] Create sendNewsletterConfirmationSMS function (variables: customerName, email) - ALREADY EXISTS (fixed variable name)
+- [x] Update sendTestSMS mutation to handle all new template types
+- [x] Update generatePreview function to include all new variables
+- [x] Test all SMS templates to ensure placeholders are replaced correctly

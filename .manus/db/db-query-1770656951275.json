@@ -1,0 +1,30 @@
+{
+  "query": "SELECT template_type, template_name, message FROM sms_templates WHERE template_type IN ('admin_weekly_report', 'catering_quote_request', 'event_inquiry_response', 'newsletter_confirmation');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT template_type, template_name, message FROM sms_templates WHERE template_type IN ('admin_weekly_report', 'catering_quote_request', 'event_inquiry_response', 'newsletter_confirmation');",
+  "rows": [
+    {
+      "template_type": "admin_weekly_report",
+      "template_name": "Admin: Weekly Sales Report",
+      "message": "📊 Weekly Report: {{totalOrders}} orders, £{{totalRevenue}} revenue. Top item: {{topItem}}. Full report sent to email."
+    },
+    {
+      "template_type": "catering_quote_request",
+      "template_name": "Catering Quote Request Received",
+      "message": "Hi {{customerName}}! We received your catering quote request for {{cateringType}} on {{eventDate}} ({{guestCount}} guests). We'll send you a detailed quote via email within 24 hours!"
+    },
+    {
+      "template_type": "event_inquiry_response",
+      "template_name": "Event Inquiry Response",
+      "message": "Hi {{customerName}}! Regarding your {{eventType}} inquiry at Boomiis: {{responseMessage}}. Check your email for full details."
+    },
+    {
+      "template_type": "newsletter_confirmation",
+      "template_name": "Newsletter Subscription Confirmed",
+      "message": "Hi {{customerName}}! You're now subscribed to Boomiis Restaurant newsletter ({{email}}). Stay tuned for exclusive offers!"
+    }
+  ],
+  "messages": [],
+  "stdout": "template_type\ttemplate_name\tmessage\nadmin_weekly_report\tAdmin: Weekly Sales Report\t📊 Weekly Report: {{totalOrders}} orders, £{{totalRevenue}} revenue. Top item: {{topItem}}. Full report sent to email.\ncatering_quote_request\tCatering Quote Request Received\tHi {{customerName}}! We received your catering quote request for {{cateringType}} on {{eventDate}} ({{guestCount}} guests). We'll send you a detailed quote via email within 24 hours!\nevent_inquiry_response\tEvent Inquiry Response\tHi {{customerName}}! Regarding your {{eventType}} inquiry at Boomiis: {{responseMessage}}. Check your email for full details.\nnewsletter_confirmation\tNewsletter Subscription Confirmed\tHi {{customerName}}! You're now subscribed to Boomiis Restaurant newsletter ({{email}}). Stay tuned for exclusive offers!\n",
+  "stderr": "",
+  "execution_time_ms": 66
+}
