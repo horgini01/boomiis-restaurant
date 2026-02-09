@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { stripe } from '../stripe';
 import { getDb } from '../db';
-import { orders, orderItems, menuItems } from '../../drizzle/schema';
+import { orders, orderItems, menuItems, siteSettings } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { sendOrderConfirmationEmail, sendAdminOrderNotification } from '../email';
 
@@ -173,7 +173,10 @@ export async function handleStripeWebhook(req: Request, res: Response) {
           // Send admin SMS notification
           try {
             const { sendAdminNewOrderSMS } = await import('../services/sms.service');
-            const adminPhone = process.env.ADMIN_PHONE;
+            // Fetch admin phone from site settings
+            const [phoneSetting] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'contact_phone')).limit(1);
+            const adminPhone = phoneSetting?.settingValue;
+            
             if (adminPhone) {
               await sendAdminNewOrderSMS(
                 adminPhone,
@@ -181,7 +184,9 @@ export async function handleStripeWebhook(req: Request, res: Response) {
                 parseFloat(metadata.total),
                 metadata.orderType as 'delivery' | 'pickup'
               );
-              console.log(`[Webhook] Sent admin SMS notification`);
+              console.log(`[Webhook] Sent admin SMS notification to ${adminPhone}`);
+            } else {
+              console.log('[Webhook] No admin phone configured in settings, skipping SMS');
             }
           } catch (smsError: any) {
             console.error('[Webhook] Failed to send admin SMS:', smsError.message);

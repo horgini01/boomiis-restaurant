@@ -2165,3 +2165,8 @@
 - [x] Update order success page to fetch order by payment intent ID
 - [ ] Test complete flow: checkout → payment → order creation → notifications
 - [x] Clean up orphaned pending orders from old flow (1 order deleted)
+
+### Admin SMS Notification Fix (User Requested - Feb 9)
+- [x] Update webhook to fetch admin phone from restaurant settings table
+- [x] Remove dependency on ADMIN_PHONE environment variable
+- [ ] Test admin SMS notification with live order
