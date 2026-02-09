@@ -756,3 +756,91 @@ export async function sendCateringQuoteRequestSMS(
     console.error(`[SMS] Failed to send catering quote request confirmation: ${result.error}`);
   }
 }
+
+/**
+ * Send SMS notification to admin for new reservations
+ * @param adminPhone - Admin's phone number (E.164 format)
+ * @param customerName - Customer's name
+ * @param partySize - Number of guests
+ * @param date - Reservation date (formatted)
+ * @param time - Reservation time
+ */
+export async function sendAdminNewReservationSMS(
+  adminPhone: string,
+  customerName: string,
+  partySize: number,
+  date: string,
+  time: string
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('admin_new_reservation');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      partySize,
+      date,
+      time,
+    });
+  } else {
+    // Fallback to default message
+    message = `[Boomiis] New Reservation! ${customerName} booked table for ${partySize} guests on ${date} at ${time}. Check admin panel.`;
+  }
+  
+  const result = await sendSMS({
+    to: adminPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Admin new reservation notification sent to ${adminPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send admin new reservation notification: ${result.error}`);
+  }
+}
+
+/**
+ * Send SMS notification to admin for catering quote requests
+ * @param adminPhone - Admin's phone number (E.164 format)
+ * @param customerName - Customer's name
+ * @param eventType - Type of event
+ * @param guestCount - Number of guests
+ * @param eventDate - Event date (formatted)
+ */
+export async function sendAdminCateringQuoteRequestSMS(
+  adminPhone: string,
+  customerName: string,
+  eventType: string,
+  guestCount: number,
+  eventDate: string
+): Promise<void> {
+  // Try to get custom template from database
+  const template = await getSmsTemplateByType('admin_catering_quote');
+  
+  let message: string;
+  if (template && template.isActive) {
+    // Use custom template with variable replacement
+    message = replaceTemplateVariables(template.message, {
+      customerName,
+      eventType,
+      guestCount,
+      eventDate,
+    });
+  } else {
+    // Fallback to default message
+    message = `[Boomiis] Catering Quote Request! ${customerName} wants ${eventType} for ${guestCount} guests on ${eventDate}. Check admin panel.`;
+  }
+  
+  const result = await sendSMS({
+    to: adminPhone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[SMS] Admin catering quote notification sent to ${adminPhone} via ${result.provider}`);
+  } else {
+    console.error(`[SMS] Failed to send admin catering quote notification: ${result.error}`);
+  }
+}

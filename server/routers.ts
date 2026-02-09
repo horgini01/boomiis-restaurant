@@ -381,6 +381,28 @@ export const appRouter = router({
           // Don't fail the reservation if email fails
         }
 
+        // Send admin SMS notification
+        try {
+          const { sendAdminNewReservationSMS } = await import('./services/sms.service');
+          
+          // Get admin phone from site settings
+          const phoneSettings = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'contact_phone'));
+          const adminPhone = phoneSettings[0]?.settingValue;
+          
+          if (adminPhone) {
+            await sendAdminNewReservationSMS(
+              adminPhone,
+              input.customerName,
+              input.partySize,
+              input.reservationDate.toLocaleDateString('en-GB'),
+              reservationTime
+            );
+          }
+        } catch (smsError: any) {
+          console.error('[Reservation] Failed to send admin SMS notification:', smsError.message);
+          // Don't fail the reservation if SMS fails
+        }
+
         return { success: true };
       }),
 
@@ -2906,6 +2928,28 @@ export const appRouter = router({
         } catch (emailError: any) {
           console.error('[EventInquiry] Failed to send email notifications:', emailError.message);
           // Don't fail the inquiry if email fails
+        }
+
+        // Send admin SMS notification
+        try {
+          const { sendAdminCateringQuoteRequestSMS } = await import('./services/sms.service');
+          
+          // Get admin phone from site settings
+          const phoneSettings = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'contact_phone'));
+          const adminPhone = phoneSettings[0]?.settingValue;
+          
+          if (adminPhone && input.eventDate && input.guestCount) {
+            await sendAdminCateringQuoteRequestSMS(
+              adminPhone,
+              input.customerName,
+              input.eventType,
+              input.guestCount,
+              input.eventDate.toLocaleDateString('en-GB')
+            );
+          }
+        } catch (smsError: any) {
+          console.error('[EventInquiry] Failed to send admin SMS notification:', smsError.message);
+          // Don't fail the inquiry if SMS fails
         }
 
         return { success: true };

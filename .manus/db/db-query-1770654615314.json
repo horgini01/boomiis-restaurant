@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO sms_templates (template_type, template_name, message, is_active) VALUES \n('admin_new_reservation', 'Admin New Reservation Alert', 'Boomiis New Reservation! {{customerName}} booked table for {{partySize}} guests on {{date}} at {{time}}. Check admin panel.', true),\n('admin_catering_quote', 'Admin Catering Quote Request', 'Boomiis Catering Quote Request! {{customerName}} wants {{eventType}} for {{guestCount}} guests on {{eventDate}}. Check admin panel.', true)\nON DUPLICATE KEY UPDATE template_name=VALUES(template_name), message=VALUES(message);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute INSERT INTO sms_templates (template_type, template_name, message, is_active) VALUES \n('admin_new_reservation', 'Admin New Reservation Alert', 'Boomiis New Reservation! {{customerName}} booked table for {{partySize}} guests on {{date}} at {{time}}. Check admin panel.', true),\n('admin_catering_quote', 'Admin Catering Quote Request', 'Boomiis Catering Quote Request! {{customerName}} wants {{eventType}} for {{guestCount}} guests on {{eventDate}}. Check admin panel.', true)\nON DUPLICATE KEY UPDATE template_name=VALUES(template_name), message=VALUES(message);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 109
+}
