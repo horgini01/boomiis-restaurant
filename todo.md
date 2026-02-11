@@ -2217,3 +2217,9 @@
 - [x] Display "Last Updated By" column in admin orders list
 - [x] Include "Last Updated By" in order export CSV
 - [x] Test with multiple admin users to verify tracking works correctly
+
+## New Features (User Request - Feb 11 - Dynamic Contact Info in Cookie Policy)
+- [x] Update cookie policy page to dynamically pull contact info from restaurant settings
+- [x] Ensure email, phone, and address are fetched from siteSettings table
+- [x] Replace hardcoded placeholder contact info with dynamic values
+- [x] Test cookie policy displays correct restaurant contact information

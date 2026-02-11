@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
-import { legalPages } from './drizzle/schema.js';
+import { legalPages, siteSettings } from './drizzle/schema.js';
 import { eq } from 'drizzle-orm';
 
 const conn = await mysql.createConnection(process.env.DATABASE_URL);
@@ -15,6 +15,15 @@ if (existing.length > 0) {
   await conn.end();
   process.exit(0);
 }
+
+// Fetch contact information from settings
+const [emailSetting] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'contact_email')).limit(1);
+const [phoneSetting] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'contact_phone')).limit(1);
+const [addressSetting] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'contact_address')).limit(1);
+
+const contactEmail = emailSetting?.settingValue || 'info@restaurant.com';
+const contactPhone = phoneSetting?.settingValue || '+44 20 1234 5678';
+const contactAddress = addressSetting?.settingValue || '123 High Street, London, UK';
 
 // Create cookie policy
 await db.insert(legalPages).values({
@@ -141,9 +150,9 @@ We may update this Cookie Policy from time to time to reflect changes in technol
 
 If you have questions about our use of cookies, please contact us:
 
-- **Email**: [contact email]
-- **Phone**: [contact phone]
-- **Address**: [restaurant address]
+- **Email**: ${contactEmail}
+- **Phone**: ${contactPhone}
+- **Address**: ${contactAddress}
 
 ## More Information
 
