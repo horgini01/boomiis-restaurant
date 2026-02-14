@@ -37,3 +37,8 @@
 - [x] Add ARG DATABASE_URL to Dockerfile before drizzle-kit generate command
 - [ ] Test Railway build with the fix (user to test)
 - [ ] Push to GitHub
+
+## Migration Script Syntax Error (User Report - Feb 14)
+- [x] Fix syntax error in migrate-and-seed.mjs (function name has space: "parseDatabase URL" should be "parseDatabaseURL")
+- [x] Test migration script locally before deployment
+- [ ] Push fix to GitHub and redeploy to Railway

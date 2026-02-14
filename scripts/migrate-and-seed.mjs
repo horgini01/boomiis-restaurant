@@ -23,7 +23,7 @@ if (!DATABASE_URL) {
   process.exit(1);
 }
 
-function parseDatabase URL() {
+function parseDatabaseURL() {
   try {
     const dbUrl = new URL(DATABASE_URL);
     const sslMode = dbUrl.searchParams.get('ssl-mode');
