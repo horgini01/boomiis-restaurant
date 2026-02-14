@@ -49,4 +49,11 @@
 - [x] Rewrite script to use proper mysql2 connection config object (not uri property)
 - [x] Test connection config parsing with Railway DATABASE_URL
 - [x] Verify syntax with node --check
-- [ ] Push tested fix to GitHub and redeploy to Railway
+- [x] Push tested fix to GitHub and redeploy to Railway
+
+## Production Deployment Issues (User Report - Feb 14)
+- [x] Fix seed-settings.mjs import path (cannot find /app/drizzle/schema.js in production)
+- [x] Inline all seeding logic into migrate-and-seed.mjs to avoid import path issues
+- [x] Fix admin creation SQL query (use single quotes instead of double quotes for MySQL string values)
+- [x] Verify syntax with node --check
+- [ ] Push fixes to GitHub and redeploy to Railway

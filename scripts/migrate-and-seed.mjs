@@ -10,12 +10,8 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import { migrate } from 'drizzle-orm/mysql2/migrator';
 import mysql from 'mysql2/promise';
-import { readdir } from 'fs/promises';
 import { existsSync } from 'fs';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
-const execAsync = promisify(exec);
 const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
@@ -96,33 +92,95 @@ async function runMigrations() {
 
 async function seedDatabase() {
   console.log('[Migration] Seeding database with initial data...');
+  let connection;
   try {
-    // Seed settings
-    if (existsSync('./scripts/seed-settings.mjs')) {
-      await execAsync('node scripts/seed-settings.mjs');
-      console.log('[Migration] ✅ Settings seeded');
+    const connectionConfig = parseDatabaseURL();
+    connection = await mysql.createConnection(connectionConfig);
+    
+    // Seed restaurant settings
+    console.log('[Migration] Seeding restaurant settings...');
+    const defaultSettings = [
+      {
+        settingKey: 'restaurant_name',
+        settingValue: 'Boomiis',
+        settingType: 'text',
+        description: 'Restaurant name displayed across the site',
+      },
+      {
+        settingKey: 'restaurant_tagline',
+        settingValue: 'Authentic African cuisine bringing the flavors of West Africa to the UK. Experience the rich tastes and warm hospitality.',
+        settingType: 'textarea',
+        description: 'Restaurant tagline/description',
+      },
+      {
+        settingKey: 'contact_address',
+        settingValue: '123 High Street, London, UK, SW1A 1AA',
+        settingType: 'textarea',
+        description: 'Physical address',
+      },
+      {
+        settingKey: 'contact_phone',
+        settingValue: '+44 20 1234 5678',
+        settingType: 'text',
+        description: 'Contact phone number',
+      },
+      {
+        settingKey: 'contact_email',
+        settingValue: 'hello@boomiis.uk',
+        settingType: 'text',
+        description: 'Contact email address',
+      },
+      {
+        settingKey: 'opening_hours',
+        settingValue: JSON.stringify({
+          monday: { open: '12:00', close: '22:00', closed: false },
+          tuesday: { open: '12:00', close: '22:00', closed: false },
+          wednesday: { open: '12:00', close: '22:00', closed: false },
+          thursday: { open: '12:00', close: '22:00', closed: false },
+          friday: { open: '12:00', close: '23:00', closed: false },
+          saturday: { open: '12:00', close: '23:00', closed: false },
+          sunday: { open: '12:00', close: '21:00', closed: false },
+        }),
+        settingType: 'json',
+        description: 'Restaurant opening hours for each day',
+      },
+      {
+        settingKey: 'social_facebook',
+        settingValue: 'https://facebook.com/boomiis',
+        settingType: 'text',
+        description: 'Facebook page URL',
+      },
+      {
+        settingKey: 'social_instagram',
+        settingValue: 'https://instagram.com/boomiis',
+        settingType: 'text',
+        description: 'Instagram profile URL',
+      },
+      {
+        settingKey: 'social_twitter',
+        settingValue: 'https://twitter.com/boomiis',
+        settingType: 'text',
+        description: 'Twitter/X profile URL',
+      },
+    ];
+    
+    for (const setting of defaultSettings) {
+      await connection.query(`
+        INSERT INTO site_settings (setting_key, setting_value, setting_type, description)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+      `, [setting.settingKey, setting.settingValue, setting.settingType, setting.description]);
     }
     
-    // Seed cookie policy
-    if (existsSync('./seed-cookie-policy.mjs')) {
-      await execAsync('node seed-cookie-policy.mjs');
-      console.log('[Migration] ✅ Cookie policy seeded');
-    }
-    
-    // Seed menu (optional)
-    if (existsSync('./scripts/seed-menu.mjs')) {
-      try {
-        await execAsync('node scripts/seed-menu.mjs');
-        console.log('[Migration] ✅ Menu seeded');
-      } catch (error) {
-        console.log('[Migration] ⚠️  Menu seeding skipped (optional)');
-      }
-    }
-    
+    console.log('[Migration] ✅ Settings seeded');
     return true;
   } catch (error) {
     console.error('[Migration] ❌ Seeding failed:', error.message);
     return false;
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 }
 
@@ -133,8 +191,8 @@ async function createDefaultAdmin() {
     const connectionConfig = parseDatabaseURL();
     connection = await mysql.createConnection(connectionConfig);
     
-    // Check if any admin exists
-    const [admins] = await connection.query('SELECT COUNT(*) as count FROM users WHERE role = "admin"');
+    // Check if any admin exists (use single quotes for string values in MySQL)
+    const [admins] = await connection.query("SELECT COUNT(*) as count FROM users WHERE role = 'admin'");
     const adminCount = admins[0]?.count || 0;
     
     if (adminCount === 0) {
@@ -146,7 +204,7 @@ async function createDefaultAdmin() {
       
       // Create admin account (password will be set on first login)
       await connection.query(`
-        INSERT INTO users (open_id, email, name, role, is_setup_complete, created_at, updated_at)
+        INSERT INTO users (openId, email, name, role, is_setup_complete, createdAt, updatedAt)
         VALUES (?, ?, ?, 'admin', FALSE, NOW(), NOW())
       `, [openId, adminEmail, adminName]);
       
@@ -160,6 +218,7 @@ async function createDefaultAdmin() {
     return true;
   } catch (error) {
     console.error('[Migration] ❌ Admin account check/creation failed:', error.message);
+    console.error(error);
     return false;
   } finally {
     if (connection) {
