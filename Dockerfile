@@ -52,8 +52,8 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Copy built application from builder
+# Note: Vite builds to dist/public, and esbuild builds server to dist/index.js
 COPY --from=builder --chown=restaurantpro:nodejs /app/dist ./dist
-COPY --from=builder --chown=restaurantpro:nodejs /app/client/dist ./client/dist
 COPY --from=builder --chown=restaurantpro:nodejs /app/drizzle ./drizzle
 COPY --from=builder --chown=restaurantpro:nodejs /app/package.json ./package.json
 
