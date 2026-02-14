@@ -16,8 +16,9 @@ export async function getDb() {
       dbUrl.searchParams.delete('ssl-mode');
       
       // Add proper SSL configuration for mysql2
+      // Use rejectUnauthorized: false to accept self-signed certificates from Railway/Aiven
       if (sslMode === 'REQUIRED' || sslMode === 'required') {
-        dbUrl.searchParams.set('ssl', JSON.stringify({ rejectUnauthorized: true }));
+        dbUrl.searchParams.set('ssl', JSON.stringify({ rejectUnauthorized: false }));
       }
       
       _db = drizzle(dbUrl.toString());

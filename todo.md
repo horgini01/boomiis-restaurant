@@ -56,4 +56,15 @@
 - [x] Inline all seeding logic into migrate-and-seed.mjs to avoid import path issues
 - [x] Fix admin creation SQL query (use single quotes instead of double quotes for MySQL string values)
 - [x] Verify syntax with node --check
-- [ ] Push fixes to GitHub and redeploy to Railway
+- [x] Push fixes to GitHub and redeploy to Railway
+
+## Database Schema Mismatch (User Report - Feb 14)
+- [ ] Check migration files to see actual column names created in database
+- [ ] Fix schema.ts to match actual database column names
+- [ ] Generate new migration to add missing columns
+- [ ] Test admin setup flow
+
+## SSL Handshake Error in Scheduled Jobs (User Report - Feb 14)
+- [x] Find reservation reminders job and other scheduled jobs
+- [x] Fix database connection in server/db.ts (rejectUnauthorized: false)
+- [ ] Trigger Railway rebuild to compile latest schema and apply SSL fix
