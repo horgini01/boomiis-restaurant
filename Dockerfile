@@ -18,8 +18,7 @@ COPY .npmrc* ./
 COPY patches ./patches
 
 # Install dependencies with frozen lockfile
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --prod=false
-
+RUN --mount=type=cache,id=restaurantpro-pnpm,target=/pnpm/store pnpm install --frozen-lockfile --prod=false
 # Stage 3: Build application
 FROM base AS builder
 WORKDIR /app
