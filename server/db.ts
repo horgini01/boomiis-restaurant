@@ -8,7 +8,19 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      // Parse DATABASE_URL to handle SSL parameters correctly
+      const dbUrl = new URL(process.env.DATABASE_URL);
+      const sslMode = dbUrl.searchParams.get('ssl-mode');
+      
+      // Remove ssl-mode from URL params (mysql2 doesn't recognize it)
+      dbUrl.searchParams.delete('ssl-mode');
+      
+      // Add proper SSL configuration for mysql2
+      if (sslMode === 'REQUIRED' || sslMode === 'required') {
+        dbUrl.searchParams.set('ssl', JSON.stringify({ rejectUnauthorized: true }));
+      }
+      
+      _db = drizzle(dbUrl.toString());
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;

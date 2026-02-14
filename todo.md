@@ -2246,3 +2246,12 @@
 - [x] Fix Dockerfile build step to properly build frontend
 - [x] Test Docker build locally to verify fix
 - [x] Commit fix (will be pushed with next checkpoint)
+
+## Railway Deployment Issues (User Report - Feb 14)
+- [x] Fix database SSL connection warning (ssl-mode parameter)
+- [x] Add automatic database migration on startup
+- [x] Add automatic admin account creation if none exists
+- [x] Make OAuth optional for self-hosting (currently throwing errors)
+- [x] Update Dockerfile to run migrations before starting server
+- [x] Add startup script to handle initial database setup
+- [ ] Test deployment with fresh database (user to execute)

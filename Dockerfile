@@ -55,6 +55,8 @@ ENV PORT=3000
 # Note: Vite builds to dist/public, and esbuild builds server to dist/index.js
 COPY --from=builder --chown=restaurantpro:nodejs /app/dist ./dist
 COPY --from=builder --chown=restaurantpro:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=restaurantpro:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=restaurantpro:nodejs /app/seed-cookie-policy.mjs ./seed-cookie-policy.mjs
 COPY --from=builder --chown=restaurantpro:nodejs /app/package.json ./package.json
 
 # Copy public assets (uploads, logos, etc.)
@@ -80,5 +82,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
-CMD ["node", "dist/index.js"]
+# Run migrations and start the application
+# The migration script will check if database is initialized and run setup if needed
+CMD ["sh", "-c", "node scripts/migrate-and-seed.mjs && node dist/index.js"]
