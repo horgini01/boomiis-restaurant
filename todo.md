@@ -32,3 +32,8 @@
 - [x] Make OAuth optional for self-hosting
 - [x] Update Dockerfile to run migrations before starting server
 - [x] Add startup script to handle initial database setup
+
+## Railway Build Error Fix (User Report - Feb 14)
+- [x] Add ARG DATABASE_URL to Dockerfile before drizzle-kit generate command
+- [ ] Test Railway build with the fix (user to test)
+- [ ] Push to GitHub

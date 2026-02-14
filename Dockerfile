@@ -32,6 +32,9 @@ COPY . .
 # Set build-time environment variables
 ENV NODE_ENV=production
 
+# Declare DATABASE_URL as build argument (Railway provides this at build time)
+ARG DATABASE_URL
+
 # Generate database migrations at build time
 RUN pnpm drizzle-kit generate
 
