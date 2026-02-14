@@ -23,27 +23,39 @@ if (!DATABASE_URL) {
   process.exit(1);
 }
 
+/**
+ * Parse DATABASE_URL and extract connection config
+ * Handles ssl-mode parameter for Railway/Aiven MySQL
+ */
 function parseDatabaseURL() {
   try {
     const dbUrl = new URL(DATABASE_URL);
     const sslMode = dbUrl.searchParams.get('ssl-mode');
-    dbUrl.searchParams.delete('ssl-mode');
     
+    const config = {
+      host: dbUrl.hostname,
+      port: parseInt(dbUrl.port) || 3306,
+      user: dbUrl.username,
+      password: dbUrl.password,
+      database: dbUrl.pathname.replace('/', ''),
+    };
+    
+    // For Railway/Aiven MySQL with ssl-mode=REQUIRED, accept self-signed certificates
     if (sslMode === 'REQUIRED' || sslMode === 'required') {
-      dbUrl.searchParams.set('ssl', JSON.stringify({ rejectUnauthorized: true }));
+      config.ssl = { rejectUnauthorized: false };
     }
     
-    return dbUrl.toString();
+    return config;
   } catch (error) {
     console.error('[Migration] Failed to parse DATABASE_URL:', error.message);
-    return DATABASE_URL;
+    throw error;
   }
 }
 
 async function checkDatabaseInitialized() {
   try {
-    const connectionString = parseDatabaseURL();
-    const connection = await mysql.createConnection(connectionString);
+    const connectionConfig = parseDatabaseURL();
+    const connection = await mysql.createConnection(connectionConfig);
     const [tables] = await connection.query('SHOW TABLES');
     await connection.end();
     return tables && tables.length > 0;
@@ -55,9 +67,11 @@ async function checkDatabaseInitialized() {
 
 async function runMigrations() {
   console.log('[Migration] Applying database migrations...');
+  let connection;
   try {
-    const connectionString = parseDatabaseURL();
-    const db = drizzle(connectionString);
+    const connectionConfig = parseDatabaseURL();
+    connection = await mysql.createConnection(connectionConfig);
+    const db = drizzle(connection);
     
     // Check if migration files exist
     if (!existsSync('./drizzle')) {
@@ -73,6 +87,10 @@ async function runMigrations() {
     console.error('[Migration] ❌ Migration failed:', error.message);
     console.error(error);
     return false;
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 }
 
@@ -110,9 +128,10 @@ async function seedDatabase() {
 
 async function createDefaultAdmin() {
   console.log('[Migration] Checking for admin account...');
+  let connection;
   try {
-    const connectionString = parseDatabaseURL();
-    const connection = await mysql.createConnection(connectionString);
+    const connectionConfig = parseDatabaseURL();
+    connection = await mysql.createConnection(connectionConfig);
     
     // Check if any admin exists
     const [admins] = await connection.query('SELECT COUNT(*) as count FROM users WHERE role = "admin"');
@@ -138,11 +157,14 @@ async function createDefaultAdmin() {
       console.log(`[Migration] ✅ Admin account exists (${adminCount} admin(s) found)`);
     }
     
-    await connection.end();
     return true;
   } catch (error) {
     console.error('[Migration] ❌ Admin account check/creation failed:', error.message);
     return false;
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 }
 
