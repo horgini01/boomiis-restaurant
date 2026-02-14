@@ -118,6 +118,10 @@ async function startServer() {
     return handleTestimonialAction(req, res);
   });
   
+  // Health check endpoints for Railway/Docker monitoring
+  const healthRouter = await import('./health');
+  app.use('/api', healthRouter.default);
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   

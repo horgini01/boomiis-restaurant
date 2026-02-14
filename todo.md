@@ -2223,3 +2223,13 @@
 - [x] Ensure email, phone, and address are fetched from siteSettings table
 - [x] Replace hardcoded placeholder contact info with dynamic values
 - [x] Test cookie policy displays correct restaurant contact information
+
+## Railway Deployment Configuration (User Request - Feb 12)
+- [x] Create production-ready Dockerfile with multi-stage build
+- [x] Create .dockerignore file to exclude unnecessary files
+- [x] Create railway.json configuration file
+- [x] Create comprehensive deployment documentation
+- [x] Create environment variables documentation
+- [x] Create health check endpoint for monitoring
+- [x] Create Docker build test script
+- [ ] Test Docker build locally (user to execute)

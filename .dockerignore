@@ -1,0 +1,95 @@
+# ============================================
+# Docker Ignore File
+# Excludes unnecessary files from Docker build
+# ============================================
+
+# Node modules (will be installed in Docker)
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build outputs (will be generated in Docker)
+dist
+client/dist
+.vite
+.turbo
+
+# Development files
+.env
+.env.local
+.env.development
+.env.test
+*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage
+.nyc_output
+*.test.ts
+*.spec.ts
+__tests__
+__mocks__
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs
+*.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+circle.yml
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Deployment files (not needed in container)
+railway.json
+railway.toml
+nixpacks.toml
+docker-compose.yml
+docker-compose.*.yml
+
+# Development scripts
+scripts/dev-*
+scripts/test-*
+
+# Screenshots and marketing materials
+screenshots
+marketing-materials
+training-materials
+
+# Database files (use external database)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
