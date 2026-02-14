@@ -21,6 +21,7 @@ import { About } from "./pages/About";
 import { Blog } from "./pages/Blog";
 import { BlogArticle } from "./pages/BlogArticle";
 import AdminLogin from "./pages/admin/Login";
+import AdminSetup from "./pages/admin/Setup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -82,6 +83,7 @@ function Router() {
       <Route path="/accessibility" component={Accessibility} />
       <Route path="/submit-testimonial" component={SubmitTestimonial} />
       <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/setup" component={AdminSetup} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/admin/dashboard" component={AdminDashboard} />

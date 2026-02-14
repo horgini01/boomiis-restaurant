@@ -18,6 +18,7 @@ import { customRolesRouter } from "./customRoles";
 import { analyticsRouter } from "./routers/analytics";
 import { auditLogsRouter } from "./routers/auditLogs";
 import { passwordResetRouter } from "./passwordReset";
+import { authRouter } from "./routers/auth";
 import { logAuditAction, getIpAddress, createChangesObject } from "./services/audit.service";
 
 export const appRouter = router({
@@ -25,101 +26,7 @@ export const appRouter = router({
   analytics: analyticsRouter,
   auditLogs: auditLogsRouter,
   passwordReset: passwordResetRouter,
-  auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    login: publicProcedure
-      .input(z.object({
-        email: z.string().email(),
-        password: z.string().min(1),
-        rememberMe: z.boolean().optional(),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        const user = await verifyCredentials(input.email, input.password);
-        
-        if (!user) {
-          throw new Error('Invalid email or password');
-        }
-
-        // Allow all roles to login - navigation will be filtered based on permissions
-        // No role restriction needed here
-
-        // Create session token with appropriate expiry
-        const expiresInMs = input.rememberMe 
-          ? 30 * 24 * 60 * 60 * 1000  // 30 days if remember me is checked
-          : 24 * 60 * 60 * 1000;       // 1 day if not checked
-        
-        const token = await sdk.createSessionToken(user.openId, {
-          name: user.name || '',
-          expiresInMs,
-        });
-
-        // Set session cookie
-        const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, token, cookieOptions);
-
-        return {
-          success: true,
-          user: {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          },
-        };
-      }),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
-    }),
-    changePassword: protectedProcedure
-      .input(z.object({
-        oldPassword: z.string().min(1, 'Old password is required'),
-        newPassword: z.string()
-          .min(8, 'Password must be at least 8 characters')
-          .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-          .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-          .regex(/[0-9]/, 'Password must contain at least one number'),
-      }))
-      .mutation(async ({ input, ctx }) => {
-        const db = await getDb();
-        if (!db) throw new Error('Database not available');
-
-        // Verify old password
-        const user = await verifyCredentials(ctx.user.email!, input.oldPassword);
-        if (!user) {
-          throw new Error('Current password is incorrect');
-        }
-
-        // Hash new password
-        const { createPasswordHash } = await import('./customAuth');
-        const hashedPassword = await createPasswordHash(input.newPassword);
-
-        // Update password in database
-        await db.update(users)
-          .set({ password: hashedPassword })
-          .where(eq(users.id, ctx.user.id));
-
-        // Log audit action
-        await logAuditAction({
-          userId: ctx.user.id,
-          userName: ctx.user.name || 'Unknown',
-          userRole: ctx.user.role,
-          action: 'password_changed',
-          entityType: 'user',
-          entityId: ctx.user.id.toString(),
-          ipAddress: getIpAddress(ctx.req as any),
-          userAgent: ctx.req.headers['user-agent'] || undefined,
-        });
-
-        return {
-          success: true,
-          message: 'Password changed successfully',
-        };
-      }),
-  }),
+  auth: authRouter,
 
   newsletter: router({
     subscribe: publicProcedure

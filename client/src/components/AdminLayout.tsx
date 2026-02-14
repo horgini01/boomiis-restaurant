@@ -206,13 +206,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       const hasStandardAccess = canAccessRoute(user.role as Role, item.path);
       
       // Check custom role access if user has a custom role
-      const hasCustomAccess = user.customRoleId 
-        ? canAccessRouteWithCustomRole(user.customRoleId, item.path, customRoles)
+      const hasCustomAccess = (user as any).customRoleId 
+        ? canAccessRouteWithCustomRole((user as any).customRoleId, item.path, customRoles)
         : false;
       
       return hasStandardAccess || hasCustomAccess;
     });
-  }, [user?.role, user?.customRoleId, customRoles]);
+  }, [user?.role, (user as any)?.customRoleId, customRoles]);
   
   // Get favorite nav items
   const favoriteNavItems = useMemo(() => {

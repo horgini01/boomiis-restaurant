@@ -41,8 +41,8 @@ export default function RoleGuard({ children, requiredRoles }: RoleGuardProps) {
 
     // Check if user can access current route
     // First check if user has a custom role
-    const hasCustomRoleAccess = user.customRoleId 
-      ? canAccessRouteWithCustomRole(user.customRoleId, location, customRoles)
+    const hasCustomRoleAccess = (user as any).customRoleId 
+      ? canAccessRouteWithCustomRole((user as any).customRoleId, location, customRoles)
       : false;
     
     const hasStandardRoleAccess = canAccessRoute(userRole, location);
@@ -55,8 +55,8 @@ export default function RoleGuard({ children, requiredRoles }: RoleGuardProps) {
 
   // If user doesn't have access, don't render children
   if (user) {
-    const hasCustomRoleAccess = user.customRoleId 
-      ? canAccessRouteWithCustomRole(user.customRoleId, location, customRoles)
+    const hasCustomRoleAccess = (user as any).customRoleId 
+      ? canAccessRouteWithCustomRole((user as any).customRoleId, location, customRoles)
       : false;
     const hasStandardRoleAccess = canAccessRoute(user.role as Role, location);
     

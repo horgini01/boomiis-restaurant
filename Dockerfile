@@ -32,6 +32,9 @@ COPY . .
 # Set build-time environment variables
 ENV NODE_ENV=production
 
+# Generate database migrations at build time
+RUN pnpm drizzle-kit generate
+
 # Build the application
 # This runs: vite build (frontend) && esbuild (backend)
 RUN pnpm run build

@@ -10,6 +10,12 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   password: varchar("password", { length: 255 }), // Hashed password for email/password login
+  passwordHash: varchar("password_hash", { length: 255 }), // Bcrypt hashed password for self-hosted auth
+  otpCode: varchar("otp_code", { length: 6 }), // 6-digit OTP for email verification
+  otpExpires: timestamp("otp_expires"), // OTP expiry timestamp (10 minutes)
+  passwordResetToken: varchar("password_reset_token", { length: 255 }), // Token for password reset
+  passwordResetExpires: timestamp("password_reset_expires"), // Password reset token expiry
+  isSetupComplete: boolean("is_setup_complete").default(false).notNull(), // First-time admin setup flag
   role: mysqlEnum("role", ["user", "admin", "owner", "manager", "kitchen_staff", "front_desk"]).default("user").notNull(),
   customRoleId: int("custom_role_id"), // Reference to custom_roles table for custom role assignment
   firstName: varchar("first_name", { length: 100 }),

@@ -1,18 +1,18 @@
 import { useState, FormEvent } from 'react';
-import { Link, useLocation } from 'wouter';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Mail, Lock, CheckCircle2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Lock, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
-type ResetStep = 'email' | 'otp' | 'password' | 'complete';
+type SetupStep = 'email' | 'otp' | 'password' | 'complete';
 
-export default function ForgotPassword() {
+export default function AdminSetup() {
   const [, setLocation] = useLocation();
-  const [step, setStep] = useState<ResetStep>('email');
+  const [step, setStep] = useState<SetupStep>('email');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
@@ -20,26 +20,28 @@ export default function ForgotPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const requestResetMutation = trpc.auth.requestPasswordResetOTP.useMutation({
+  const requestOTPMutation = trpc.auth.requestSetupOTP.useMutation({
     onSuccess: () => {
-      toast.success('Reset code sent to your email!');
+      toast.success('Verification code sent to your email!');
       setStep('otp');
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to send reset code');
+      toast.error(error.message || 'Failed to send verification code');
     },
   });
 
-  const resetPasswordMutation = trpc.auth.resetPassword.useMutation({
+  // No separate verify OTP mutation - verification happens in completeSetup
+
+  const completeSetupMutation = trpc.auth.completeSetup.useMutation({
     onSuccess: () => {
-      toast.success('Password reset successful!');
+      toast.success('Setup complete! Redirecting to login...');
       setStep('complete');
       setTimeout(() => {
         setLocation('/admin/login');
-      }, 3000);
+      }, 2000);
     },
     onError: (error) => {
-      toast.error(error.message || 'Password reset failed');
+      toast.error(error.message || 'Setup failed');
     },
   });
 
@@ -49,7 +51,7 @@ export default function ForgotPassword() {
       toast.error('Please enter your email');
       return;
     }
-    requestResetMutation.mutate({ email });
+    requestOTPMutation.mutate({ email });
   };
 
   const handleOTPSubmit = (e: FormEvent) => {
@@ -58,6 +60,7 @@ export default function ForgotPassword() {
       toast.error('Please enter the 6-digit code');
       return;
     }
+    // Move to password step
     setStep('password');
   };
 
@@ -94,7 +97,7 @@ export default function ForgotPassword() {
       return;
     }
 
-    resetPasswordMutation.mutate({ email, otpCode: otp, newPassword: password });
+    completeSetupMutation.mutate({ email, otpCode: otp, password });
   };
 
   const renderStepIndicator = () => (
@@ -136,12 +139,12 @@ export default function ForgotPassword() {
               <Mail className="h-8 w-8 text-primary" />
             )}
           </div>
-          <CardTitle className="text-3xl font-bold">Reset Password</CardTitle>
+          <CardTitle className="text-3xl font-bold">Admin Setup</CardTitle>
           <CardDescription>
-            {step === 'email' && 'Enter your email to receive a reset code'}
+            {step === 'email' && 'Verify your email to get started'}
             {step === 'otp' && 'Enter the verification code'}
-            {step === 'password' && 'Create your new password'}
-            {step === 'complete' && 'Password reset complete!'}
+            {step === 'password' && 'Create your password'}
+            {step === 'complete' && 'Setup complete!'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -157,7 +160,7 @@ export default function ForgotPassword() {
                   placeholder="admin@restaurant.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={requestResetMutation.isPending}
+                  disabled={requestOTPMutation.isPending}
                   required
                   autoFocus
                 />
@@ -170,29 +173,17 @@ export default function ForgotPassword() {
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={requestResetMutation.isPending}
+                disabled={requestOTPMutation.isPending}
               >
-                {requestResetMutation.isPending ? (
+                {requestOTPMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Sending code...
                   </>
                 ) : (
-                  'Send Reset Code'
+                  'Send Verification Code'
                 )}
               </Button>
-
-              <Link href="/admin/login">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Login
-                </Button>
-              </Link>
             </form>
           )}
 
@@ -223,7 +214,14 @@ export default function ForgotPassword() {
                 className="w-full"
                 disabled={false}
               >
-                Continue
+                {false ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify Code'
+                )}
               </Button>
 
               <Button
@@ -242,15 +240,15 @@ export default function ForgotPassword() {
           {step === 'password' && (
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="password">New Password</Label>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter new password"
+                    placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={resetPasswordMutation.isPending}
+                    disabled={completeSetupMutation.isPending}
                     required
                     autoFocus
                     className="pr-10"
@@ -267,15 +265,15 @@ export default function ForgotPassword() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm new password"
+                    placeholder="Confirm password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={resetPasswordMutation.isPending}
+                    disabled={completeSetupMutation.isPending}
                     required
                     className="pr-10"
                   />
@@ -312,15 +310,15 @@ export default function ForgotPassword() {
                 type="submit"
                 size="lg"
                 className="w-full"
-                disabled={resetPasswordMutation.isPending}
+                disabled={completeSetupMutation.isPending}
               >
-                {resetPasswordMutation.isPending ? (
+                {completeSetupMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Resetting password...
+                    Completing setup...
                   </>
                 ) : (
-                  'Reset Password'
+                  'Complete Setup'
                 )}
               </Button>
             </form>
@@ -332,9 +330,9 @@ export default function ForgotPassword() {
                 <CheckCircle2 className="h-8 w-8 text-green-500" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">Password Reset Complete!</h3>
+                <h3 className="text-lg font-semibold">Setup Complete!</h3>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Your password has been reset successfully.
+                  Your admin account has been created successfully.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Redirecting to login...
