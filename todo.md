@@ -2233,3 +2233,10 @@
 - [x] Create health check endpoint for monitoring
 - [x] Create Docker build test script
 - [ ] Test Docker build locally (user to execute)
+
+## Railway Resource Optimization (User Request - Feb 14)
+- [ ] Add Railway Hobby plan resource constraints to railway.json
+- [ ] Document Railway pricing tiers and resource limits
+- [ ] Optimize application for $5/month Hobby plan
+- [ ] Generate complete environment variables list for Railway
+- [ ] Push deployment configuration to GitHub

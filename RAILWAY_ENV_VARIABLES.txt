@@ -1,0 +1,70 @@
+# ============================================
+# RAILWAY ENVIRONMENT VARIABLES
+# Copy and paste these into Railway dashboard
+# Replace placeholder values with your actual values
+# ============================================
+
+# ============================================
+# REQUIRED - DATABASE
+# ============================================
+DATABASE_URL=mysql://username:password@host:3306/database
+# If using Railway MySQL, this is auto-set
+# If using PlanetScale: mysql://username:password@aws.connect.psdb.cloud/database?ssl={"rejectUnauthorized":true}
+
+# ============================================
+# REQUIRED - APPLICATION
+# ============================================
+NODE_ENV=production
+PORT=3000
+BASE_URL=https://your-app.railway.app
+JWT_SECRET=generate-with-openssl-rand-base64-32
+
+# ============================================
+# REQUIRED - STRIPE PAYMENT
+# ============================================
+STRIPE_SECRET_KEY=sk_live_your_stripe_secret_key
+VITE_STRIPE_PUBLISHABLE_KEY=pk_live_your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+
+# ============================================
+# REQUIRED - EMAIL (RESEND)
+# ============================================
+RESEND_API_KEY=re_your_resend_api_key
+FROM_EMAIL=orders@yourdomain.com
+ADMIN_EMAIL=admin@yourdomain.com
+
+# ============================================
+# REQUIRED - BRANDING
+# ============================================
+VITE_APP_TITLE=Your Restaurant Name
+VITE_APP_LOGO=/logos/your-logo.png
+
+# ============================================
+# OPTIONAL - MANUS OAUTH (if using Manus auth)
+# ============================================
+OAUTH_SERVER_URL=https://api.manus.im
+VITE_OAUTH_PORTAL_URL=https://auth.manus.im
+VITE_APP_ID=your-manus-app-id
+OWNER_OPEN_ID=your-owner-open-id
+OWNER_NAME=Your Name
+
+# ============================================
+# OPTIONAL - MANUS SERVICES (if using Manus features)
+# ============================================
+BUILT_IN_FORGE_API_URL=https://forge.manus.im
+BUILT_IN_FORGE_API_KEY=your-forge-api-key
+VITE_FRONTEND_FORGE_API_KEY=your-frontend-forge-key
+VITE_FRONTEND_FORGE_API_URL=https://forge.manus.im
+
+# ============================================
+# OPTIONAL - ANALYTICS
+# ============================================
+VITE_ANALYTICS_ENDPOINT=https://analytics.yourdomain.com
+VITE_ANALYTICS_WEBSITE_ID=your-website-id
+
+# ============================================
+# OPTIONAL - SMS NOTIFICATIONS
+# ============================================
+BULKSMS_TOKEN_ID=your-bulksms-token-id
+BULKSMS_TOKEN_SECRET=your-bulksms-token-secret
+TEXTLOCAL_API_KEY=your-textlocal-api-key
