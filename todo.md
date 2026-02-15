@@ -67,4 +67,16 @@
 ## SSL Handshake Error in Scheduled Jobs (User Report - Feb 14)
 - [x] Find reservation reminders job and other scheduled jobs
 - [x] Fix database connection in server/db.ts (rejectUnauthorized: false)
-- [ ] Trigger Railway rebuild to compile latest schema and apply SSL fix
+- [x] Trigger Railway rebuild to compile latest schema and apply SSL fix
+
+## Admin Setup Email Not Recognized (User Report - Feb 15)
+- [ ] Explain current admin setup flow logic
+- [ ] Check if admin account exists in database with user's email
+- [ ] Verify migration script created admin account correctly
+- [ ] Fix admin setup to recognize custom admin email (bravehatconsulting@gmail.com)
+
+## Critical Admin Flow Issues (User Report - Feb 15)
+- [x] Fix createDefaultAdmin function to properly handle SQL errors and create admin account
+- [ ] Document admin setup flow purpose (setup = first-time password creation, not registration)
+- [x] Fix "Invalid URL" error on /admin/login page (removed OAuth redirects, use /admin/login)
+- [ ] Test complete admin authentication flow (setup → login → dashboard)

@@ -204,8 +204,8 @@ async function createDefaultAdmin() {
       
       // Create admin account (password will be set on first login)
       await connection.query(`
-        INSERT INTO users (openId, email, name, role, is_setup_complete, createdAt, updatedAt)
-        VALUES (?, ?, ?, 'admin', FALSE, NOW(), NOW())
+        INSERT INTO users (openId, email, name, role, is_setup_complete, createdAt, updatedAt, lastSignedIn)
+        VALUES (?, ?, ?, 'admin', FALSE, NOW(), NOW(), NOW())
       `, [openId, adminEmail, adminName]);
       
       console.log(`[Migration] ✅ Admin account created: ${adminEmail}`);
