@@ -95,4 +95,26 @@
 ## Invalid URL Error on Admin Login Page (User Report - Feb 15)
 - [x] Search for all getLoginUrl() calls in codebase (found in useAuth.ts)
 - [x] Fix useAuth hook to use '/admin/login' instead of getLoginUrl()
-- [ ] Test admin login page works without errors after redeployment
+- [x] Test admin login page works without errors after redeployment
+
+## Login Redirect Loop - Session Cookie Not Set (User Report - Feb 15)
+- [x] Check login procedure session cookie creation (correct)
+- [x] Check authentication middleware cookie validation (correct)
+- [x] Found bug: cookie-parser middleware was missing
+- [x] Install cookie-parser package
+- [x] Add cookieParser() middleware to Express server
+- [ ] Test login flow end-to-end with browser DevTools
+
+## S3 Image Upload Integration Status
+- [x] Check if S3 upload is implemented in admin dashboard (YES - fully implemented)
+- [x] Verify storagePut/storageGet are wired to UI (YES - used in MenuItems, GalleryManagement, AboutContent, RestaurantSettings)
+- [x] Document current image upload implementation
+
+**S3 Integration Summary:**
+- Backend: `admin.uploadImage` procedure accepts base64 images, uploads to S3 via `storagePut()`
+- Storage path: `menu-items/{timestamp}-{random}-{filename}`
+- Frontend pages using S3 uploads:
+  * Menu Items Management
+  * Gallery Management
+  * About Content Management (team photos, awards)
+  * Restaurant Settings (logo, hero image)

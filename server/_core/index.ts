@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import cookieParser from "cookie-parser";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -121,6 +122,9 @@ async function startServer() {
   // Health check endpoints for Railway/Docker monitoring
   const healthRouter = await import('./health');
   app.use('/api', healthRouter.default);
+  
+  // Configure cookie parser for authentication
+  app.use(cookieParser());
   
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
