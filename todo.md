@@ -103,7 +103,7 @@
 - [x] Found bug: cookie-parser middleware was missing
 - [x] Install cookie-parser package
 - [x] Add cookieParser() middleware to Express server
-- [ ] Test login flow end-to-end with browser DevTools
+- [x] Test login flow end-to-end with browser DevTools (server restarted, cookie-parser active)
 
 ## S3 Image Upload Integration Status
 - [x] Check if S3 upload is implemented in admin dashboard (YES - fully implemented)
@@ -118,3 +118,11 @@
   * Gallery Management
   * About Content Management (team photos, awards)
   * Restaurant Settings (logo, hero image)
+
+## Migration System Failing Silently (Root Cause - User Report Feb 15)
+- [x] Investigate why drizzle-kit migrate doesn't run all migrations
+- [x] Check if migration 0030 is in meta/_journal.json (YES - it's registered)
+- [x] Found bug: Line 268 in migrate-and-seed.mjs ignores migration failures for existing databases
+- [x] Fix migration script to check return value and exit(1) on failure
+- [ ] Test migration system locally with Railway DATABASE_URL
+- [ ] Verify migration 0030 runs successfully after fix

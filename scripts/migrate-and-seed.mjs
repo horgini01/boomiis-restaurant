@@ -265,7 +265,11 @@ async function main() {
     
     // Still apply any pending migrations
     console.log('[Migration] Checking for pending migrations...');
-    await runMigrations();
+    const migrationSuccess = await runMigrations();
+    if (!migrationSuccess) {
+      console.error('[Migration] ❌ Pending migrations failed');
+      process.exit(1);
+    }
   }
   
   process.exit(0);
