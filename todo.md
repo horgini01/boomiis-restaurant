@@ -92,3 +92,7 @@
 - [x] Test: Second admin registration (1 admin exists, ALLOW_ADMIN_SIGNUP=true) - should succeed ✅ PASSED
 - [x] Test: Duplicate email registration - should fail ✅ PASSED
 - [x] Test: Weak password validation - should fail ✅ PASSED
+## Invalid URL Error on Admin Login Page (User Report - Feb 15)
+- [x] Search for all getLoginUrl() calls in codebase (found in useAuth.ts)
+- [x] Fix useAuth hook to use '/admin/login' instead of getLoginUrl()
+- [ ] Test admin login page works without errors after redeployment
