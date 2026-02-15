@@ -250,11 +250,12 @@ async function main() {
       console.error('[Migration] ⚠️  Seeding failed, but continuing...');
     }
     
-    // Create admin account
-    const adminSuccess = await createDefaultAdmin();
-    if (!adminSuccess) {
-      console.error('[Migration] ⚠️  Admin creation failed, but continuing...');
-    }
+    // Admin account creation removed - using self-registration flow instead
+    // See /admin/register for admin registration
+    // const adminSuccess = await createDefaultAdmin();
+    // if (!adminSuccess) {
+    //   console.error('[Migration] ⚠️  Admin creation failed, but continuing...');
+    // }
     
     console.log('='.repeat(60));
     console.log('✅ Database initialization completed!');

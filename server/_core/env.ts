@@ -18,4 +18,6 @@ export const ENV = {
   bulksmsTokenId: process.env.BULKSMS_TOKEN_ID ?? "",
   bulksmsTokenSecret: process.env.BULKSMS_TOKEN_SECRET ?? "",
   smsProvider: process.env.SMS_PROVIDER ?? "bulksms",
+  adminSignupSecret: process.env.ADMIN_SIGNUP_SECRET ?? "",
+  allowAdminSignup: process.env.ALLOW_ADMIN_SIGNUP === "true",
 };

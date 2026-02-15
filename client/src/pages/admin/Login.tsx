@@ -132,7 +132,16 @@ export default function AdminLogin() {
             </Button>
           </form>
           
-          <p className="text-xs text-muted-foreground text-center mt-6">
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{' '}
+              <Link href="/admin/register" className="text-primary hover:underline font-medium">
+                Register here
+              </Link>
+            </p>
+          </div>
+          
+          <p className="text-xs text-muted-foreground text-center mt-4">
             Only authorized administrators can access this area
           </p>
         </CardContent>

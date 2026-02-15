@@ -3,7 +3,7 @@ import { TRPCError } from '@trpc/server';
 import { publicProcedure, router } from '../_core/trpc';
 import { getDb } from '../db';
 import { users } from '../../drizzle/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import {
   hashPassword,
   verifyPassword,
@@ -633,4 +633,115 @@ export const authRouter = router({
       return null;
     }
   }),
+
+  /**
+   * Admin self-registration with secret validation
+   */
+  registerAdmin: publicProcedure
+    .input(
+      z.object({
+        firstName: z.string().min(1, 'First name is required'),
+        lastName: z.string().min(1, 'Last name is required'),
+        email: z.string().email('Invalid email address'),
+        password: z.string().min(8, 'Password must be at least 8 characters'),
+        secret: z.string().min(1, 'Registration secret is required'),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database connection failed',
+        });
+      }
+
+      // Validate secret
+      if (!ENV.adminSignupSecret) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Admin registration is not configured. Please contact system administrator.',
+        });
+      }
+
+      if (input.secret !== ENV.adminSignupSecret) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Invalid registration secret',
+        });
+      }
+
+      // Check if any admin exists
+      const [adminCountResult] = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(users)
+        .where(eq(users.role, 'admin'));
+      
+      const adminCount = Number(adminCountResult?.count || 0);
+
+      // If admins exist and ALLOW_ADMIN_SIGNUP is false, block registration
+      if (adminCount > 0 && !ENV.allowAdminSignup) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Admin registration is currently disabled',
+        });
+      }
+
+      // Check if email already exists
+      const [existingUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, input.email))
+        .limit(1);
+
+      if (existingUser) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'An account with this email already exists',
+        });
+      }
+
+      // Validate password strength
+      const passwordValidation = validatePassword(input.password);
+      if (!passwordValidation.isValid) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: passwordValidation.error || 'Invalid password',
+        });
+      }
+
+      // Hash password
+      const passwordHash = await hashPassword(input.password);
+
+      // Create admin account
+      const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      const fullName = `${input.firstName} ${input.lastName}`;
+
+      await db.insert(users).values({
+        openId,
+        email: input.email,
+        name: fullName,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        role: 'admin',
+        passwordHash,
+        isSetupComplete: true, // Self-registration is complete setup
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastSignedIn: new Date(),
+      });
+
+      // Send welcome email (optional, don't fail if it errors)
+      try {
+        const loginUrl = `${ENV.baseUrl}/admin/login`;
+        await sendAdminWelcomeEmail(input.email, fullName, loginUrl);
+      } catch (error) {
+        console.error('[Admin Registration] Failed to send welcome email:', error);
+      }
+
+      return {
+        success: true,
+        message: 'Admin account created successfully. You can now log in.',
+      };
+    }),
 });

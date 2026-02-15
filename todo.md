@@ -77,6 +77,18 @@
 
 ## Critical Admin Flow Issues (User Report - Feb 15)
 - [x] Fix createDefaultAdmin function to properly handle SQL errors and create admin account
-- [ ] Document admin setup flow purpose (setup = first-time password creation, not registration)
+- [x] Document admin setup flow purpose (setup = first-time password creation, not registration)
 - [x] Fix "Invalid URL" error on /admin/login page (removed OAuth redirects, use /admin/login)
-- [ ] Test complete admin authentication flow (setup → login → dashboard)
+- [ ] Test complete admin authentication flow (setup → login → dashboard) - requires manual SQL insert first
+
+## Admin Self-Registration Implementation (User Request - Feb 15)
+- [x] Remove createDefaultAdmin() call from migration script (keep function commented for reference)
+- [x] Add ADMIN_SIGNUP_SECRET and ALLOW_ADMIN_SIGNUP env variables to server/_core/env.ts
+- [x] Create auth.registerAdmin tRPC procedure with validation logic
+- [x] Create /admin/register frontend page with firstname, lastname, email, password, secret fields
+- [x] Test: First admin registration (no admins in DB, ALLOW_ADMIN_SIGNUP=false) ✅ PASSED
+- [x] Test: First admin registration with wrong secret ✅ PASSED
+- [x] Test: Second admin registration (1 admin exists, ALLOW_ADMIN_SIGNUP=false) - should fail ✅ PASSED
+- [x] Test: Second admin registration (1 admin exists, ALLOW_ADMIN_SIGNUP=true) - should succeed ✅ PASSED
+- [x] Test: Duplicate email registration - should fail ✅ PASSED
+- [x] Test: Weak password validation - should fail ✅ PASSED
