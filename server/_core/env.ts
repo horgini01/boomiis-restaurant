@@ -20,4 +20,10 @@ export const ENV = {
   smsProvider: process.env.SMS_PROVIDER ?? "bulksms",
   adminSignupSecret: process.env.ADMIN_SIGNUP_SECRET ?? "",
   allowAdminSignup: process.env.ALLOW_ADMIN_SIGNUP === "true",
+  
+  // AWS S3 Configuration
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
+  awsRegion: process.env.AWS_REGION ?? "",
+  awsS3Bucket: process.env.AWS_S3_BUCKET ?? "",
 };
