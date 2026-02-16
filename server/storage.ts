@@ -28,8 +28,8 @@ export async function storagePut(
     Key: key,
     Body: data,
     ContentType: contentType,
-    // Make objects publicly readable (adjust based on your security requirements)
-    ACL: 'public-read',
+    // Note: Public access is controlled by bucket policy, not ACLs
+    // ACLs are disabled on this bucket (AWS recommended security setting)
   });
 
   await s3Client.send(command);

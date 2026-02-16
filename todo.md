@@ -135,3 +135,8 @@
 - [ ] User to set up AWS S3 bucket and IAM credentials
 - [ ] User to add AWS environment variables to Railway
 - [ ] Test upload after AWS credentials are configured
+
+## S3 Upload ACL Error (User Report - Feb 16)
+- [x] Fix AccessControlListNotSupported error in storage.ts (remove ACL: 'public-read')
+- [ ] User to add bucket policy for public read access (see checkpoint message)
+- [ ] Test image upload after bucket policy is configured
