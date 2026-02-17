@@ -580,3 +580,15 @@ export const passwordResetTokens = mysqlTable("password_reset_tokens", {
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+/**
+ * Track completed data migrations to prevent re-running on server restart
+ */
+export const migrationsRun = mysqlTable("migrations_run", {
+  id: int("id").autoincrement().primaryKey(),
+  migrationName: varchar("migration_name", { length: 255 }).notNull().unique(),
+  runAt: timestamp("run_at").defaultNow().notNull(),
+});
+
+export type MigrationRun = typeof migrationsRun.$inferSelect;
+export type InsertMigrationRun = typeof migrationsRun.$inferInsert;

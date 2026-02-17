@@ -33,6 +33,10 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   
+  // Run data migrations on startup
+  const { runDataMigrations } = await import('./migrations');
+  await runDataMigrations();
+  
   // Initialize scheduled jobs
   const { setupCronJobs } = await import('../jobs/setup-cron');
   setupCronJobs();

@@ -145,3 +145,10 @@
 - [x] Add support for all 18 template types in sendTestEmail procedure
 - [x] Generate preview data for each template type
 - [ ] Test sending test emails for all template types (user to test)
+
+## Email Template Not Found Error (User Report - Feb 17)
+- [x] Check production database for existing email templates
+- [x] Create migrations_run table to track completed migrations
+- [x] Create startup migration script that seeds email templates once
+- [x] Hook migration script into server startup process
+- [ ] Test sending test emails for all template types in production
