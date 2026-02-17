@@ -152,3 +152,9 @@
 - [x] Create startup migration script that seeds email templates once
 - [x] Hook migration script into server startup process
 - [ ] Test sending test emails for all template types in production
+
+## Restaurant Logo Upload Issue (User Report - Feb 17)
+- [x] Investigate why logo disappears after clicking "Save All" in Restaurant Info
+- [x] Fix logo persistence by uploading to S3 instead of local filesystem
+- [x] Ensure uploaded logo displays correctly on frontend header
+- [ ] Test logo upload flow end-to-end (user to test)

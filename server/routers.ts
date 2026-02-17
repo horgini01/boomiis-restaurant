@@ -2026,9 +2026,8 @@ export const appRouter = router({
         const base64Data = input.fileData.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
 
-        // Save file locally to client/public/logos/ (same approach as menu images)
-        const fs = await import('fs/promises');
-        const path = await import('path');
+        // Upload to S3 instead of local filesystem
+        const { storagePut } = await import('./storage');
         
         // Sanitize filename
         const sanitizedFileName = input.fileName
@@ -2038,31 +2037,24 @@ export const appRouter = router({
         const randomSuffix = Math.random().toString(36).substring(2, 10);
         const fileName = `logo-${randomSuffix}.${sanitizedFileName.split('.').pop()}`;
         
-        // Ensure logos directory exists
-        const logosDir = path.join(process.cwd(), 'client', 'public', 'logos');
-        await fs.mkdir(logosDir, { recursive: true });
-        
-        // Write file
-        const filePath = path.join(logosDir, fileName);
-        await fs.writeFile(filePath, buffer);
-        
-        // Public URL path
-        const publicUrl = `/logos/${fileName}`;
+        // Upload to S3
+        const s3Key = `logos/${fileName}`;
+        const { url: s3Url } = await storagePut(s3Key, buffer, input.mimeType);
         
         // Save logo URL to settings
         const [existing] = await db.select().from(siteSettings).where(eq(siteSettings.settingKey, 'restaurant_logo')).limit(1);
         if (existing) {
           await db.update(siteSettings)
-            .set({ settingValue: publicUrl })
+            .set({ settingValue: s3Url })
             .where(eq(siteSettings.settingKey, 'restaurant_logo'));
         } else {
           await db.insert(siteSettings).values({
             settingKey: 'restaurant_logo',
-            settingValue: publicUrl,
+            settingValue: s3Url,
           });
         }
 
-        return { success: true, url: publicUrl };
+        return { success: true, url: s3Url };
       }),
 
     getEmailPreviews: protectedProcedure
