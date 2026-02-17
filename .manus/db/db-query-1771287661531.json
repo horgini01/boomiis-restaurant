@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, email, name, role, is_setup_complete, password_hash IS NOT NULL as has_password, createdAt FROM users WHERE role = 'admin' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, email, name, role, is_setup_complete, password_hash IS NOT NULL as has_password, createdAt FROM users WHERE role = 'admin' LIMIT 10;",
+  "rows": [
+    {
+      "id": "1980027",
+      "email": "bravehatconsulting@gmail.com",
+      "name": "Bravehat Consulting",
+      "role": "admin",
+      "is_setup_complete": "0",
+      "has_password": "0",
+      "createdAt": "2026-02-08 00:05:59"
+    },
+    {
+      "id": "2310013",
+      "email": "test-custom-role@example.com",
+      "name": "Test User",
+      "role": "admin",
+      "is_setup_complete": "0",
+      "has_password": "0",
+      "createdAt": "2026-02-09 16:18:10"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tname\trole\tis_setup_complete\thas_password\tcreatedAt\n1980027\tbravehatconsulting@gmail.com\tBravehat Consulting\tadmin\t0\t0\t2026-02-08 00:05:59\n2310013\ttest-custom-role@example.com\tTest User\tadmin\t0\t0\t2026-02-09 16:18:10\n",
+  "stderr": "",
+  "execution_time_ms": 78
+}

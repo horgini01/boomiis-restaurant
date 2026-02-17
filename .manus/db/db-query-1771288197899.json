@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, email, name, role, is_setup_complete, password_hash IS NOT NULL as has_password FROM users WHERE email LIKE '%damysho%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT id, email, name, role, is_setup_complete, password_hash IS NOT NULL as has_password FROM users WHERE email LIKE '%damysho%';",
+  "rows": [
+    {
+      "id": "1950050",
+      "email": "damysho2002@yahoo.com",
+      "name": "dammy show",
+      "role": "owner",
+      "is_setup_complete": "0",
+      "has_password": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tname\trole\tis_setup_complete\thas_password\n1950050\tdamysho2002@yahoo.com\tdammy show\towner\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 48
+}

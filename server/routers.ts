@@ -2179,28 +2179,83 @@ export const appRouter = router({
         templateType: z.string(),
         recipientEmail: z.string().email(),
       }))
-      .mutation(async ({ ctx, input }) => {        const { generateEmailPreviews } = await import('./email');
-        const previews = await generateEmailPreviews();
+      .mutation(async ({ ctx, input }) => {        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        const { emailTemplates } = await import('../drizzle/schema');
         
-        let html = '';
-        let subject = '';
-        
-        switch (input.templateType) {
-          case 'order_confirmation':
-            html = previews.orderConfirmation;
-            subject = '[TEST] Order Confirmation - #BO-PREVIEW-001';
-            break;
-          case 'reservation_confirmation':
-            html = previews.reservationConfirmation;
-            subject = '[TEST] Reservation Confirmed - Preview';
-            break;
-          case 'admin_order_notification':
-            html = previews.adminOrderNotification;
-            subject = '[TEST] New Order Notification - #BO-PREVIEW-001';
-            break;
-          default:
-            throw new Error('Invalid template type');
+        // Load template from database
+        const [template] = await db.select()
+          .from(emailTemplates)
+          .where(eq(emailTemplates.templateType, input.templateType))
+          .limit(1);
+
+        if (!template) {
+          throw new Error(`Template not found: ${input.templateType}`);
         }
+
+        // Sample data for placeholders
+        const sampleData: Record<string, string> = {
+          customerName: 'John Smith',
+          orderNumber: 'BO-PREVIEW-001',
+          orderType: 'Delivery',
+          scheduledTime: 'Today at 7:00 PM',
+          deliveryAddress: '123 Sample Street, London SW1A 1AA',
+          itemsList: '<ul><li>Jollof Rice with Chicken x2 - £25.98</li><li>Fried Plantain x1 - £3.99</li></ul>',
+          subtotal: '29.97',
+          deliveryFee: '3.99',
+          total: '33.96',
+          restaurantName: 'Boomiis Restaurant',
+          restaurantAddress: '123 High Street, London',
+          reservationDateTime: 'Saturday, 20th January 2024 at 7:00 PM',
+          partySize: '4',
+          specialRequests: 'Window seat if available',
+          estimatedArrival: '30 minutes',
+          customerEmail: 'customer@example.com',
+          customerPhone: '+44 7700 900000',
+        };
+
+        // Replace placeholders in body and subject
+        let html = template.bodyHtml;
+        let subject = template.subject;
+        
+        Object.entries(sampleData).forEach(([key, value]) => {
+          const regex = new RegExp(`\\{${key}\\}`, 'g');
+          html = html.replace(regex, value);
+          subject = subject.replace(regex, value);
+        });
+
+        // Wrap in email template structure
+        html = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                .container { max-width: 600px; margin: 0 auto; }
+                .header { background: ${template.headerColor}; color: white; padding: 30px 20px; text-align: center; }
+                .header h1 { margin: 0; font-size: 28px; }
+                .content { background: #f9f9f9; padding: 30px 20px; }
+                .content h2, .content h3, .content h4 { color: ${template.headerColor}; }
+                .footer { background: #333; color: #fff; padding: 20px; text-align: center; font-size: 14px; }
+                ul, ol { padding-left: 20px; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>[TEST] Email Preview</h1>
+                </div>
+                <div class="content">
+                  ${html}
+                </div>
+                <div class="footer">
+                  ${template.footerText || 'Thank you for choosing Boomiis Restaurant!'}
+                </div>
+              </div>
+            </body>
+          </html>
+        `;
 
         const resend = getResendClient();
         if (!resend) {
@@ -2210,7 +2265,7 @@ export const appRouter = router({
         const { data: result, error } = await resend.emails.send({
           from: FROM_EMAIL,
           to: input.recipientEmail,
-          subject,
+          subject: `[TEST] ${subject}`,
           html,
         });
 

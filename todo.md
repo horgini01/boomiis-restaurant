@@ -140,3 +140,8 @@
 - [x] Fix AccessControlListNotSupported error in storage.ts (remove ACL: 'public-read')
 - [ ] User to add bucket policy for public read access (see checkpoint message)
 - [ ] Test image upload after bucket policy is configured
+
+## Email Template Test Send Error (User Report - Feb 17)
+- [x] Add support for all 18 template types in sendTestEmail procedure
+- [x] Generate preview data for each template type
+- [ ] Test sending test emails for all template types (user to test)

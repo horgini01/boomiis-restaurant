@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE users SET password_hash = '$2b$10$zVQkglYGJ2lB0uVMDIi.m.yswq5wg64wjNgT.cjJ.sH62yVrDiDNq', is_setup_complete = TRUE, updatedAt = NOW() WHERE email = 'damysho2002@yahoo.com' AND role = 'admin';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute UPDATE users SET password_hash = '$2b$10$zVQkglYGJ2lB0uVMDIi.m.yswq5wg64wjNgT.cjJ.sH62yVrDiDNq', is_setup_complete = TRUE, updatedAt = NOW() WHERE email = 'damysho2002@yahoo.com' AND role = 'admin';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 59
+}
