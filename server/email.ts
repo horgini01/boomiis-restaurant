@@ -655,9 +655,12 @@ export async function sendAdminReservationNotification(data: ReservationEmailDat
       </html>
     `;
 
+    // Get all admin emails
+    const adminEmails = await getAdminEmails();
+    
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: ADMIN_EMAIL,
+      to: adminEmails,
       subject: `🔔 New Reservation - ${formattedDate} at ${data.time} (${data.guests} guests)`,
       html,
     });
@@ -1062,9 +1065,12 @@ export async function sendAdminEventInquiryNotification(data: {
       </html>
     `;
 
+    // Get all admin emails
+    const adminEmails = await getAdminEmails();
+    
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
-      to: ADMIN_EMAIL,
+      to: adminEmails,
       subject: `🔔 New Event Inquiry - ${eventTypeLabels[data.eventType] || data.eventType}`,
       html,
     });
@@ -2909,6 +2915,135 @@ export async function sendCateringQuoteRequestEmail(data: {
     return { success: true, id: result?.id };
   } catch (error) {
     console.error('[Email] Failed to send catering quote request email:', error);
+    return { success: false, error };
+  }
+}
+
+
+/**
+ * Send catering quote request notification to admin
+ */
+export async function sendAdminCateringNotification(data: {
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+  cateringType: string;
+  guestCount: number;
+  eventDate: Date;
+  specialRequests?: string;
+}): Promise<{ success: boolean; error?: any; id?: string }> {
+  const resend = getResendClient();
+  if (!resend) {
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const formattedDate = data.eventDate.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const cateringTypeLabels: Record<string, string> = {
+      full_service: '🍽️ Full Service Catering',
+      buffet: '🍱 Buffet Style',
+      drop_off: '📦 Drop-off Catering',
+      custom: '✨ Custom Package',
+    };
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9fafb;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 30px; text-align: center;">
+                <h1 style="margin: 0; color: #f59e0b; font-size: 28px; font-weight: bold;">🔔 New Catering Request</h1>
+              </div>
+
+              <div style="padding: 30px;">
+                <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
+                  <p style="margin: 0; color: #92400e; font-weight: 600;">⚡ Action Required: New catering quote request</p>
+                </div>
+
+                <h2 style="margin: 0 0 20px; color: #1f2937; font-size: 20px;">Customer Information</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Name:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${data.customerName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Email:</td>
+                    <td style="padding: 8px 0;"><a href="mailto:${data.customerEmail}" style="color: #f59e0b; text-decoration: none;">${data.customerEmail}</a></td>
+                  </tr>
+                  ${data.customerPhone ? `
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Phone:</td>
+                    <td style="padding: 8px 0;"><a href="tel:${data.customerPhone}" style="color: #f59e0b; text-decoration: none;">${data.customerPhone}</a></td>
+                  </tr>
+                  ` : ''}
+                </table>
+
+                <h2 style="margin: 0 0 20px; color: #1f2937; font-size: 20px;">Event Details</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Catering Type:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${cateringTypeLabels[data.cateringType] || data.cateringType}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Event Date:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${formattedDate}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Guest Count:</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${data.guestCount} guests</td>
+                  </tr>
+                </table>
+
+                ${data.specialRequests ? `
+                <h2 style="margin: 0 0 15px; color: #1f2937; font-size: 20px;">Special Requests</h2>
+                <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 25px;">
+                  <p style="margin: 0; color: #374151; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${data.specialRequests}</p>
+                </div>
+                ` : ''}
+
+                <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 15px; border-radius: 4px;">
+                  <p style="margin: 0; color: #065f46; font-size: 14px;">
+                    <strong>Next Steps:</strong> Review the request and send a detailed quote to the customer within 24 hours.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // Get all admin emails
+    const adminEmails = await getAdminEmails();
+    
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: adminEmails,
+      subject: `🔔 New Catering Request - ${formattedDate} (${data.guestCount} guests)`,
+      html,
+      replyTo: data.customerEmail,
+    });
+
+    if (error) {
+      console.error('[Email] Failed to send admin catering notification:', error);
+      return { success: false, error };
+    }
+
+    console.log(`[Email] Admin catering notification sent to ${adminEmails.length} recipient(s):`, result?.id);
+    return { success: true, id: result?.id };
+  } catch (error) {
+    console.error('[Email] Error sending admin catering notification:', error);
     return { success: false, error };
   }
 }

@@ -3155,10 +3155,23 @@ export const appRouter = router({
 
         // Send Catering Quote Request email and SMS
         try {
-          const { sendCateringQuoteRequestEmail } = await import('./email');
+          const { sendCateringQuoteRequestEmail, sendAdminCateringNotification } = await import('./email');
+          
+          // Send confirmation to customer
           await sendCateringQuoteRequestEmail({
             customerName: input.customerName,
             customerEmail: input.customerEmail,
+            cateringType: input.cateringType,
+            guestCount: input.guestCount,
+            eventDate: input.eventDate,
+            specialRequests: input.specialRequests,
+          });
+          
+          // Send notification to admin
+          await sendAdminCateringNotification({
+            customerName: input.customerName,
+            customerEmail: input.customerEmail,
+            customerPhone: input.customerPhone,
             cateringType: input.cateringType,
             guestCount: input.guestCount,
             eventDate: input.eventDate,

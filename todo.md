@@ -158,3 +158,11 @@
 - [x] Fix logo persistence by uploading to S3 instead of local filesystem
 - [x] Ensure uploaded logo displays correctly on frontend header
 - [ ] Test logo upload flow end-to-end (user to test)
+
+## CC Admin Emails from Restaurant Info (User Request - Feb 17)
+- [x] Create function to fetch admin email addresses from site_settings table (getAdminEmails already exists)
+- [x] Update sendAdminReservationNotification to CC all admin emails
+- [x] Update sendAdminEventNotification to CC all admin emails
+- [x] Create and integrate sendAdminCateringNotification to send to all admin emails
+- [x] Update order notification emails to CC all admin emails (already implemented)
+- [ ] Test email notifications with multiple admin emails (user to test)
