@@ -157,19 +157,11 @@ export default function AdminUsers() {
   const handleCreateUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
-    
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
     
     createUser.mutate({
       email: formData.get("email") as string,
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
-      password: password,
       role: formData.get("role") as "admin" | "manager" | "kitchen_staff" | "front_desk",
       phone: formData.get("phone") as string || undefined,
     });
@@ -444,7 +436,7 @@ export default function AdminUsers() {
           <DialogHeader>
             <DialogTitle>Add Admin User</DialogTitle>
             <DialogDescription>
-              Create a new admin user account with login credentials.
+              Create a new admin user account. User will set their password via /admin/setup.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateUser}>
@@ -466,15 +458,6 @@ export default function AdminUsers() {
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
                 <Input id="phone" name="phone" type="tel" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
-                <Input id="password" name="password" type="password" required minLength={8} />
-                <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                <Input id="confirmPassword" name="confirmPassword" type="password" required minLength={8} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role *</Label>

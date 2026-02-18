@@ -185,3 +185,11 @@
 - [x] Update form to simple admin creation (firstname, lastname, email, password)
 - [x] Remove email notification logic from admin creation flow
 - [x] Test admin creation flow end-to-end (ready for manual testing)
+
+## Fix Add Admin User Flow (User Request - Feb 18)
+- [x] Remove password parameter from addAdminUser backend procedure
+- [x] Set is_setup_complete = false when creating users
+- [x] Remove password and confirmPassword fields from frontend form
+- [x] Update form validation to remove password matching check
+- [x] Users will use /admin/setup page to set password with OTP verification
+- [x] Test complete flow: Create user → User goes to /admin/setup → Sets password (ready for manual testing)

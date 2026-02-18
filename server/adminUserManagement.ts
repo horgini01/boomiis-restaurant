@@ -96,13 +96,12 @@ export const adminUserManagementRouter = router({
       return adminUsers;
     }),
 
-  // Add admin user directly (no email invitation)
+  // Add admin user directly (no password - user will set via /admin/setup)
   addAdminUser: ownerProcedure
     .input(z.object({
       email: z.string().email(),
       firstName: z.string().min(1),
       lastName: z.string().min(1),
-      password: z.string().min(8),
       role: z.string(), // Can be predefined role or "custom-{id}"
       phone: z.string().optional(),
     }))
@@ -120,9 +119,6 @@ export const adminUserManagementRouter = router({
         });
       }
 
-      // Hash the provided password
-      const hashedPassword = await bcrypt.hash(input.password, 10);
-
       // Parse role - if it starts with "custom-", extract custom role ID
       let userRole: string;
       let customRoleId: number | null = null;
@@ -134,7 +130,7 @@ export const adminUserManagementRouter = router({
         userRole = input.role;
       }
       
-      // Create new user
+      // Create new user without password - they'll set it via /admin/setup
       const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
       
       await db.insert(users).values({
@@ -149,11 +145,10 @@ export const adminUserManagementRouter = router({
         status: "active",
         loginMethod: "email",
         invitedBy: ctx.user.id,
-        password: hashedPassword,
-        isSetupComplete: true, // Password already set
+        isSetupComplete: false, // User needs to complete setup at /admin/setup
       });
 
-      return { success: true, message: 'Admin user created successfully.' };
+      return { success: true, message: 'Admin user created successfully. User can now set their password at /admin/setup.' };
     }),
 
   // Create new admin user (sends invitation email)
