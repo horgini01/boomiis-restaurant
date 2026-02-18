@@ -592,3 +592,18 @@ export const migrationsRun = mysqlTable("migrations_run", {
 
 export type MigrationRun = typeof migrationsRun.$inferSelect;
 export type InsertMigrationRun = typeof migrationsRun.$inferInsert;
+
+/**
+ * OTP tokens for password reset verification
+ */
+export const otpTokens = mysqlTable("otp_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type OtpToken = typeof otpTokens.$inferSelect;
+export type InsertOtpToken = typeof otpTokens.$inferInsert;

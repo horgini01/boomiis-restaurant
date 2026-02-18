@@ -225,6 +225,13 @@
       "when": 1771299351804,
       "tag": "0031_cute_crystal",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1771410142004,
+      "tag": "0032_absent_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

@@ -166,3 +166,14 @@
 - [x] Create and integrate sendAdminCateringNotification to send to all admin emails
 - [x] Update order notification emails to CC all admin emails (already implemented)
 - [ ] Test email notifications with multiple admin emails (user to test)
+
+## Admin Forgot Password Feature (User Request - Feb 17)
+- [x] Create otp_tokens table schema with email, code, expires_at, created_at fields
+- [x] Add migration to create otp_tokens table
+- [x] Implement requestPasswordResetOTP procedure with rate limiting (5 per hour)
+- [x] Implement verifyPasswordResetOTP procedure
+- [x] Implement resetPasswordWithOTP procedure
+- [x] Create email template for OTP sending
+- [x] Create /admin/forgot-password frontend page
+- [x] Implement 3-step UI: Request OTP → Verify OTP → Reset Password
+- [x] Test complete forgot password flow (19/19 tests passed)

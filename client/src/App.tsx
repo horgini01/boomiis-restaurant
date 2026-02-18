@@ -24,6 +24,7 @@ import AdminLogin from "./pages/admin/Login";
 import AdminRegister from "./pages/admin/Register";
 import AdminSetup from "./pages/admin/Setup";
 import ForgotPassword from "./pages/ForgotPassword";
+import AdminForgotPassword from "./pages/admin/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/admin/Dashboard";
 import CategoriesManagement from "./pages/admin/Categories";
@@ -86,6 +87,7 @@ function Router() {
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/register" component={AdminRegister} />
       <Route path="/admin/setup" component={AdminSetup} />
+      <Route path="/admin/forgot-password" component={AdminForgotPassword} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
