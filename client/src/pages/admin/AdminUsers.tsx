@@ -89,9 +89,9 @@ export default function AdminUsers() {
   const { data: customRoles } = trpc.customRoles.getAllCustomRoles.useQuery();
 
   // Mutations
-  const createUser = trpc.adminUsers.createAdminUser.useMutation({
+  const createUser = trpc.adminUsers.addAdminUser.useMutation({
     onSuccess: () => {
-      toast.success("User invited successfully! Invitation email sent.");
+      toast.success("Admin user created successfully!");
       setIsCreateDialogOpen(false);
       refetch();
     },
@@ -157,10 +157,19 @@ export default function AdminUsers() {
   const handleCreateUser = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    
     createUser.mutate({
       email: formData.get("email") as string,
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
+      password: password,
       role: formData.get("role") as "admin" | "manager" | "kitchen_staff" | "front_desk",
       phone: formData.get("phone") as string || undefined,
     });
@@ -244,7 +253,7 @@ export default function AdminUsers() {
           </Button>
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" />
-            Invite User
+            Add Admin User
           </Button>
         </div>
       </div>
@@ -433,9 +442,9 @@ export default function AdminUsers() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Invite New User</DialogTitle>
+            <DialogTitle>Add Admin User</DialogTitle>
             <DialogDescription>
-              Send an invitation email with login credentials to a new team member.
+              Create a new admin user account with login credentials.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateUser}>
@@ -457,6 +466,15 @@ export default function AdminUsers() {
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
                 <Input id="phone" name="phone" type="tel" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
+                <Input id="password" name="password" type="password" required minLength={8} />
+                <p className="text-xs text-muted-foreground">Minimum 8 characters</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                <Input id="confirmPassword" name="confirmPassword" type="password" required minLength={8} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role *</Label>
@@ -489,7 +507,7 @@ export default function AdminUsers() {
                 Cancel
               </Button>
               <Button type="submit" disabled={createUser.isPending}>
-                {createUser.isPending ? "Sending..." : "Send Invitation"}
+                {createUser.isPending ? "Creating..." : "Create Admin User"}
               </Button>
             </DialogFooter>
           </form>

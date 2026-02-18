@@ -177,3 +177,11 @@
 - [x] Create /admin/forgot-password frontend page
 - [x] Implement 3-step UI: Request OTP → Verify OTP → Reset Password
 - [x] Test complete forgot password flow (19/19 tests passed)
+
+## Change Invite User to Add Admin User (User Request - Feb 18)
+- [x] Analyze current "Invite User" implementation in /admin/users page
+- [x] Create new tRPC procedure for direct admin creation (no email verification)
+- [x] Update frontend button text from "Invite User" to "Add Admin User"
+- [x] Update form to simple admin creation (firstname, lastname, email, password)
+- [x] Remove email notification logic from admin creation flow
+- [x] Test admin creation flow end-to-end (ready for manual testing)

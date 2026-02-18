@@ -96,6 +96,66 @@ export const adminUserManagementRouter = router({
       return adminUsers;
     }),
 
+  // Add admin user directly (no email invitation)
+  addAdminUser: ownerProcedure
+    .input(z.object({
+      email: z.string().email(),
+      firstName: z.string().min(1),
+      lastName: z.string().min(1),
+      password: z.string().min(8),
+      role: z.string(), // Can be predefined role or "custom-{id}"
+      phone: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
+
+      // Check if user already exists
+      const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+      
+      if (existing.length > 0) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'A user with this email already exists. Please use a different email address.'
+        });
+      }
+
+      // Hash the provided password
+      const hashedPassword = await bcrypt.hash(input.password, 10);
+
+      // Parse role - if it starts with "custom-", extract custom role ID
+      let userRole: string;
+      let customRoleId: number | null = null;
+      
+      if (input.role.startsWith("custom-")) {
+        customRoleId = parseInt(input.role.replace("custom-", ""));
+        userRole = "admin"; // Default to admin for custom roles
+      } else {
+        userRole = input.role;
+      }
+      
+      // Create new user
+      const openId = `admin-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      
+      await db.insert(users).values({
+        openId,
+        email: input.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        name: `${input.firstName} ${input.lastName}`,
+        role: userRole as any,
+        customRoleId,
+        phone: input.phone || null,
+        status: "active",
+        loginMethod: "email",
+        invitedBy: ctx.user.id,
+        password: hashedPassword,
+        isSetupComplete: true, // Password already set
+      });
+
+      return { success: true, message: 'Admin user created successfully.' };
+    }),
+
   // Create new admin user (sends invitation email)
   createAdminUser: ownerProcedure
     .input(z.object({
