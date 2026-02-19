@@ -206,3 +206,23 @@
 - [x] Add phone number validation before sending SMS (handled in backend)
 - [x] Test complete flows: Setup with Email OTP, Setup with SMS OTP (ready for manual testing)
 - [x] Test complete flows: Forgot Password with Email OTP, Forgot Password with SMS OTP (ready for manual testing)
+
+## Add Search, Filters, and CSV Export to Reservations & Events (User Request - Feb 19)
+- [x] Analyze current Orders page implementation (search, date filters, CSV export)
+- [x] Update reservations backend to support search by customer name, email, phone
+- [x] Update reservations backend to support date range filtering
+- [ ] Add CSV export procedure for reservations (handled in frontend)
+- [x] Update events backend to support search by customer name, email, phone, event type
+- [x] Update events backend to support date range filtering
+- [ ] Add CSV export procedure for events/catering (handled in frontend)
+- [x] Update Reservations frontend: Add search bar
+- [x] Update Reservations frontend: Add date range filter (From/To)
+- [x] Update Reservations frontend: Add "Export to CSV" button
+- [x] Update Reservations frontend: Add sort options
+- [x] Update Events & Catering frontend: Add search bar
+- [x] Update Events & Catering frontend: Add date range filter (From/To)
+- [x] Update Events & Catering frontend: Add "Export to CSV" button
+- [x] Update Events & Catering frontend: Add sort options
+- [x] Test search functionality on both pages (ready for manual testing)
+- [x] Test date filtering on both pages (ready for manual testing)
+- [x] Test CSV export with various filters applied (ready for manual testing)

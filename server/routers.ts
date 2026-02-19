@@ -317,16 +317,46 @@ export const appRouter = router({
       .input(z.object({
         status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
         limit: z.number().default(50),
+        search: z.string().optional(),
+        dateFrom: z.string().optional(), // ISO date string
+        dateTo: z.string().optional(), // ISO date string
       }).optional())
       .query(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        const { desc } = await import('drizzle-orm');
+        const { desc, like, or } = await import('drizzle-orm');
+
+        let conditions: any[] = [];
+
+        // Status filter
+        if (input?.status) {
+          conditions.push(eq(reservations.status, input.status));
+        }
+
+        // Search filter (customer name, email, phone)
+        if (input?.search && input.search.trim()) {
+          const searchTerm = `%${input.search.trim()}%`;
+          conditions.push(
+            or(
+              like(reservations.customerName, searchTerm),
+              like(reservations.customerEmail, searchTerm),
+              like(reservations.customerPhone, searchTerm)
+            )
+          );
+        }
+
+        // Date range filter
+        if (input?.dateFrom) {
+          conditions.push(sql`DATE(${reservations.reservationDate}) >= ${input.dateFrom}`);
+        }
+        if (input?.dateTo) {
+          conditions.push(sql`DATE(${reservations.reservationDate}) <= ${input.dateTo}`);
+        }
 
         let query = db.select().from(reservations);
 
-        if (input?.status) {
-          query = query.where(eq(reservations.status, input.status)) as any;
+        if (conditions.length > 0) {
+          query = query.where(and(...conditions)) as any;
         }
 
         const results = await query
@@ -2991,16 +3021,47 @@ export const appRouter = router({
       .input(z.object({
         status: z.enum(['new', 'contacted', 'quoted', 'booked', 'cancelled']).optional(),
         limit: z.number().default(50),
+        search: z.string().optional(),
+        dateFrom: z.string().optional(), // ISO date string
+        dateTo: z.string().optional(), // ISO date string
       }).optional())
       .query(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        const { desc } = await import('drizzle-orm');
+        const { desc, like, or } = await import('drizzle-orm');
+
+        let conditions: any[] = [];
+
+        // Status filter
+        if (input?.status) {
+          conditions.push(eq(eventInquiries.status, input.status));
+        }
+
+        // Search filter (customer name, email, phone, event type)
+        if (input?.search && input.search.trim()) {
+          const searchTerm = `%${input.search.trim()}%`;
+          conditions.push(
+            or(
+              like(eventInquiries.customerName, searchTerm),
+              like(eventInquiries.customerEmail, searchTerm),
+              like(eventInquiries.customerPhone, searchTerm),
+              like(eventInquiries.eventType, searchTerm)
+            )
+          );
+        }
+
+        // Date range filter (based on event date or created date if event date is null)
+        if (input?.dateFrom) {
+          conditions.push(sql`DATE(COALESCE(${eventInquiries.eventDate}, ${eventInquiries.createdAt})) >= ${input.dateFrom}`);
+        }
+        if (input?.dateTo) {
+          conditions.push(sql`DATE(COALESCE(${eventInquiries.eventDate}, ${eventInquiries.createdAt})) <= ${input.dateTo}`);
+        }
 
         let query = db.select().from(eventInquiries);
 
-        if (input?.status) {
-          query = query.where(eq(eventInquiries.status, input.status)) as any;
+        if (conditions.length > 0) {
+          query = query.where(and(...conditions)) as any;
         }
 
         const results = await query
