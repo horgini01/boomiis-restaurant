@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
 import { useAuth } from '@/_core/hooks/useAuth';
-import { CreditAlertBanner } from '@/components/CreditAlertBanner';
+import { CreditStatusCards } from '@/components/CreditStatusCards';
 
 export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = trpc.admin.statsWithTrends.useQuery();
@@ -43,7 +43,6 @@ export default function AdminDashboard() {
       <AdminLayout>
         <div>
           <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
-          <CreditAlertBanner />
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -61,7 +60,7 @@ export default function AdminDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">Revenue</p>
                         <p className="text-3xl font-bold">£{snapshot.today.revenue}</p>
@@ -92,6 +91,7 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                       </div>
+                      <CreditStatusCards />
                     </div>
 
                     {snapshot.upcomingReservations.length > 0 && (

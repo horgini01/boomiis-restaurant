@@ -239,3 +239,12 @@
 - [x] Store last alert timestamp to prevent spam notifications (implemented in credit-alerts.service.ts)
 - [ ] Create scheduled job to check credits periodically (deferred - currently checks on dashboard load)
 - [x] Test complete alert flow with mock low credit scenarios (ready for manual testing)
+
+## Credit Status Cards on Dashboard (User Request - Feb 19)
+- [x] Remove CreditAlertBanner component from dashboard
+- [x] Create credit status cards component with always-visible counts
+- [x] Add color coding: Green (healthy), Yellow (warning ≤100), Red (critical ≤20)
+- [x] Implement blinking animation for warning and critical states
+- [x] Add SMS Credits card to Today's Snapshot section
+- [x] Add Email Credits card to Today's Snapshot section
+- [x] Test blinking animations and color transitions (ready for manual testing)
