@@ -239,6 +239,13 @@
       "when": 1771471297862,
       "tag": "0033_perpetual_slapstick",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "5",
+      "when": 1771476055637,
+      "tag": "0034_curly_shinobi_shaw",
+      "breakpoints": true
     }
   ]
 }

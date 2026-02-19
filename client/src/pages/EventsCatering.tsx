@@ -16,10 +16,14 @@ import {
 } from '@/components/ui/select';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, MapPin, Users, Calendar, DollarSign, Utensils, Building2, PartyPopper } from 'lucide-react';
+import { Loader2, MapPin, Users, Calendar, DollarSign, Utensils, Building2, PartyPopper, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function EventsCatering() {
   const [, setLocation] = useLocation();
+  
+  // Fetch system settings to check if events are enabled
+  const { data: settings } = trpc.systemSettings.getPublicSettings.useQuery();
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -85,6 +89,21 @@ export default function EventsCatering() {
           </div>
         </section>
 
+        {/* Closure Notice Banner */}
+        {settings && !settings.eventsEnabled && (
+          <section className="py-6 bg-amber-500/10">
+            <div className="container max-w-4xl">
+              <Alert className="border-amber-500 bg-amber-500/20 animate-pulse">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <AlertTitle className="text-amber-900 font-bold">Events & Catering Currently Unavailable</AlertTitle>
+                <AlertDescription className="text-amber-800">
+                  {settings.eventsClosureMessage || 'We are not accepting event inquiries at this time. Please check back later.'}
+                </AlertDescription>
+              </Alert>
+            </div>
+          </section>
+        )}
+
         {/* Features Section */}
         <section className="py-12 bg-muted/30">
           <div className="container">
@@ -146,7 +165,8 @@ export default function EventsCatering() {
         </section>
 
         {/* Inquiry Form */}
-        <section className="py-12 bg-muted/30">
+        {settings && settings.eventsEnabled && (
+          <section className="py-12 bg-muted/30">
           <div className="container max-w-3xl">
             <Card className="border-border/50">
               <CardContent className="p-8">
@@ -312,6 +332,7 @@ export default function EventsCatering() {
             </Card>
           </div>
         </section>
+        )}
 
         {/* Why Choose Us Section */}
         <section className="py-16">

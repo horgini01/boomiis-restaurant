@@ -609,3 +609,14 @@ export const otpTokens = mysqlTable("otp_tokens", {
 
 export type OtpToken = typeof otpTokens.$inferSelect;
 export type InsertOtpToken = typeof otpTokens.$inferInsert;
+
+// System Settings for Feature Toggles
+export const systemSettings = mysqlTable("system_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  settingKey: varchar("setting_key", { length: 100 }).unique().notNull(),
+  settingValue: text("setting_value"),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = typeof systemSettings.$inferInsert;

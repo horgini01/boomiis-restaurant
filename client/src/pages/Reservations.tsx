@@ -9,10 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Calendar, Clock, Users } from 'lucide-react';
+import { Loader2, Calendar, Clock, Users, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function Reservations() {
   const [, setLocation] = useLocation();
+  
+  // Fetch system settings to check if reservations are enabled
+  const { data: settings } = trpc.systemSettings.getPublicSettings.useQuery();
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -68,9 +72,25 @@ export default function Reservations() {
           </div>
         </section>
 
+        {/* Closure Notice Banner */}
+        {settings && !settings.reservationsEnabled && (
+          <section className="py-6 bg-amber-500/10">
+            <div className="container max-w-4xl">
+              <Alert className="border-amber-500 bg-amber-500/20 animate-pulse">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <AlertTitle className="text-amber-900 font-bold">Reservations Currently Unavailable</AlertTitle>
+                <AlertDescription className="text-amber-800">
+                  {settings.reservationsClosureMessage || 'We are not accepting reservations at this time. Please check back later.'}
+                </AlertDescription>
+              </Alert>
+            </div>
+          </section>
+        )}
+
         {/* Reservation Form */}
-        <section className="py-12">
-          <div className="container max-w-4xl">
+        {settings && settings.reservationsEnabled && (
+          <section className="py-12">
+            <div className="container max-w-4xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
               <Card className="border-border/50">
                 <CardContent className="pt-6 text-center">
@@ -213,6 +233,7 @@ export default function Reservations() {
             </Card>
           </div>
         </section>
+        )}
       </main>
 
       <Footer />

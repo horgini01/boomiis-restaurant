@@ -248,3 +248,35 @@
 - [x] Add SMS Credits card to Today's Snapshot section
 - [x] Add Email Credits card to Today's Snapshot section
 - [x] Test blinking animations and color transitions (ready for manual testing)
+
+## Reservation & Events Toggle with Notice Banners (User Request - Feb 19)
+- [x] Design database schema for toggle settings (reservations_enabled, events_enabled, custom messages)
+- [x] Create system_settings table or extend existing settings table
+- [x] Create backend procedures to get/update reservation toggle settings
+- [x] Create backend procedures to get/update events toggle settings
+- [ ] Add toggle switch to admin Reservations Management page
+- [ ] Add custom message input field for reservation closure notice
+- [ ] Add toggle switch to admin Events & Catering Management page
+- [ ] Add custom message input field for events closure notice
+- [ ] Create notice banner component with blinking animation
+- [ ] Update customer Reservations page to show banner and disable form when toggled off
+- [ ] Update customer Events & Catering page to show banner and disable form when toggled off
+- [ ] Test toggle on/off functionality for both features
+- [ ] Test custom message display on customer pages
+
+
+## Service Toggle Feature - Enable/Disable Reservations and Events (User Request - Feb 19)
+- [x] Create system_settings table with key-value structure
+- [x] Add migration to create system_settings table with default values
+- [x] Create systemSettings tRPC router with getPublicSettings, updateReservationSettings, updateEventsSettings procedures
+- [x] Register systemSettings router in main routers.ts
+- [x] Add toggle controls to /admin/reservations page (Switch + custom closure message input)
+- [x] Add toggle controls to /admin/events-catering page (Switch + custom closure message input)
+- [x] Add closure notice banner to customer /reservations page (animated amber alert)
+- [x] Add closure notice banner to customer /events-catering page (animated amber alert)
+- [x] Hide reservation form when reservations are disabled
+- [x] Hide events inquiry form when events are disabled
+- [x] Write comprehensive tests for service toggle feature (13 tests - all passing ✅)
+- [ ] Test complete flow: Toggle reservations off → Check customer page shows banner → Toggle back on (user to test)
+- [ ] Test complete flow: Toggle events off → Check customer page shows banner → Toggle back on (user to test)
+- [ ] Push to GitHub

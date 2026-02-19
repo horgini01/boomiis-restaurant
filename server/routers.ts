@@ -20,6 +20,7 @@ import { auditLogsRouter } from "./routers/auditLogs";
 import { passwordResetRouter } from "./passwordReset";
 import { authRouter } from "./routers/auth";
 import { creditMonitoringRouter } from "./creditMonitoring";
+import { systemSettingsRouter } from "./systemSettings";
 import { logAuditAction, getIpAddress, createChangesObject } from "./services/audit.service";
 
 export const appRouter = router({
@@ -29,6 +30,7 @@ export const appRouter = router({
   passwordReset: passwordResetRouter,
   auth: authRouter,
   creditMonitoring: creditMonitoringRouter,
+  systemSettings: systemSettingsRouter,
 
   newsletter: router({
     subscribe: publicProcedure

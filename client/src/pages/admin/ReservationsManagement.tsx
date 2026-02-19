@@ -19,22 +19,61 @@ import {
 } from '@/components/ui/table';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2, Calendar, Users, Mail, Phone, Search, ArrowUpDown, Download } from 'lucide-react';
+import { Loader2, Calendar, Users, Mail, Phone, Search, ArrowUpDown, Download, Power } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 export default function ReservationsManagement() {
   const [statusFilter, setStatusFilter] = useState<'pending' | 'confirmed' | 'cancelled' | 'completed' | undefined>(undefined);
+  const [reservationsEnabled, setReservationsEnabled] = useState(true);
+  const [closureMessage, setClosureMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'partySize'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const utils = trpc.useUtils();
+
+  // Fetch current settings
+  const { data: settings } = trpc.systemSettings.getPublicSettings.useQuery();
+  
+  // Update local state when settings are loaded
+  useEffect(() => {
+    if (settings) {
+      setReservationsEnabled(settings.reservationsEnabled);
+      setClosureMessage(settings.reservationsClosureMessage);
+    }
+  }, [settings]);
+
+  const updateSettingsMutation = trpc.systemSettings.updateReservationSettings.useMutation({
+    onSuccess: () => {
+      toast.success('Reservation settings updated successfully');
+      utils.systemSettings.getPublicSettings.invalidate();
+    },
+    onError: () => {
+      toast.error('Failed to update settings');
+    },
+  });
+
+  const handleToggleChange = (enabled: boolean) => {
+    setReservationsEnabled(enabled);
+    updateSettingsMutation.mutate({ enabled, closureMessage });
+  };
+
+  const handleMessageChange = (message: string) => {
+    setClosureMessage(message);
+  };
+
+  const handleSaveMessage = () => {
+    updateSettingsMutation.mutate({ enabled: reservationsEnabled, closureMessage });
+  };
   
   const { data: reservations, isLoading } = trpc.reservations.list.useQuery({
     status: statusFilter,
@@ -165,6 +204,44 @@ export default function ReservationsManagement() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-4xl font-bold">Reservations Management</h1>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Power className={cn("h-5 w-5", reservationsEnabled ? "text-green-500" : "text-red-500")} />
+                <Label htmlFor="reservations-toggle" className="text-sm font-medium">
+                  {reservationsEnabled ? "Accepting Reservations" : "Reservations Closed"}
+                </Label>
+                <Switch
+                  id="reservations-toggle"
+                  checked={reservationsEnabled}
+                  onCheckedChange={handleToggleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Closure Message Input */}
+          {!reservationsEnabled && (
+            <Card className="border-amber-500/50 bg-amber-500/10">
+              <CardContent className="pt-6">
+                <Label htmlFor="closure-message" className="text-sm font-medium mb-2 block">
+                  Closure Message (displayed to customers)
+                </Label>
+                <Textarea
+                  id="closure-message"
+                  placeholder="e.g., Closed for renovations until March 1st"
+                  value={closureMessage}
+                  onChange={(e) => handleMessageChange(e.target.value)}
+                  className="mb-2"
+                  rows={3}
+                />
+                <Button onClick={handleSaveMessage} size="sm">
+                  Save Message
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="flex items-center justify-between">
             <Select value={statusFilter || 'all'} onValueChange={(value) => setStatusFilter(value === 'all' ? undefined : value as any)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by status" />
