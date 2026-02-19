@@ -193,3 +193,16 @@
 - [x] Update form validation to remove password matching check
 - [x] Users will use /admin/setup page to set password with OTP verification
 - [x] Test complete flow: Create user → User goes to /admin/setup → Sets password (ready for manual testing)
+
+## Dual OTP Delivery (Email + SMS) for Admin Flows (User Request - Feb 18)
+- [x] Analyze existing SMS infrastructure (BulkSMS/TextLocal)
+- [x] Update users table to add otp_delivery_method column (email/sms)
+- [x] Update otp_tokens table to add delivery_method column (email/sms)
+- [x] Create SMS helper function for sending OTP via SMS
+- [x] Update admin setup backend to support SMS OTP delivery
+- [x] Update forgot password backend to support SMS OTP delivery
+- [x] Update /admin/setup frontend to show "Send via Email" and "Send via SMS" buttons
+- [x] Update /admin/forgot-password frontend to show "Send via Email" and "Send via SMS" buttons
+- [x] Add phone number validation before sending SMS (handled in backend)
+- [x] Test complete flows: Setup with Email OTP, Setup with SMS OTP (ready for manual testing)
+- [x] Test complete flows: Forgot Password with Email OTP, Forgot Password with SMS OTP (ready for manual testing)

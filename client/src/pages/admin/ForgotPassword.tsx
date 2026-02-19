@@ -18,10 +18,11 @@ export default function ForgotPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'sms'>('email');
 
   const requestOTP = trpc.passwordReset.requestPasswordResetOTP.useMutation({
-    onSuccess: () => {
-      setSuccess("OTP sent! Check your email.");
+    onSuccess: (data) => {
+      setSuccess(data.message || "OTP sent!");
       setError("");
       setStep("verify");
     },
@@ -67,7 +68,7 @@ export default function ForgotPassword() {
       return;
     }
 
-    requestOTP.mutate({ email });
+    requestOTP.mutate({ email, deliveryMethod });
   };
 
   const handleVerifyOTP = (e: React.FormEvent) => {
@@ -152,6 +153,39 @@ export default function ForgotPassword() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label className="text-zinc-300">Delivery Method</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant={deliveryMethod === 'email' ? 'default' : 'outline'}
+                    className={deliveryMethod === 'email' ? 'bg-amber-600 hover:bg-amber-700' : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'}
+                    onClick={() => setDeliveryMethod('email')}
+                    disabled={requestOTP.isPending}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={deliveryMethod === 'sms' ? 'default' : 'outline'}
+                    className={deliveryMethod === 'sms' ? 'bg-amber-600 hover:bg-amber-700' : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'}
+                    onClick={() => setDeliveryMethod('sms')}
+                    disabled={requestOTP.isPending}
+                  >
+                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    SMS
+                  </Button>
+                </div>
+                <p className="text-xs text-zinc-400">
+                  {deliveryMethod === 'email' 
+                    ? "We'll send a verification code to your email" 
+                    : "We'll send a verification code to your phone number"}
+                </p>
+              </div>
+
               <Button
                 type="submit"
                 className="w-full bg-amber-600 hover:bg-amber-700"
@@ -163,7 +197,7 @@ export default function ForgotPassword() {
                     Sending OTP...
                   </>
                 ) : (
-                  "Send OTP"
+                  `Send OTP via ${deliveryMethod === 'email' ? 'Email' : 'SMS'}`
                 )}
               </Button>
 

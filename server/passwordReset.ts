@@ -277,6 +277,7 @@ export const passwordResetRouter = router({
     .input(
       z.object({
         email: z.string().email(),
+        deliveryMethod: z.enum(['email', 'sms']).default('email'),
       })
     )
     .mutation(async ({ input }) => {
@@ -324,69 +325,87 @@ export const passwordResetRouter = router({
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-      // Save OTP to database
+      // Save OTP to database with delivery method
       await db.insert(otpTokens).values({
         email: input.email,
         code: otpCode,
+        deliveryMethod: input.deliveryMethod,
         expiresAt,
         used: false,
       });
 
-      // Send OTP email
-      const resend = getResendClient();
-      if (!resend) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Email service is not configured.",
-        });
-      }
-
+      // Send OTP via selected method
       try {
-        await resend.emails.send({
-          from: ENV.fromEmail,
-          to: input.email,
-          subject: "Password Reset OTP - Boomiis Admin",
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background-color: #d97706; color: white; padding: 20px; text-align: center; }
-                .content { padding: 30px; background-color: #f9f9f9; }
-                .otp-code { font-size: 32px; font-weight: bold; text-align: center; letter-spacing: 8px; color: #d97706; padding: 20px; background: white; border-radius: 8px; margin: 20px 0; }
-                .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="header">
-                  <h1>🔐 Password Reset OTP</h1>
+        if (input.deliveryMethod === 'sms') {
+          // Validate phone number exists
+          if (!user[0].phone) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "No phone number associated with this account. Please use email verification.",
+            });
+          }
+          
+          const { sendPasswordResetOTPSMS } = await import('./services/otp-sms.service');
+          const result = await sendPasswordResetOTPSMS(user[0].phone, otpCode, user[0].name || 'Admin');
+          
+          if (!result.success) {
+            throw new Error(result.error || 'Failed to send SMS');
+          }
+        } else {
+          const resend = getResendClient();
+          if (!resend) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Email service is not configured.",
+            });
+          }
+
+          await resend.emails.send({
+            from: ENV.fromEmail,
+            to: input.email,
+            subject: "Password Reset OTP - Boomiis Admin",
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <style>
+                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background-color: #d97706; color: white; padding: 20px; text-align: center; }
+                  .content { padding: 30px; background-color: #f9f9f9; }
+                  .otp-code { font-size: 32px; font-weight: bold; text-align: center; letter-spacing: 8px; color: #d97706; padding: 20px; background: white; border-radius: 8px; margin: 20px 0; }
+                  .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h1>🔐 Password Reset OTP</h1>
+                  </div>
+                  <div class="content">
+                    <p>Hello ${user[0].name || 'Admin'},</p>
+                    <p>We received a request to reset your password for your Boomiis Restaurant admin account.</p>
+                    <p>Your One-Time Password (OTP) is:</p>
+                    <div class="otp-code">${otpCode}</div>
+                    <p><strong>This OTP will expire in 15 minutes.</strong></p>
+                    <p>Enter this code on the password reset page to continue.</p>
+                    <p>If you didn't request a password reset, you can safely ignore this email. Your password will not be changed.</p>
+                  </div>
+                  <div class="footer">
+                    <p>Boomiis Restaurant Admin</p>
+                    <p>This is an automated email, please do not reply.</p>
+                  </div>
                 </div>
-                <div class="content">
-                  <p>Hello ${user[0].name || 'Admin'},</p>
-                  <p>We received a request to reset your password for your Boomiis Restaurant admin account.</p>
-                  <p>Your One-Time Password (OTP) is:</p>
-                  <div class="otp-code">${otpCode}</div>
-                  <p><strong>This OTP will expire in 15 minutes.</strong></p>
-                  <p>Enter this code on the password reset page to continue.</p>
-                  <p>If you didn't request a password reset, you can safely ignore this email. Your password will not be changed.</p>
-                </div>
-                <div class="footer">
-                  <p>Boomiis Restaurant Admin</p>
-                  <p>This is an automated email, please do not reply.</p>
-                </div>
-              </div>
-            </body>
-            </html>
-          `,
-        });
-      } catch (error) {
-        console.error("Failed to send OTP email:", error);
+              </body>
+              </html>
+            `,
+          });
+        }
+      } catch (error: any) {
+        console.error(`Failed to send OTP via ${input.deliveryMethod}:`, error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to send OTP email. Please try again later.",
+          message: `Failed to send OTP ${input.deliveryMethod === 'sms' ? 'SMS' : 'email'}. Please try again later.`,
         });
       }
 

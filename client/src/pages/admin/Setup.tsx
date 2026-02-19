@@ -19,10 +19,11 @@ export default function AdminSetup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'sms'>('email');
 
   const requestOTPMutation = trpc.auth.requestSetupOTP.useMutation({
-    onSuccess: () => {
-      toast.success('Verification code sent to your email!');
+    onSuccess: (data) => {
+      toast.success(data.message || 'Verification code sent!');
       setStep('otp');
     },
     onError: (error) => {
@@ -51,7 +52,7 @@ export default function AdminSetup() {
       toast.error('Please enter your email');
       return;
     }
-    requestOTPMutation.mutate({ email });
+    requestOTPMutation.mutate({ email, deliveryMethod });
   };
 
   const handleOTPSubmit = (e: FormEvent) => {
@@ -164,8 +165,38 @@ export default function AdminSetup() {
                   required
                   autoFocus
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Delivery Method</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant={deliveryMethod === 'email' ? 'default' : 'outline'}
+                    className="w-full"
+                    onClick={() => setDeliveryMethod('email')}
+                    disabled={requestOTPMutation.isPending}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={deliveryMethod === 'sms' ? 'default' : 'outline'}
+                    className="w-full"
+                    onClick={() => setDeliveryMethod('sms')}
+                    disabled={requestOTPMutation.isPending}
+                  >
+                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    SMS
+                  </Button>
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  We'll send a verification code to this email
+                  {deliveryMethod === 'email' 
+                    ? "We'll send a verification code to your email" 
+                    : "We'll send a verification code to your phone number"}
                 </p>
               </div>
 
@@ -181,7 +212,7 @@ export default function AdminSetup() {
                     Sending code...
                   </>
                 ) : (
-                  'Send Verification Code'
+                  `Send Code via ${deliveryMethod === 'email' ? 'Email' : 'SMS'}`
                 )}
               </Button>
             </form>

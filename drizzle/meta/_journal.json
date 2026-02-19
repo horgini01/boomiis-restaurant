@@ -232,6 +232,13 @@
       "when": 1771410142004,
       "tag": "0032_absent_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1771471297862,
+      "tag": "0033_perpetual_slapstick",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,7 @@ export const users = mysqlTable("users", {
   passwordHash: varchar("password_hash", { length: 255 }), // Bcrypt hashed password for self-hosted auth
   otpCode: varchar("otp_code", { length: 6 }), // 6-digit OTP for email verification
   otpExpires: timestamp("otp_expires"), // OTP expiry timestamp (10 minutes)
+  otpDeliveryMethod: mysqlEnum("otp_delivery_method", ["email", "sms"]).default("email"), // OTP delivery method
   passwordResetToken: varchar("password_reset_token", { length: 255 }), // Token for password reset
   passwordResetExpires: timestamp("password_reset_expires"), // Password reset token expiry
   isSetupComplete: boolean("is_setup_complete").default(false).notNull(), // First-time admin setup flag
@@ -600,6 +601,7 @@ export const otpTokens = mysqlTable("otp_tokens", {
   id: int("id").autoincrement().primaryKey(),
   email: varchar("email", { length: 320 }).notNull(),
   code: varchar("code", { length: 6 }).notNull(),
+  deliveryMethod: mysqlEnum("delivery_method", ["email", "sms"]).default("email").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   used: boolean("used").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

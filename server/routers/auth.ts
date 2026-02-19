@@ -54,6 +54,7 @@ export const authRouter = router({
     .input(
       z.object({
         email: z.string().email('Invalid email address'),
+        deliveryMethod: z.enum(['email', 'sms']).default('email'),
       })
     )
     .mutation(async ({ input }) => {
@@ -108,29 +109,47 @@ export const authRouter = router({
       const otpCode = generateOTP();
       const otpExpires = generateOTPExpiry();
 
-      // Save OTP to database
+      // Save OTP to database with delivery method
       await db
         .update(users)
         .set({
           otpCode,
           otpExpires,
+          otpDeliveryMethod: input.deliveryMethod,
         })
         .where(eq(users.id, user.id));
 
-      // Send OTP email
+      // Send OTP via selected method
       try {
-        await sendSetupOTPEmail(input.email, otpCode, user.name || 'Admin');
-      } catch (error) {
-        console.error('[Auth] Failed to send OTP email:', error);
+        if (input.deliveryMethod === 'sms') {
+          // Validate phone number exists
+          if (!user.phone) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'No phone number associated with this account. Please use email verification.',
+            });
+          }
+          
+          const { sendSetupOTPSMS } = await import('../services/otp-sms.service');
+          const result = await sendSetupOTPSMS(user.phone, otpCode, user.name || 'Admin');
+          
+          if (!result.success) {
+            throw new Error(result.error || 'Failed to send SMS');
+          }
+        } else {
+          await sendSetupOTPEmail(input.email, otpCode, user.name || 'Admin');
+        }
+      } catch (error: any) {
+        console.error(`[Auth] Failed to send OTP via ${input.deliveryMethod}:`, error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to send verification email. Please try again.',
+          message: `Failed to send verification ${input.deliveryMethod === 'sms' ? 'SMS' : 'email'}. Please try again.`,
         });
       }
 
       return {
         success: true,
-        message: 'Verification code sent to your email.',
+        message: `Verification code sent to your ${input.deliveryMethod === 'sms' ? 'phone' : 'email'}.`,
       };
     }),
 
