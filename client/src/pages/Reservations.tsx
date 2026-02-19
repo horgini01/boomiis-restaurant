@@ -77,9 +77,9 @@ export default function Reservations() {
           <section className="py-6 bg-amber-500/10">
             <div className="container max-w-4xl">
               <Alert className="border-amber-500 bg-amber-500/20 animate-pulse">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
-                <AlertTitle className="text-amber-900 font-bold">Reservations Currently Unavailable</AlertTitle>
-                <AlertDescription className="text-amber-800">
+                <AlertCircle className="h-5 w-5 text-yellow-400" />
+                <AlertTitle className="text-white font-bold text-lg">Reservations Currently Unavailable</AlertTitle>
+                <AlertDescription className="text-yellow-300 text-base">
                   {settings.reservationsClosureMessage || 'We are not accepting reservations at this time. Please check back later.'}
                 </AlertDescription>
               </Alert>

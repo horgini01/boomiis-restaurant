@@ -280,3 +280,10 @@
 - [ ] Test complete flow: Toggle reservations off → Check customer page shows banner → Toggle back on (user to test)
 - [ ] Test complete flow: Toggle events off → Check customer page shows banner → Toggle back on (user to test)
 - [ ] Push to GitHub
+
+## Fix Closure Banner Text Color Visibility (User Report - Feb 19)
+- [x] Change closure banner text color from dark red/brown to bright amber/yellow for better contrast
+- [x] Update text color in Reservations page closure banner (white title + yellow-300 description)
+- [x] Update text color in Events & Catering page closure banner (white title + yellow-300 description)
+- [x] Test visibility on both pages
+- [x] Save checkpoint and push to GitHub

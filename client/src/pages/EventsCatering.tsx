@@ -94,9 +94,9 @@ export default function EventsCatering() {
           <section className="py-6 bg-amber-500/10">
             <div className="container max-w-4xl">
               <Alert className="border-amber-500 bg-amber-500/20 animate-pulse">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
-                <AlertTitle className="text-amber-900 font-bold">Events & Catering Currently Unavailable</AlertTitle>
-                <AlertDescription className="text-amber-800">
+                <AlertCircle className="h-5 w-5 text-yellow-400" />
+                <AlertTitle className="text-white font-bold text-lg">Events & Catering Currently Unavailable</AlertTitle>
+                <AlertDescription className="text-yellow-300 text-base">
                   {settings.eventsClosureMessage || 'We are not accepting event inquiries at this time. Please check back later.'}
                 </AlertDescription>
               </Alert>
