@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { CreditAlertBanner } from '@/components/CreditAlertBanner';
 
 export default function AdminDashboard() {
   const { data: stats, isLoading: statsLoading } = trpc.admin.statsWithTrends.useQuery();
@@ -42,6 +43,7 @@ export default function AdminDashboard() {
       <AdminLayout>
         <div>
           <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
+          <CreditAlertBanner />
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">

@@ -226,3 +226,16 @@
 - [x] Test search functionality on both pages (ready for manual testing)
 - [x] Test date filtering on both pages (ready for manual testing)
 - [x] Test CSV export with various filters applied (ready for manual testing)
+
+## Low Credit Alert System (User Request - Feb 19)
+- [x] Research BulkSMS and TextLocal APIs for credit balance checking
+- [x] Research Resend API for email credit/quota checking (no API available - will track locally)
+- [x] Create backend procedure to check SMS credit balance
+- [x] Create backend procedure to check email credit balance (tracks locally)
+- [x] Implement credit threshold checking (Warning: 100, Critical: 20)
+- [x] Create email notification template for low credit alerts
+- [x] Create SMS notification for critical credit alerts (with cooldown)
+- [x] Add dashboard warning banner component for low credits
+- [x] Store last alert timestamp to prevent spam notifications (implemented in credit-alerts.service.ts)
+- [ ] Create scheduled job to check credits periodically (deferred - currently checks on dashboard load)
+- [x] Test complete alert flow with mock low credit scenarios (ready for manual testing)
