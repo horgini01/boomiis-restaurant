@@ -13,7 +13,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useCart } from '@/contexts/CartContext';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
@@ -21,6 +22,7 @@ export default function Checkout() {
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
   const { data: settings } = trpc.admin.getSettings.useQuery();
   const { data: deliveryAreas = [] } = trpc.admin.getDeliveryAreas.useQuery();
+  const { data: systemSettings } = trpc.systemSettings.getPublicSettings.useQuery();
   const [postcodeError, setPostcodeError] = useState<string>('');
   const [formData, setFormData] = useState({
     customerName: '',
@@ -207,7 +209,18 @@ export default function Checkout() {
       <main className="flex-1 py-12">
         <div className="container">
           <h1 className="text-4xl font-bold mb-8">Checkout</h1>
+          
+          {systemSettings && !systemSettings.ordersEnabled && (
+            <Alert className="mb-6 border-amber-500 bg-gradient-to-r from-amber-900/20 to-amber-800/20 animate-in fade-in-50 slide-in-from-top-5 duration-500">
+              <AlertCircle className="h-5 w-5 text-white" />
+              <AlertTitle className="text-white text-lg font-semibold">Orders Currently Unavailable</AlertTitle>
+              <AlertDescription className="text-yellow-300 text-base">
+                {systemSettings.ordersClosureMessage || 'We are not accepting online orders at this time. Please check back later.'}
+              </AlertDescription>
+            </Alert>
+          )}
 
+          {systemSettings && systemSettings.ordersEnabled && (
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Order Details Form */}
@@ -498,6 +511,7 @@ export default function Checkout() {
               </div>
             </div>
           </form>
+          )}
         </div>
       </main>
 

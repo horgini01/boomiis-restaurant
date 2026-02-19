@@ -287,3 +287,13 @@
 - [x] Update text color in Events & Catering page closure banner (white title + yellow-300 description)
 - [x] Test visibility on both pages
 - [x] Save checkpoint and push to GitHub
+
+## Add Orders Toggle Feature (User Request - Feb 19)
+- [x] Update system_settings schema to support orders_enabled and orders_closure_message
+- [x] Add updateOrderSettings and getSettings procedures to systemSettings router
+- [x] Add toggle switch and closure message input to Orders Management admin page
+- [x] Add closure banner to checkout page when orders are disabled
+- [x] Hide checkout form when orders are disabled
+- [x] Write comprehensive tests for orders toggle functionality (18 tests passing)
+- [x] Verify banner visibility and text contrast
+- [x] Save checkpoint and push to GitHub

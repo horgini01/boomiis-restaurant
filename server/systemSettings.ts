@@ -25,6 +25,14 @@ export const systemSettingsRouter = router({
       db.select().from(systemSettings).where(
         eq(systemSettings.settingKey, "events_closure_message")
       )
+    ).union(
+      db.select().from(systemSettings).where(
+        eq(systemSettings.settingKey, "orders_enabled")
+      )
+    ).union(
+      db.select().from(systemSettings).where(
+        eq(systemSettings.settingKey, "orders_closure_message")
+      )
     );
 
     const settingsMap: Record<string, string | null> = {};
@@ -37,6 +45,8 @@ export const systemSettingsRouter = router({
       reservationsClosureMessage: settingsMap.reservations_closure_message || "",
       eventsEnabled: settingsMap.events_enabled === "true",
       eventsClosureMessage: settingsMap.events_closure_message || "",
+      ordersEnabled: settingsMap.orders_enabled === "true",
+      ordersClosureMessage: settingsMap.orders_closure_message || "",
     };
   }),
 
@@ -91,6 +101,34 @@ export const systemSettingsRouter = router({
           .update(systemSettings)
           .set({ settingValue: input.closureMessage })
           .where(eq(systemSettings.settingKey, "events_closure_message"));
+      }
+
+      return { success: true };
+    }),
+
+  // Admin procedure to update order settings
+  updateOrderSettings: protectedProcedure
+    .input(
+      z.object({
+        enabled: z.boolean(),
+        closureMessage: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }: { input: { enabled: boolean; closureMessage?: string } }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database connection failed");
+      // Update enabled status
+      await db
+        .update(systemSettings)
+        .set({ settingValue: input.enabled.toString() })
+        .where(eq(systemSettings.settingKey, "orders_enabled"));
+
+      // Update closure message if provided
+      if (input.closureMessage !== undefined) {
+        await db
+          .update(systemSettings)
+          .set({ settingValue: input.closureMessage })
+          .where(eq(systemSettings.settingKey, "orders_closure_message"));
       }
 
       return { success: true };

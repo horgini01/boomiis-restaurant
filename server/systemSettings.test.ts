@@ -27,6 +27,8 @@ describe('System Settings - Service Toggle Feature', () => {
         { settingKey: 'reservations_closure_message', settingValue: '' },
         { settingKey: 'events_enabled', settingValue: 'true' },
         { settingKey: 'events_closure_message', settingValue: '' },
+        { settingKey: 'orders_enabled', settingValue: 'true' },
+        { settingKey: 'orders_closure_message', settingValue: '' },
       ]);
     }
   });
@@ -52,6 +54,14 @@ describe('System Settings - Service Toggle Feature', () => {
     await db.update(systemSettings)
       .set({ settingValue: '' })
       .where(eq(systemSettings.settingKey, 'events_closure_message'));
+    
+    await db.update(systemSettings)
+      .set({ settingValue: 'true' })
+      .where(eq(systemSettings.settingKey, 'orders_enabled'));
+    
+    await db.update(systemSettings)
+      .set({ settingValue: '' })
+      .where(eq(systemSettings.settingKey, 'orders_closure_message'));
   });
 
   describe('getPublicSettings', () => {
@@ -64,8 +74,11 @@ describe('System Settings - Service Toggle Feature', () => {
       expect(settings).toHaveProperty('reservationsClosureMessage');
       expect(settings).toHaveProperty('eventsEnabled');
       expect(settings).toHaveProperty('eventsClosureMessage');
+      expect(settings).toHaveProperty('ordersEnabled');
+      expect(settings).toHaveProperty('ordersClosureMessage');
       expect(typeof settings.reservationsEnabled).toBe('boolean');
       expect(typeof settings.eventsEnabled).toBe('boolean');
+      expect(typeof settings.ordersEnabled).toBe('boolean');
     });
   });
 
@@ -282,6 +295,114 @@ describe('System Settings - Service Toggle Feature', () => {
       const settings = await caller.systemSettings.getPublicSettings();
       expect(settings.reservationsEnabled).toBe(false);
       expect(settings.reservationsClosureMessage).toBe('Closed again');
+    });
+  });
+
+  describe('updateOrderSettings', () => {
+    it('should require admin authentication', async () => {
+      const caller = appRouter.createCaller({ user: null });
+
+      await expect(
+        caller.systemSettings.updateOrderSettings({
+          enabled: false,
+          closureMessage: 'Test message',
+        })
+      ).rejects.toThrow();
+    });
+
+    it('should allow admin to disable orders', async () => {
+      const caller = appRouter.createCaller(adminContext);
+
+      const result = await caller.systemSettings.updateOrderSettings({
+        enabled: false,
+        closureMessage: 'We are temporarily not accepting online orders',
+      });
+
+      expect(result.success).toBe(true);
+
+      // Verify via public API
+      const settings = await caller.systemSettings.getPublicSettings();
+      expect(settings.ordersEnabled).toBe(false);
+      expect(settings.ordersClosureMessage).toBe('We are temporarily not accepting online orders');
+    });
+
+    it('should allow admin to enable orders', async () => {
+      const caller = appRouter.createCaller(adminContext);
+
+      const result = await caller.systemSettings.updateOrderSettings({
+        enabled: true,
+        closureMessage: '',
+      });
+
+      expect(result.success).toBe(true);
+
+      // Verify via public API
+      const settings = await caller.systemSettings.getPublicSettings();
+      expect(settings.ordersEnabled).toBe(true);
+    });
+
+    it('should update closure message independently', async () => {
+      const caller = appRouter.createCaller(adminContext);
+
+      await caller.systemSettings.updateOrderSettings({
+        enabled: false,
+        closureMessage: 'First message',
+      });
+
+      await caller.systemSettings.updateOrderSettings({
+        enabled: false,
+        closureMessage: 'Updated message',
+      });
+
+      const settings = await caller.systemSettings.getPublicSettings();
+      expect(settings.ordersClosureMessage).toBe('Updated message');
+      expect(settings.ordersEnabled).toBe(false);
+    });
+
+    it('should allow independent control of all three services', async () => {
+      const caller = appRouter.createCaller(adminContext);
+
+      // Disable orders, enable reservations and events
+      await caller.systemSettings.updateOrderSettings({
+        enabled: false,
+        closureMessage: 'Orders closed',
+      });
+
+      await caller.systemSettings.updateReservationSettings({
+        enabled: true,
+        closureMessage: '',
+      });
+
+      await caller.systemSettings.updateEventsSettings({
+        enabled: true,
+        closureMessage: '',
+      });
+
+      let settings = await caller.systemSettings.getPublicSettings();
+      expect(settings.ordersEnabled).toBe(false);
+      expect(settings.reservationsEnabled).toBe(true);
+      expect(settings.eventsEnabled).toBe(true);
+
+      // Enable orders, disable reservations and events
+      await caller.systemSettings.updateOrderSettings({
+        enabled: true,
+        closureMessage: '',
+      });
+
+      await caller.systemSettings.updateReservationSettings({
+        enabled: false,
+        closureMessage: 'Reservations closed',
+      });
+
+      await caller.systemSettings.updateEventsSettings({
+        enabled: false,
+        closureMessage: 'Events closed',
+      });
+
+      settings = await caller.systemSettings.getPublicSettings();
+      expect(settings.ordersEnabled).toBe(true);
+      expect(settings.reservationsEnabled).toBe(false);
+      expect(settings.eventsEnabled).toBe(false);
     });
   });
 });
