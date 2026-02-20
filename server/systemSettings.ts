@@ -115,22 +115,28 @@ export const systemSettingsRouter = router({
       })
     )
     .mutation(async ({ input }: { input: { enabled: boolean; closureMessage?: string } }) => {
+      console.log('[updateOrderSettings] Called with:', input);
       const db = await getDb();
       if (!db) throw new Error("Database connection failed");
       // Update enabled status
+      console.log('[updateOrderSettings] Updating orders_enabled to:', input.enabled.toString());
       await db
         .update(systemSettings)
         .set({ settingValue: input.enabled.toString() })
         .where(eq(systemSettings.settingKey, "orders_enabled"));
+      console.log('[updateOrderSettings] Updated orders_enabled successfully');
 
       // Update closure message if provided
       if (input.closureMessage !== undefined) {
+        console.log('[updateOrderSettings] Updating orders_closure_message to:', input.closureMessage);
         await db
           .update(systemSettings)
           .set({ settingValue: input.closureMessage })
           .where(eq(systemSettings.settingKey, "orders_closure_message"));
+        console.log('[updateOrderSettings] Updated orders_closure_message successfully');
       }
 
+      console.log('[updateOrderSettings] Mutation completed, returning success');
       return { success: true };
     }),
 });

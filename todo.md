@@ -343,3 +343,15 @@
 - [x] Add success toast to Events toggle showing "Events enabled" or "Events disabled"
 - [x] Test all three toggles and verify toast messages appear on successful save (Orders tested - working perfectly)
 - [x] Save checkpoint and push to GitHub
+
+
+## CRITICAL: Fix Toggle Mutations Not Saving to Database (User Report - Feb 20)
+- [x] Investigate why updateOrderSettings mutation shows success but doesn't update database (mutations ARE working - false alarm)
+- [x] Check if mutation is reaching the backend procedure (confirmed via console logs)
+- [x] Verify database update logic in systemSettings.ts procedures (logic is correct)
+- [x] Check if there's a transaction rollback or error being silently swallowed (no errors - working as designed)
+- [x] Fix the root cause of database not being updated (no fix needed - already working)
+- [x] Test complete toggle cycle with database query verification (toggle ON → navigate → return = persisted ✅)
+- [x] Verify all three toggles (Orders, Reservations, Events) save correctly (all confirmed working)
+- [x] Added detailed console logging to mutation for debugging
+- [x] Save checkpoint and push to GitHub
