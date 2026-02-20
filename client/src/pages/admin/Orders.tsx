@@ -84,7 +84,10 @@ export default function OrdersManagement() {
   const handleOrdersToggle = (checked: boolean) => {
     setOrdersEnabled(checked);
     setShowClosureInput(!checked);
-    updateOrderSettingsMutation.mutate({ enabled: checked });
+    updateOrderSettingsMutation.mutate({ 
+      enabled: checked,
+      closureMessage: closureMessage || undefined
+    });
   };
   
   const handleSaveClosureMessage = () => {

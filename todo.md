@@ -317,3 +317,12 @@
 - [x] Test complete toggle cycle (ON → OFF → ON) - working perfectly
 - [x] Verify checkout page reflects correct state - confirmed
 - [x] Save checkpoint and push to GitHub
+
+
+## Fix Orders Toggle Not Persisting on Navigation (User Report - Feb 20)
+- [x] Investigate why toggle changes revert when navigating away from page (mutation wasn't including closure message)
+- [x] Update handleOrdersToggle to save both enabled state AND closure message immediately
+- [x] Ensure mutation includes closure message when toggling
+- [x] Test toggle persistence by navigating to different pages and returning (Dashboard → Orders - state persisted)
+- [x] Verify database is updated immediately when toggle is clicked
+- [x] Save checkpoint and push to GitHub
