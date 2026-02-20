@@ -1,0 +1,16 @@
+{
+  "query": "SELECT * FROM system_settings WHERE setting_key = 'orders_enabled';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM system_settings WHERE setting_key = 'orders_enabled';",
+  "rows": [
+    {
+      "id": "5",
+      "setting_key": "orders_enabled",
+      "setting_value": "false",
+      "updated_at": "2026-02-20 18:17:00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsetting_key\tsetting_value\tupdated_at\n5\torders_enabled\tfalse\t2026-02-20 18:17:00\n",
+  "stderr": "",
+  "execution_time_ms": 115
+}

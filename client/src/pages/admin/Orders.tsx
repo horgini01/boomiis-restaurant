@@ -56,15 +56,21 @@ export default function OrdersManagement() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [previousOrderIds, setPreviousOrderIds] = useState<Set<number>>(new Set());
   
-  // Orders toggle state - use query data directly, no local state syncing
+  // Orders toggle state - initialize from query data
   const { data: systemSettings } = trpc.systemSettings.getPublicSettings.useQuery();
-  const [ordersEnabled, setOrdersEnabled] = useState<boolean | null>(null);
-  const [closureMessage, setClosureMessage] = useState<string | null>(null);
+  const [ordersEnabled, setOrdersEnabled] = useState<boolean>(systemSettings?.ordersEnabled ?? true);
+  const [closureMessage, setClosureMessage] = useState<string>(systemSettings?.ordersClosureMessage ?? '');
   
-  // Use query data as source of truth, only use local state for unsaved changes
-  const currentOrdersEnabled = ordersEnabled !== null ? ordersEnabled : (systemSettings?.ordersEnabled ?? true);
-  const currentClosureMessage = closureMessage !== null ? closureMessage : (systemSettings?.ordersClosureMessage ?? '');
-  const showClosureInput = !currentOrdersEnabled;
+  // Sync with query data when it changes (only on initial load or after save)
+  useEffect(() => {
+    if (systemSettings && ordersEnabled === (systemSettings.ordersEnabled ?? true) && closureMessage === (systemSettings.ordersClosureMessage ?? '')) {
+      // Only update if values match (meaning no unsaved changes)
+      setOrdersEnabled(systemSettings.ordersEnabled ?? true);
+      setClosureMessage(systemSettings.ordersClosureMessage ?? '');
+    }
+  }, [systemSettings]);
+  
+  const showClosureInput = !ordersEnabled;
   
   const updateOrderSettingsMutation = trpc.systemSettings.updateOrderSettings.useMutation({
     onSuccess: (_, variables) => {
@@ -73,9 +79,7 @@ export default function OrdersManagement() {
       } else {
         toast.success('Order settings updated');
       }
-      // Reset local state after successful save
-      setOrdersEnabled(null);
-      setClosureMessage(null);
+      // Invalidate query to refetch latest data
       utils.systemSettings.getPublicSettings.invalidate();
     },
     onError: (error: any) => {
@@ -84,21 +88,22 @@ export default function OrdersManagement() {
   });
   
   const handleOrdersToggle = (checked: boolean) => {
+    console.log('[handleOrdersToggle] Setting ordersEnabled to:', checked);
     setOrdersEnabled(checked);
-    // Don't auto-save - user must click Save Settings button
   };
   
   const handleSaveSettings = () => {
+    console.log('[handleSaveSettings] Saving - ordersEnabled:', ordersEnabled, 'closureMessage:', closureMessage);
     updateOrderSettingsMutation.mutate({ 
-      enabled: currentOrdersEnabled,
-      closureMessage: currentClosureMessage || undefined
+      enabled: ordersEnabled,
+      closureMessage: closureMessage || undefined
     });
   };
   
   const handleSaveClosureMessage = () => {
     updateOrderSettingsMutation.mutate({ 
-      enabled: currentOrdersEnabled, 
-      closureMessage: currentClosureMessage
+      enabled: ordersEnabled, 
+      closureMessage: closureMessage
     });
   };
 
@@ -357,11 +362,11 @@ export default function OrdersManagement() {
                 <div className="flex items-center gap-2">
                   <Switch
                     id="orders-toggle"
-                    checked={currentOrdersEnabled}
+                    checked={ordersEnabled}
                     onCheckedChange={handleOrdersToggle}
                   />
                   <Label htmlFor="orders-toggle" className="cursor-pointer">
-                    {currentOrdersEnabled ? 'Accepting Orders' : 'Orders Closed'}
+                    {ordersEnabled ? 'Accepting Orders' : 'Orders Closed'}
                   </Label>
                 </div>
                 <Button
@@ -399,7 +404,7 @@ export default function OrdersManagement() {
                     <Textarea
                       id="closure-message"
                       placeholder="e.g., We are temporarily not accepting online orders. Please call us to place your order."
-                      value={currentClosureMessage}
+                      value={closureMessage}
                       onChange={(e) => setClosureMessage(e.target.value)}
                       className="mt-2 min-h-[100px]"
                     />

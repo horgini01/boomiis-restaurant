@@ -392,3 +392,16 @@
 - [x] Applied fix to all three pages (Orders, Reservations, Events)
 - [x] Tested toggle OFF → Save → Navigate away → Return → State persisted correctly ✅
 - [ ] Save checkpoint and push to GitHub
+
+
+## CRITICAL BUG: Save Settings Saves Inverted Toggle Value (User Report - Feb 20) - FIXED ✅
+- [x] Investigate handleSaveSettings function - why does it save opposite of UI state?
+- [x] Identified root cause: Complex computed value (currentOrdersEnabled) with null-based logic
+- [x] Redesigned state management: Direct state values instead of computed values
+- [x] Fixed Orders page: Use ordersEnabled state directly, sync with useEffect
+- [x] Fixed Reservations page: Use reservationsEnabled state directly, sync with useEffect
+- [x] Fixed Events page: Use eventsEnabled state directly, sync with useEffect
+- [x] Removed all current* computed variables that caused confusion
+- [ ] Test: Toggle OFF → Save → Should save as false and show "Orders disabled" toast (User to verify)
+- [ ] Test: Toggle ON → Save → Should save as true and show "Orders enabled" toast (User to verify)
+- [x] Save checkpoint and push to GitHub

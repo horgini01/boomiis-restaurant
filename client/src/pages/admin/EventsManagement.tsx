@@ -39,8 +39,8 @@ import { Button } from '@/components/ui/button';
 
 export default function EventsManagement() {
   const [statusFilter, setStatusFilter] = useState<'new' | 'contacted' | 'quoted' | 'booked' | 'cancelled' | undefined>(undefined);
-  const [eventsEnabled, setEventsEnabled] = useState<boolean | null>(null);
-  const [closureMessage, setClosureMessage] = useState<string | null>(null);
+  const [eventsEnabled, setEventsEnabled] = useState<boolean>(true);
+  const [closureMessage, setClosureMessage] = useState<string>('');
   const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'guestCount'>('date');
@@ -49,12 +49,16 @@ export default function EventsManagement() {
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const utils = trpc.useUtils();
 
-  // Fetch current settings - use query data directly, no local state syncing
+  // Fetch current settings
   const { data: settings } = trpc.systemSettings.getPublicSettings.useQuery();
   
-  // Use query data as source of truth, only use local state for unsaved changes
-  const currentEventsEnabled = eventsEnabled !== null ? eventsEnabled : (settings?.eventsEnabled ?? true);
-  const currentClosureMessage = closureMessage !== null ? closureMessage : (settings?.eventsClosureMessage ?? '');
+  // Sync with query data when it changes
+  useEffect(() => {
+    if (settings) {
+      setEventsEnabled(settings.eventsEnabled ?? true);
+      setClosureMessage(settings.eventsClosureMessage ?? '');
+    }
+  }, [settings]);
 
   const updateSettingsMutation = trpc.systemSettings.updateEventsSettings.useMutation({
     onSuccess: (_, variables) => {
@@ -63,9 +67,7 @@ export default function EventsManagement() {
       } else {
         toast.success('Events settings updated successfully');
       }
-      // Reset local state after successful save
-      setEventsEnabled(null);
-      setClosureMessage(null);
+      // Invalidate query to refetch latest data
       utils.systemSettings.getPublicSettings.invalidate();
     },
     onError: () => {
@@ -80,8 +82,8 @@ export default function EventsManagement() {
   
   const handleSaveSettings = () => {
     updateSettingsMutation.mutate({ 
-      enabled: currentEventsEnabled, 
-      closureMessage: currentClosureMessage
+      enabled: eventsEnabled, 
+      closureMessage: closureMessage
     });
   };
 
@@ -90,7 +92,7 @@ export default function EventsManagement() {
   };
 
   const handleSaveMessage = () => {
-    updateSettingsMutation.mutate({ enabled: currentEventsEnabled, closureMessage: currentClosureMessage });
+    updateSettingsMutation.mutate({ enabled: eventsEnabled, closureMessage: closureMessage });
   };
   
   const { data: inquiries, isLoading } = trpc.eventInquiries.list.useQuery({
@@ -243,13 +245,13 @@ export default function EventsManagement() {
             <h1 className="text-4xl font-bold">Events & Catering Management</h1>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Power className={cn("h-5 w-5", currentEventsEnabled ? "text-green-500" : "text-red-500")} />
+                <Power className={cn("h-5 w-5", eventsEnabled ? "text-green-500" : "text-red-500")} />
                 <Label htmlFor="events-toggle" className="text-sm font-medium">
-                  {currentEventsEnabled ? "Accepting Inquiries" : "Inquiries Closed"}
+                  {eventsEnabled ? "Accepting Inquiries" : "Inquiries Closed"}
                 </Label>
                 <Switch
                   id="events-toggle"
-                  checked={currentEventsEnabled}
+                  checked={eventsEnabled}
                   onCheckedChange={handleToggleChange}
                 />
               </div>
@@ -268,7 +270,7 @@ export default function EventsManagement() {
           </div>
 
           {/* Closure Message Input */}
-          {!currentEventsEnabled && (
+          {!eventsEnabled && (
             <Card className="border-amber-500/50 bg-amber-500/10">
               <CardContent className="pt-6">
                 <Label htmlFor="events-closure-message" className="text-sm font-medium mb-2 block">
@@ -277,7 +279,7 @@ export default function EventsManagement() {
                 <Textarea
                   id="events-closure-message"
                   placeholder="e.g., Not accepting event bookings during holiday season"
-                  value={currentClosureMessage}
+                  value={closureMessage}
                   onChange={(e) => handleMessageChange(e.target.value)}
                   className="mb-2"
                   rows={3}
