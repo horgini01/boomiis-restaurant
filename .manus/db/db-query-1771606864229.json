@@ -1,0 +1,28 @@
+{
+  "query": "SELECT * FROM system_settings WHERE setting_key IN ('orders_enabled', 'reservations_enabled', 'events_enabled');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM system_settings WHERE setting_key IN ('orders_enabled', 'reservations_enabled', 'events_enabled');",
+  "rows": [
+    {
+      "id": "5",
+      "setting_key": "orders_enabled",
+      "setting_value": "false",
+      "updated_at": "2026-02-20 16:50:46"
+    },
+    {
+      "id": "1",
+      "setting_key": "reservations_enabled",
+      "setting_value": "true",
+      "updated_at": "2026-02-19 05:19:38"
+    },
+    {
+      "id": "3",
+      "setting_key": "events_enabled",
+      "setting_value": "true",
+      "updated_at": "2026-02-19 05:19:38"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsetting_key\tsetting_value\tupdated_at\n5\torders_enabled\tfalse\t2026-02-20 16:50:46\n1\treservations_enabled\ttrue\t2026-02-19 05:19:38\n3\tevents_enabled\ttrue\t2026-02-19 05:19:38\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

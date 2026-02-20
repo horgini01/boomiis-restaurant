@@ -1,0 +1,8 @@
+{
+  "query": "SELECT setting_key, setting_value, TYPEOF(setting_value) as value_type FROM system_settings WHERE setting_key IN ('orders_enabled', 'orders_closure_message');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT setting_key, setting_value, TYPEOF(setting_value) as value_type FROM system_settings WHERE setting_key IN ('orders_enabled', 'orders_closure_message');",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1305 (42000) at line 1: FUNCTION 6g8xxhsNMKiXF83cS8YGfP.typeof does not exist"
+  ]
+}

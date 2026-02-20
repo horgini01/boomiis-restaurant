@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE system_settings SET setting_value = 'true' WHERE setting_key IN ('orders_enabled', 'reservations_enabled', 'events_enabled') AND setting_value = '1';\nUPDATE system_settings SET setting_value = 'false' WHERE setting_key IN ('orders_enabled', 'reservations_enabled', 'events_enabled') AND setting_value = '0';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute UPDATE system_settings SET setting_value = 'true' WHERE setting_key IN ('orders_enabled', 'reservations_enabled', 'events_enabled') AND setting_value = '1';\nUPDATE system_settings SET setting_value = 'false' WHERE setting_key IN ('orders_enabled', 'reservations_enabled', 'events_enabled') AND setting_value = '0';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 71
+}

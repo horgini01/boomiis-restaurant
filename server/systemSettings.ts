@@ -41,11 +41,11 @@ export const systemSettingsRouter = router({
     });
 
     return {
-      reservationsEnabled: settingsMap.reservations_enabled === "true",
+      reservationsEnabled: settingsMap.reservations_enabled === "true" || settingsMap.reservations_enabled === "1",
       reservationsClosureMessage: settingsMap.reservations_closure_message || "",
-      eventsEnabled: settingsMap.events_enabled === "true",
+      eventsEnabled: settingsMap.events_enabled === "true" || settingsMap.events_enabled === "1",
       eventsClosureMessage: settingsMap.events_closure_message || "",
-      ordersEnabled: settingsMap.orders_enabled === "true",
+      ordersEnabled: settingsMap.orders_enabled === "true" || settingsMap.orders_enabled === "1",
       ordersClosureMessage: settingsMap.orders_closure_message || "",
     };
   }),

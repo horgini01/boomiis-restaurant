@@ -1,0 +1,20 @@
+{
+  "query": "SELECT setting_key, setting_value, LENGTH(setting_value) as value_length FROM system_settings WHERE setting_key IN ('orders_enabled', 'orders_closure_message');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT setting_key, setting_value, LENGTH(setting_value) as value_length FROM system_settings WHERE setting_key IN ('orders_enabled', 'orders_closure_message');",
+  "rows": [
+    {
+      "setting_key": "orders_closure_message",
+      "setting_value": "",
+      "value_length": "0"
+    },
+    {
+      "setting_key": "orders_enabled",
+      "setting_value": "false",
+      "value_length": "5"
+    }
+  ],
+  "messages": [],
+  "stdout": "setting_key\tsetting_value\tvalue_length\norders_closure_message\t\t0\norders_enabled\tfalse\t5\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

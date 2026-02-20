@@ -297,3 +297,23 @@
 - [x] Write comprehensive tests for orders toggle functionality (18 tests passing)
 - [x] Verify banner visibility and text contrast
 - [x] Save checkpoint and push to GitHub
+
+
+## Fix Orders Toggle Lock Issue (User Report - Feb 19)
+- [ ] Investigate why toggling off orders keeps form locked
+- [ ] Identify root cause of the lock/accessibility problem
+- [ ] Fix the toggle logic to properly enable/disable orders
+- [ ] Test toggle on/off functionality in browser
+- [ ] Verify banner appears when disabled and form shows when enabled
+- [ ] Save checkpoint and push to GitHub
+
+
+## Fix Orders Toggle Not Saving State (User Report - Feb 20)
+- [x] Investigate why toggle state changes are not persisting to database (found value comparison mismatch)
+- [x] Check if mutation is being called correctly (mutations working fine)
+- [x] Verify database is being updated when toggle is clicked (database had "0"/"1" instead of "true"/"false")
+- [x] Fix the save mechanism (updated getPublicSettings to handle both "0"/"1" and "true"/"false")
+- [x] Standardize database values to use "true"/"false" consistently
+- [x] Test complete toggle cycle (ON → OFF → ON) - working perfectly
+- [x] Verify checkout page reflects correct state - confirmed
+- [x] Save checkpoint and push to GitHub
