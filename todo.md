@@ -440,4 +440,14 @@
 ## Push Opening Hours Interface to GitHub (User Request - Feb 20)
 - [x] Verify opening hours editing UI exists in RestaurantSettings.tsx
 - [x] Create checkpoint to sync code to GitHub
-- [ ] Verify production environment receives the update (user will deploy)
+- [x] Force re-push to trigger automated deployment
+- [ ] Verify production environment receives the update (user will test)
+
+
+## Debug Opening Hours Not Showing on Production (User Report - Feb 20)
+- [x] Investigate why opening hours input fields are empty on boomiis.com
+- [x] Check if openingHours query is returning data in production
+- [x] Verify database has opening hours data - MISSING TABLE!
+- [x] Root cause: opening_hours table was never created in production database
+- [x] Create migration 0035 to create opening_hours table with default data
+- [ ] Deploy migration and verify fix works on boomiis.com

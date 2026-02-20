@@ -1,0 +1,15 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "id": "0035_create_opening_hours_table",
+  "prevId": "0034_curly_shinobi_shaw",
+  "tables": {},
+  "columns": {},
+  "indexes": {},
+  "foreignKeys": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}

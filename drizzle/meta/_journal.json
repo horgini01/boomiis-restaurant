@@ -246,6 +246,20 @@
       "when": 1771476055637,
       "tag": "0034_curly_shinobi_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "5",
+      "when": 1771622000000,
+      "tag": "0035_create_opening_hours_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1771622017533,
+      "tag": "0036_cultured_amazoness",
+      "breakpoints": true
     }
   ]
 }
