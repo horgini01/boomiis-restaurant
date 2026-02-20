@@ -89,20 +89,7 @@ export default function EventsCatering() {
           </div>
         </section>
 
-        {/* Closure Notice Banner */}
-        {settings && !settings.eventsEnabled && (
-          <section className="py-6 bg-amber-500/10">
-            <div className="container max-w-4xl">
-              <Alert className="border-amber-500 bg-amber-500/20 animate-pulse">
-                <AlertCircle className="h-5 w-5 text-yellow-400" />
-                <AlertTitle className="text-white font-bold text-lg">Events & Catering Currently Unavailable</AlertTitle>
-                <AlertDescription className="text-yellow-300 text-base">
-                  {settings.eventsClosureMessage || 'We are not accepting event inquiries at this time. Please check back later.'}
-                </AlertDescription>
-              </Alert>
-            </div>
-          </section>
-        )}
+
 
         {/* Features Section */}
         <section className="py-12 bg-muted/30">
@@ -165,8 +152,7 @@ export default function EventsCatering() {
         </section>
 
         {/* Inquiry Form */}
-        {settings && settings.eventsEnabled && (
-          <section className="py-12 bg-muted/30">
+        <section className="py-12 bg-muted/30">
           <div className="container max-w-3xl">
             <Card className="border-border/50">
               <CardContent className="p-8">
@@ -332,7 +318,6 @@ export default function EventsCatering() {
             </Card>
           </div>
         </section>
-        )}
 
         {/* Why Choose Us Section */}
         <section className="py-16">

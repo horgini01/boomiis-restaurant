@@ -416,3 +416,11 @@
 - [x] Keep all other functionality intact (order list, status updates, search, filters, etc.)
 - [ ] Test that all core features still work after removal (User to verify)
 - [x] Save checkpoint and push to GitHub
+
+
+## Remove Service Unavailability Banners from Customer Pages (User Report - Feb 20) - COMPLETED ✅
+- [x] Find and remove "Reservations Currently Unavailable" banner from Reservations page
+- [x] Find and remove "Events & Catering Currently Unavailable" banner from Events & Catering page
+- [x] Find and remove "Orders Currently Unavailable" banner from Checkout page
+- [x] Remove all settings checks that control banner visibility
+- [x] Save checkpoint and push to GitHub

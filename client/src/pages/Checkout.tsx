@@ -210,17 +210,6 @@ export default function Checkout() {
         <div className="container">
           <h1 className="text-4xl font-bold mb-8">Checkout</h1>
           
-          {systemSettings && !systemSettings.ordersEnabled && (
-            <Alert className="mb-6 border-amber-500 bg-gradient-to-r from-amber-900/20 to-amber-800/20 animate-in fade-in-50 slide-in-from-top-5 duration-500">
-              <AlertCircle className="h-5 w-5 text-white" />
-              <AlertTitle className="text-white text-lg font-semibold">Orders Currently Unavailable</AlertTitle>
-              <AlertDescription className="text-yellow-300 text-base">
-                {systemSettings.ordersClosureMessage || 'We are not accepting online orders at this time. Please check back later.'}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {systemSettings && systemSettings.ordersEnabled && (
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Order Details Form */}
@@ -511,7 +500,6 @@ export default function Checkout() {
               </div>
             </div>
           </form>
-          )}
         </div>
       </main>
 
