@@ -1,4 +1,4 @@
-CREATE TABLE `about_content` (
+CREATE TABLE IF NOT EXISTS `about_content` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`section_key` varchar(50) NOT NULL,
 	`section_value` text NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE `about_content` (
 	CONSTRAINT `about_content_section_key_unique` UNIQUE(`section_key`)
 );
 --> statement-breakpoint
-CREATE TABLE `about_values` (
+CREATE TABLE IF NOT EXISTS `about_values` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`title` varchar(100) NOT NULL,
 	`description` text NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE `about_values` (
 	CONSTRAINT `about_values_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `audit_logs` (
+CREATE TABLE IF NOT EXISTS `audit_logs` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`user_id` int NOT NULL,
 	`user_name` varchar(255),
@@ -36,7 +36,7 @@ CREATE TABLE `audit_logs` (
 	CONSTRAINT `audit_logs_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `awards` (
+CREATE TABLE IF NOT EXISTS `awards` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`title` varchar(200) NOT NULL,
 	`description` text,
@@ -49,7 +49,7 @@ CREATE TABLE `awards` (
 	CONSTRAINT `awards_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `blog_posts` (
+CREATE TABLE IF NOT EXISTS `blog_posts` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`title` varchar(300) NOT NULL,
 	`slug` varchar(300) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE `blog_posts` (
 	CONSTRAINT `blog_posts_slug_unique` UNIQUE(`slug`)
 );
 --> statement-breakpoint
-CREATE TABLE `custom_roles` (
+CREATE TABLE IF NOT EXISTS `custom_roles` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`role_name` varchar(100) NOT NULL,
 	`role_slug` varchar(100) NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE `custom_roles` (
 	CONSTRAINT `custom_roles_role_slug_unique` UNIQUE(`role_slug`)
 );
 --> statement-breakpoint
-CREATE TABLE `delivery_areas` (
+CREATE TABLE IF NOT EXISTS `delivery_areas` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`area_name` varchar(100) NOT NULL,
 	`postcodes_prefixes` text NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE `delivery_areas` (
 	CONSTRAINT `delivery_areas_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `email_campaigns` (
+CREATE TABLE IF NOT EXISTS `email_campaigns` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`campaign_name` varchar(200) NOT NULL,
 	`subject` varchar(200) NOT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE `email_campaigns` (
 	CONSTRAINT `email_campaigns_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `email_logs` (
+CREATE TABLE IF NOT EXISTS `email_logs` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`template_type` varchar(50) NOT NULL,
 	`recipient_email` varchar(320) NOT NULL,
@@ -128,7 +128,7 @@ CREATE TABLE `email_logs` (
 	CONSTRAINT `email_logs_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `email_templates` (
+CREATE TABLE IF NOT EXISTS `email_templates` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`template_type` varchar(50) NOT NULL,
 	`subject` varchar(200) NOT NULL,
@@ -142,7 +142,7 @@ CREATE TABLE `email_templates` (
 	CONSTRAINT `email_templates_template_type_unique` UNIQUE(`template_type`)
 );
 --> statement-breakpoint
-CREATE TABLE `event_inquiries` (
+CREATE TABLE IF NOT EXISTS `event_inquiries` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`customer_name` varchar(200) NOT NULL,
 	`customer_email` varchar(320) NOT NULL,
@@ -159,7 +159,7 @@ CREATE TABLE `event_inquiries` (
 	CONSTRAINT `event_inquiries_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `gallery_images` (
+CREATE TABLE IF NOT EXISTS `gallery_images` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`title` varchar(200),
 	`description` text,
@@ -173,7 +173,7 @@ CREATE TABLE `gallery_images` (
 	CONSTRAINT `gallery_images_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `legal_pages` (
+CREATE TABLE IF NOT EXISTS `legal_pages` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`page_type` varchar(50) NOT NULL,
 	`title` varchar(200) NOT NULL,
@@ -185,7 +185,7 @@ CREATE TABLE `legal_pages` (
 	CONSTRAINT `legal_pages_page_type_unique` UNIQUE(`page_type`)
 );
 --> statement-breakpoint
-CREATE TABLE `menu_categories` (
+CREATE TABLE IF NOT EXISTS `menu_categories` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`name` varchar(100) NOT NULL,
 	`slug` varchar(100) NOT NULL,
@@ -198,7 +198,7 @@ CREATE TABLE `menu_categories` (
 	CONSTRAINT `menu_categories_slug_unique` UNIQUE(`slug`)
 );
 --> statement-breakpoint
-CREATE TABLE `menu_item_reviews` (
+CREATE TABLE IF NOT EXISTS `menu_item_reviews` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`menu_item_id` int NOT NULL,
 	`customer_name` varchar(100) NOT NULL,
@@ -211,7 +211,7 @@ CREATE TABLE `menu_item_reviews` (
 	CONSTRAINT `menu_item_reviews_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `menu_items` (
+CREATE TABLE IF NOT EXISTS `menu_items` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`category_id` int NOT NULL,
 	`name` varchar(200) NOT NULL,
@@ -235,7 +235,7 @@ CREATE TABLE `menu_items` (
 	CONSTRAINT `menu_items_slug_unique` UNIQUE(`slug`)
 );
 --> statement-breakpoint
-CREATE TABLE `migrations_run` (
+CREATE TABLE IF NOT EXISTS `migrations_run` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`migration_name` varchar(255) NOT NULL,
 	`run_at` timestamp NOT NULL DEFAULT (now()),
@@ -243,7 +243,7 @@ CREATE TABLE `migrations_run` (
 	CONSTRAINT `migrations_run_migration_name_unique` UNIQUE(`migration_name`)
 );
 --> statement-breakpoint
-CREATE TABLE `opening_hours` (
+CREATE TABLE IF NOT EXISTS `opening_hours` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`day_of_week` int NOT NULL,
 	`open_time` varchar(5) NOT NULL,
@@ -254,7 +254,7 @@ CREATE TABLE `opening_hours` (
 	CONSTRAINT `opening_hours_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `order_items` (
+CREATE TABLE IF NOT EXISTS `order_items` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`order_id` int NOT NULL,
 	`menu_item_id` int NOT NULL,
@@ -266,7 +266,7 @@ CREATE TABLE `order_items` (
 	CONSTRAINT `order_items_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `orders` (
+CREATE TABLE IF NOT EXISTS `orders` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`order_number` varchar(50) NOT NULL,
 	`customer_name` varchar(200) NOT NULL,
@@ -296,7 +296,7 @@ CREATE TABLE `orders` (
 	CONSTRAINT `orders_payment_intent_id_unique` UNIQUE(`payment_intent_id`)
 );
 --> statement-breakpoint
-CREATE TABLE `otp_tokens` (
+CREATE TABLE IF NOT EXISTS `otp_tokens` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`email` varchar(320) NOT NULL,
 	`code` varchar(6) NOT NULL,
@@ -307,7 +307,7 @@ CREATE TABLE `otp_tokens` (
 	CONSTRAINT `otp_tokens_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `password_reset_tokens` (
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`user_id` int NOT NULL,
 	`token` varchar(255) NOT NULL,
@@ -318,7 +318,7 @@ CREATE TABLE `password_reset_tokens` (
 	CONSTRAINT `password_reset_tokens_token_unique` UNIQUE(`token`)
 );
 --> statement-breakpoint
-CREATE TABLE `reservations` (
+CREATE TABLE IF NOT EXISTS `reservations` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`customer_name` varchar(200) NOT NULL,
 	`customer_email` varchar(320) NOT NULL,
@@ -333,7 +333,7 @@ CREATE TABLE `reservations` (
 	CONSTRAINT `reservations_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `role_permissions` (
+CREATE TABLE IF NOT EXISTS `role_permissions` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`role_id` int NOT NULL,
 	`route` varchar(200) NOT NULL,
@@ -341,7 +341,7 @@ CREATE TABLE `role_permissions` (
 	CONSTRAINT `role_permissions_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `site_settings` (
+CREATE TABLE IF NOT EXISTS `site_settings` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`setting_key` varchar(100) NOT NULL,
 	`setting_value` text NOT NULL,
@@ -352,7 +352,7 @@ CREATE TABLE `site_settings` (
 	CONSTRAINT `site_settings_setting_key_unique` UNIQUE(`setting_key`)
 );
 --> statement-breakpoint
-CREATE TABLE `sms_logs` (
+CREATE TABLE IF NOT EXISTS `sms_logs` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`template_type` varchar(50) NOT NULL,
 	`recipient_phone` varchar(50) NOT NULL,
@@ -372,7 +372,7 @@ CREATE TABLE `sms_logs` (
 	CONSTRAINT `sms_logs_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `sms_templates` (
+CREATE TABLE IF NOT EXISTS `sms_templates` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`template_type` varchar(50) NOT NULL,
 	`template_name` varchar(100) NOT NULL,
@@ -384,7 +384,7 @@ CREATE TABLE `sms_templates` (
 	CONSTRAINT `sms_templates_template_type_unique` UNIQUE(`template_type`)
 );
 --> statement-breakpoint
-CREATE TABLE `subscribers` (
+CREATE TABLE IF NOT EXISTS `subscribers` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`email` varchar(320) NOT NULL,
 	`name` varchar(200),
@@ -396,7 +396,7 @@ CREATE TABLE `subscribers` (
 	CONSTRAINT `subscribers_email_unique` UNIQUE(`email`)
 );
 --> statement-breakpoint
-CREATE TABLE `system_settings` (
+CREATE TABLE IF NOT EXISTS `system_settings` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`setting_key` varchar(100) NOT NULL,
 	`setting_value` text,
@@ -405,7 +405,7 @@ CREATE TABLE `system_settings` (
 	CONSTRAINT `system_settings_setting_key_unique` UNIQUE(`setting_key`)
 );
 --> statement-breakpoint
-CREATE TABLE `team_members` (
+CREATE TABLE IF NOT EXISTS `team_members` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`name` varchar(200) NOT NULL,
 	`title` varchar(200) NOT NULL,
@@ -418,7 +418,7 @@ CREATE TABLE `team_members` (
 	CONSTRAINT `team_members_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `testimonial_response_templates` (
+CREATE TABLE IF NOT EXISTS `testimonial_response_templates` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`name` varchar(100) NOT NULL,
 	`content` text NOT NULL,
@@ -429,7 +429,7 @@ CREATE TABLE `testimonial_response_templates` (
 	CONSTRAINT `testimonial_response_templates_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `testimonials` (
+CREATE TABLE IF NOT EXISTS `testimonials` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`customer_name` varchar(100) NOT NULL,
 	`customer_email` varchar(320),
@@ -445,7 +445,7 @@ CREATE TABLE `testimonials` (
 	CONSTRAINT `testimonials_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`openId` varchar(64) NOT NULL,
 	`name` text,

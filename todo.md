@@ -519,4 +519,11 @@
 ## Reorganize Migrations to Drizzle Default Structure (User Request - Feb 20)
 - [x] Move migration SQL files from drizzle/migrations/ to drizzle/
 - [x] Revert migration script path to ./drizzle
-- [ ] Deploy fix
+- [x] Deploy fix to GitHub (checkpoint 88c6e8f0)
+- [ ] User to verify Railway deployment succeeds
+
+
+## Fix Migration 0036 IF NOT EXISTS (User Request - Feb 20)
+- [x] Read migration 0036 - contains 33 CREATE TABLE statements
+- [x] Update all 33 CREATE TABLE to use IF NOT EXISTS
+- [ ] Deploy fix to GitHub
