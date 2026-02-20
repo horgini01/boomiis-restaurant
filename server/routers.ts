@@ -2917,7 +2917,8 @@ export const appRouter = router({
 
     updateBulk: protectedProcedure
       .input(z.array(z.object({
-        id: z.number(),
+        id: z.number().optional(),
+        dayOfWeek: z.number().min(0).max(6),
         openTime: z.string().regex(/^\d{2}:\d{2}$/),
         closeTime: z.string().regex(/^\d{2}:\d{2}$/),
         isClosed: z.boolean(),
@@ -2925,16 +2926,27 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {        const db = await getDb();
         if (!db) throw new Error('Database not available');
 
-        // Update each day's hours
+        // Upsert each day's hours (create if doesn't exist, update if exists)
         for (const hours of input) {
-          await db.update(openingHours)
-            .set({
+          if (hours.id && hours.id > 0) {
+            // Update existing record
+            await db.update(openingHours)
+              .set({
+                openTime: hours.openTime,
+                closeTime: hours.closeTime,
+                isClosed: hours.isClosed,
+                updatedAt: new Date(),
+              })
+              .where(eq(openingHours.id, hours.id));
+          } else {
+            // Create new record
+            await db.insert(openingHours).values({
+              dayOfWeek: hours.dayOfWeek,
               openTime: hours.openTime,
               closeTime: hours.closeTime,
               isClosed: hours.isClosed,
-              updatedAt: new Date(),
-            })
-            .where(eq(openingHours.id, hours.id));
+            });
+          }
         }
 
         return { success: true };

@@ -463,8 +463,27 @@
 
 
 ## Persistent Railway Healthcheck Failure (User Report - Feb 20)
-- [ ] Check migrate-and-seed.mjs script for issues
-- [ ] Verify drizzle-kit migrate command is working correctly
-- [ ] Check if migration 0035 has syntax errors preventing execution
-- [ ] Investigate Railway startup logs for actual error
-- [ ] Consider alternative approach: skip migration, manually create table
+- [x] Check migrate-and-seed.mjs script for issues
+- [x] Verify drizzle-kit migrate command is working correctly
+- [x] Root cause: Complex WHERE NOT EXISTS subquery was timing out
+- [x] Solution: Simplified to INSERT IGNORE with UNIQUE constraint
+- [x] Deploy simplified migration (checkpoint f28d9e0c)
+- [ ] Verify Railway deployment succeeds with new migration
+
+
+## Fix Opening Hours Form to Display Without Database Data (User Request - Feb 20)
+- [ ] Design solution architecture (frontend + backend)
+- [ ] Check current backend tRPC procedures for opening hours
+- [ ] Update backend to handle both create and update operations properly
+- [ ] Update frontend to initialize with 7-day default structure
+- [ ] Update frontend useEffect to merge backend data with defaults
+- [ ] Update save handler to distinguish create vs update
+- [ ] Test in Manus dev environment
+- [x] Create shared constants file for default opening hours
+- [x] Update RestaurantSettings to use shared defaults
+- [x] Update useSettings hook to use shared defaults
+- [x] Test form with empty database - displays default 9AM-5PM
+- [x] Test footer display with empty database - displays default hours
+- [x] Write and run vitest tests for opening hours
+- [ ] Deploy to production
+- [ ] Verify form displays on boomiis.com

@@ -14,6 +14,7 @@ import AdminEmailSettings from "./AdminEmailSettings";
 import EmailTemplatesEditor from "./EmailTemplatesEditor";
 import DeliverySettings from "./DeliverySettings";
 import { DeliveryAreasSettings } from "@/components/DeliveryAreasSettings";
+import { DEFAULT_OPENING_HOURS } from "@shared/constants/openingHours";
 
 export default function RestaurantSettings() {
   const { data: settings, isLoading, refetch } = trpc.admin.getSettings.useQuery();
@@ -51,6 +52,7 @@ export default function RestaurantSettings() {
   });
 
   const [formData, setFormData] = useState<Record<string, string>>({});
+  
   const [openingHours, setOpeningHours] = useState<Array<{
     id: number;
     dayOfWeek: number;
@@ -58,7 +60,7 @@ export default function RestaurantSettings() {
     openTime: string;
     closeTime: string;
     isClosed: boolean;
-  }>>([]);
+  }>>(DEFAULT_OPENING_HOURS);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
 
@@ -73,10 +75,15 @@ export default function RestaurantSettings() {
     }
   }, [settings]);
 
-  // Initialize opening hours from database
+  // Initialize opening hours from database or use defaults
   useEffect(() => {
-    if (openingHoursData) {
+    if (openingHoursData && openingHoursData.length > 0) {
+      // Backend has data - use it
       setOpeningHours(openingHoursData);
+    } else {
+      // Backend has no data - keep the default 7-day structure
+      // This allows admin to fill in hours even on fresh database
+      setOpeningHours(DEFAULT_OPENING_HOURS);
     }
   }, [openingHoursData]);
 
@@ -94,18 +101,21 @@ export default function RestaurantSettings() {
   const handleSaveOpeningHours = async () => {
     await updateOpeningHours.mutateAsync(
       openingHours.map(h => ({
-        id: h.id,
+        id: h.id > 0 ? h.id : undefined, // Only send ID if it exists (for updates)
+        dayOfWeek: h.dayOfWeek,
         openTime: h.openTime,
         closeTime: h.closeTime,
         isClosed: h.isClosed,
       }))
     );
+    // Refetch to get newly created IDs
+    refetchHours();
   };
 
-  const handleHoursChange = (id: number, field: 'openTime' | 'closeTime' | 'isClosed', value: string | boolean) => {
+  const handleHoursChange = (dayOfWeek: number, field: 'openTime' | 'closeTime' | 'isClosed', value: string | boolean) => {
     setOpeningHours(prev => 
       prev.map(h => 
-        h.id === id 
+        h.dayOfWeek === dayOfWeek 
           ? { ...h, [field]: value }
           : h
       )
@@ -464,13 +474,13 @@ export default function RestaurantSettings() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {openingHours.map((hours) => (
-                    <div key={hours.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                    <div key={hours.dayOfWeek} className="flex items-center gap-4 p-4 border rounded-lg">
                       <div className="w-32 font-medium">{hours.dayName}</div>
                       <div className="flex items-center gap-2 flex-1">
                         <Input
                           type="time"
                           value={hours.openTime}
-                          onChange={(e) => handleHoursChange(hours.id, "openTime", e.target.value)}
+                          onChange={(e) => handleHoursChange(hours.dayOfWeek, "openTime", e.target.value)}
                           disabled={hours.isClosed}
                           className="w-32"
                         />
@@ -478,7 +488,7 @@ export default function RestaurantSettings() {
                         <Input
                           type="time"
                           value={hours.closeTime}
-                          onChange={(e) => handleHoursChange(hours.id, "closeTime", e.target.value)}
+                          onChange={(e) => handleHoursChange(hours.dayOfWeek, "closeTime", e.target.value)}
                           disabled={hours.isClosed}
                           className="w-32"
                         />
@@ -487,7 +497,7 @@ export default function RestaurantSettings() {
                         <input
                           type="checkbox"
                           checked={hours.isClosed}
-                          onChange={(e) => handleHoursChange(hours.id, "isClosed", e.target.checked)}
+                          onChange={(e) => handleHoursChange(hours.dayOfWeek, "isClosed", e.target.checked)}
                           className="w-4 h-4"
                         />
                         <span className="text-sm">Closed</span>

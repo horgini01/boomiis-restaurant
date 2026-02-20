@@ -1,11 +1,17 @@
 import { trpc } from "@/lib/trpc";
+import { DEFAULT_OPENING_HOURS } from "@shared/constants/openingHours";
 
 export function useSettings() {
   const { data: settings, isLoading } = trpc.settings.getPublic.useQuery();
   const { data: openingHoursData } = trpc.settings.getPublicOpeningHours.useQuery();
 
   const formatOpeningHoursDisplay = () => {
-    if (!openingHoursData || openingHoursData.length === 0) {
+    // Use default hours if database has no data
+    const hoursToDisplay = (openingHoursData && openingHoursData.length > 0) 
+      ? openingHoursData 
+      : DEFAULT_OPENING_HOURS;
+    
+    if (!hoursToDisplay || hoursToDisplay.length === 0) {
       return ["Hours not available"];
     }
 
@@ -13,7 +19,7 @@ export function useSettings() {
     const grouped: string[] = [];
     let currentGroup: any[] = [];
 
-    openingHoursData.forEach((hour, index) => {
+    hoursToDisplay.forEach((hour, index) => {
       if (hour.isClosed) {
         if (currentGroup.length > 0) {
           grouped.push(formatGroup(currentGroup));
@@ -32,7 +38,7 @@ export function useSettings() {
         }
       }
 
-      if (index === openingHoursData.length - 1 && currentGroup.length > 0) {
+      if (index === hoursToDisplay.length - 1 && currentGroup.length > 0) {
         grouped.push(formatGroup(currentGroup));
       }
     });
@@ -70,7 +76,7 @@ export function useSettings() {
     socialFacebook: settings?.social_facebook || "",
     socialInstagram: settings?.social_instagram || "",
     socialTwitter: settings?.social_twitter || "",
-    openingHours: openingHoursData || [],
+    openingHours: openingHoursData && openingHoursData.length > 0 ? openingHoursData : DEFAULT_OPENING_HOURS,
     openingHoursDisplay: formatOpeningHoursDisplay(),
   };
 }
