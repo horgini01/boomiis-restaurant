@@ -505,4 +505,11 @@
 - [x] Delete migration 0036 (full schema dump, redundant)
 - [x] Remove migration 0036 from journal
 - [x] Remove INSERT from migration 0035 (conflicts with shared constants)
-- [ ] Deploy and verify Railway deployment succeeds
+- [x] Deploy migration fixes to GitHub (checkpoint 74b018e8)
+- [ ] User to verify Railway deployment succeeds
+
+
+## Migration Script Looking in Wrong Folder (User Report - Feb 20)
+- [x] Check migrate-and-seed.mjs configuration - was pointing to ./drizzle
+- [x] Fix migrationsFolder path to point to drizzle/migrations
+- [ ] Deploy fix

@@ -76,7 +76,7 @@ async function runMigrations() {
     }
     
     // Apply migrations using drizzle-orm migrator
-    await migrate(db, { migrationsFolder: './drizzle' });
+    await migrate(db, { migrationsFolder: './drizzle/migrations' });
     console.log('[Migration] ✅ Migrations applied successfully');
     return true;
   } catch (error) {
