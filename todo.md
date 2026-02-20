@@ -405,3 +405,14 @@
 - [ ] Test: Toggle OFF → Save → Should save as false and show "Orders disabled" toast (User to verify)
 - [ ] Test: Toggle ON → Save → Should save as true and show "Orders enabled" toast (User to verify)
 - [x] Save checkpoint and push to GitHub
+
+
+## Remove Toggle Functionality (User Request - Feb 20) - COMPLETED ✅
+- [x] Remove toggle switch, closure message input, and Save Settings button from Orders page
+- [x] Remove toggle switch, closure message input, and Save Settings button from Reservations page
+- [x] Remove toggle switch, closure message input, and Save Settings button from Events page
+- [x] Remove all toggle-related state management (ordersEnabled, closureMessage, etc.)
+- [x] Remove all toggle-related mutations and handlers
+- [x] Keep all other functionality intact (order list, status updates, search, filters, etc.)
+- [ ] Test that all core features still work after removal (User to verify)
+- [x] Save checkpoint and push to GitHub

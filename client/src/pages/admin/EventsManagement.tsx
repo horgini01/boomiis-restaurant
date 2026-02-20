@@ -39,8 +39,6 @@ import { Button } from '@/components/ui/button';
 
 export default function EventsManagement() {
   const [statusFilter, setStatusFilter] = useState<'new' | 'contacted' | 'quoted' | 'booked' | 'cancelled' | undefined>(undefined);
-  const [eventsEnabled, setEventsEnabled] = useState<boolean>(true);
-  const [closureMessage, setClosureMessage] = useState<string>('');
   const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'guestCount'>('date');
@@ -49,51 +47,7 @@ export default function EventsManagement() {
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const utils = trpc.useUtils();
 
-  // Fetch current settings
-  const { data: settings } = trpc.systemSettings.getPublicSettings.useQuery();
-  
-  // Sync with query data when it changes
-  useEffect(() => {
-    if (settings) {
-      setEventsEnabled(settings.eventsEnabled ?? true);
-      setClosureMessage(settings.eventsClosureMessage ?? '');
-    }
-  }, [settings]);
-
-  const updateSettingsMutation = trpc.systemSettings.updateEventsSettings.useMutation({
-    onSuccess: (_, variables) => {
-      if (variables.enabled !== undefined) {
-        toast.success(variables.enabled ? 'Events enabled' : 'Events disabled');
-      } else {
-        toast.success('Events settings updated successfully');
-      }
-      // Invalidate query to refetch latest data
-      utils.systemSettings.getPublicSettings.invalidate();
-    },
-    onError: () => {
-      toast.error('Failed to update settings');
-    },
-  });
-
-  const handleToggleChange = (enabled: boolean) => {
-    setEventsEnabled(enabled);
-    // Don't auto-save - user must click Save Settings button
-  };
-  
-  const handleSaveSettings = () => {
-    updateSettingsMutation.mutate({ 
-      enabled: eventsEnabled, 
-      closureMessage: closureMessage
-    });
-  };
-
-  const handleMessageChange = (message: string) => {
-    setClosureMessage(message);
-  };
-
-  const handleSaveMessage = () => {
-    updateSettingsMutation.mutate({ enabled: eventsEnabled, closureMessage: closureMessage });
-  };
+  // Toggle functionality removed - events are always enabled
   
   const { data: inquiries, isLoading } = trpc.eventInquiries.list.useQuery({
     status: statusFilter,
@@ -243,53 +197,9 @@ export default function EventsManagement() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-4xl font-bold">Events & Catering Management</h1>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Power className={cn("h-5 w-5", eventsEnabled ? "text-green-500" : "text-red-500")} />
-                <Label htmlFor="events-toggle" className="text-sm font-medium">
-                  {eventsEnabled ? "Accepting Inquiries" : "Inquiries Closed"}
-                </Label>
-                <Switch
-                  id="events-toggle"
-                  checked={eventsEnabled}
-                  onCheckedChange={handleToggleChange}
-                />
-              </div>
-              <Button
-                onClick={handleSaveSettings}
-                disabled={updateSettingsMutation.isPending}
-                size="sm"
-              >
-                {updateSettingsMutation.isPending ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
-                ) : (
-                  'Save Settings'
-                )}
-              </Button>
-            </div>
           </div>
 
-          {/* Closure Message Input */}
-          {!eventsEnabled && (
-            <Card className="border-amber-500/50 bg-amber-500/10">
-              <CardContent className="pt-6">
-                <Label htmlFor="events-closure-message" className="text-sm font-medium mb-2 block">
-                  Closure Message (displayed to customers)
-                </Label>
-                <Textarea
-                  id="events-closure-message"
-                  placeholder="e.g., Not accepting event bookings during holiday season"
-                  value={closureMessage}
-                  onChange={(e) => handleMessageChange(e.target.value)}
-                  className="mb-2"
-                  rows={3}
-                />
-                <Button onClick={handleSaveMessage} size="sm">
-                  Save Message
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+
 
           <div className="flex items-center justify-between">
             <div />

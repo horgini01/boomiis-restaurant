@@ -56,56 +56,7 @@ export default function OrdersManagement() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [previousOrderIds, setPreviousOrderIds] = useState<Set<number>>(new Set());
   
-  // Orders toggle state - initialize from query data
-  const { data: systemSettings } = trpc.systemSettings.getPublicSettings.useQuery();
-  const [ordersEnabled, setOrdersEnabled] = useState<boolean>(systemSettings?.ordersEnabled ?? true);
-  const [closureMessage, setClosureMessage] = useState<string>(systemSettings?.ordersClosureMessage ?? '');
-  
-  // Sync with query data when it changes (only on initial load or after save)
-  useEffect(() => {
-    if (systemSettings && ordersEnabled === (systemSettings.ordersEnabled ?? true) && closureMessage === (systemSettings.ordersClosureMessage ?? '')) {
-      // Only update if values match (meaning no unsaved changes)
-      setOrdersEnabled(systemSettings.ordersEnabled ?? true);
-      setClosureMessage(systemSettings.ordersClosureMessage ?? '');
-    }
-  }, [systemSettings]);
-  
-  const showClosureInput = !ordersEnabled;
-  
-  const updateOrderSettingsMutation = trpc.systemSettings.updateOrderSettings.useMutation({
-    onSuccess: (_, variables) => {
-      if (variables.enabled !== undefined) {
-        toast.success(variables.enabled ? 'Orders enabled' : 'Orders disabled');
-      } else {
-        toast.success('Order settings updated');
-      }
-      // Invalidate query to refetch latest data
-      utils.systemSettings.getPublicSettings.invalidate();
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to update order settings');
-    },
-  });
-  
-  const handleOrdersToggle = (checked: boolean) => {
-    console.log('[handleOrdersToggle] Setting ordersEnabled to:', checked);
-    setOrdersEnabled(checked);
-  };
-  
-  const handleSaveSettings = () => {
-    console.log('[handleSaveSettings] Saving - ordersEnabled:', ordersEnabled, 'closureMessage:', closureMessage);
-    updateOrderSettingsMutation.mutate({ 
-      enabled: ordersEnabled,
-      closureMessage: closureMessage || undefined
-    });
-  };
-  
-  const handleSaveClosureMessage = () => {
-    updateOrderSettingsMutation.mutate({ 
-      enabled: ordersEnabled, 
-      closureMessage: closureMessage
-    });
-  };
+  // Toggle functionality removed - orders are always enabled
 
   // Play alert sound for new orders
   const playAlertSound = () => {
@@ -358,29 +309,6 @@ export default function OrdersManagement() {
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-4xl font-bold">Orders Management</h1>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="orders-toggle"
-                    checked={ordersEnabled}
-                    onCheckedChange={handleOrdersToggle}
-                  />
-                  <Label htmlFor="orders-toggle" className="cursor-pointer">
-                    {ordersEnabled ? 'Accepting Orders' : 'Orders Closed'}
-                  </Label>
-                </div>
-                <Button
-                  onClick={handleSaveSettings}
-                  disabled={updateOrderSettingsMutation.isPending}
-                  size="sm"
-                >
-                  {updateOrderSettingsMutation.isPending ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
-                  ) : (
-                    'Save Settings'
-                  )}
-                </Button>
-              </div>
               <Button
                 variant={soundEnabled ? "default" : "outline"}
                 size="sm"
@@ -392,30 +320,7 @@ export default function OrdersManagement() {
               </Button>
             </div>
           </div>
-          
-          {showClosureInput && (
-            <Card className="mb-6 border-amber-500 bg-amber-500/5">
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="closure-message" className="text-base font-semibold">
-                      Closure Message (displayed to customers)
-                    </Label>
-                    <Textarea
-                      id="closure-message"
-                      placeholder="e.g., We are temporarily not accepting online orders. Please call us to place your order."
-                      value={closureMessage}
-                      onChange={(e) => setClosureMessage(e.target.value)}
-                      className="mt-2 min-h-[100px]"
-                    />
-                  </div>
-                  <Button onClick={handleSaveClosureMessage} className="w-full sm:w-auto">
-                    Save Message
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
           {/* Search, Filter, and Sort Controls */}
           <div className="space-y-4 mb-6">
