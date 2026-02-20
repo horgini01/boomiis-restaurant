@@ -455,7 +455,16 @@
 
 
 ## Railway Deployment Failure - Opening Hours Migration (User Report - Feb 20)
-- [ ] Investigate deployment failure logs
-- [ ] Check migration 0035 SQL syntax
-- [ ] Fix migration script issues
-- [ ] Redeploy and verify success
+- [x] Investigate deployment failure logs
+- [x] Check migration 0035 SQL syntax
+- [x] Fix migration script with idempotent INSERT logic
+- [x] Deploy fix to GitHub (checkpoint 6ab957fe)
+- [ ] Verify Railway deployment succeeds and opening hours appear on boomiis.com
+
+
+## Persistent Railway Healthcheck Failure (User Report - Feb 20)
+- [ ] Check migrate-and-seed.mjs script for issues
+- [ ] Verify drizzle-kit migrate command is working correctly
+- [ ] Check if migration 0035 has syntax errors preventing execution
+- [ ] Investigate Railway startup logs for actual error
+- [ ] Consider alternative approach: skip migration, manually create table
