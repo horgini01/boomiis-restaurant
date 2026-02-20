@@ -450,4 +450,12 @@
 - [x] Verify database has opening hours data - MISSING TABLE!
 - [x] Root cause: opening_hours table was never created in production database
 - [x] Create migration 0035 to create opening_hours table with default data
-- [ ] Deploy migration and verify fix works on boomiis.com
+- [x] Deploy migration to GitHub (checkpoint 0cf7d5c5)
+- [ ] Verify fix works on boomiis.com after Railway deployment completes
+
+
+## Railway Deployment Failure - Opening Hours Migration (User Report - Feb 20)
+- [ ] Investigate deployment failure logs
+- [ ] Check migration 0035 SQL syntax
+- [ ] Fix migration script issues
+- [ ] Redeploy and verify success
