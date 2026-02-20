@@ -61,8 +61,12 @@ export default function EventsManagement() {
   }, [settings]);
 
   const updateSettingsMutation = trpc.systemSettings.updateEventsSettings.useMutation({
-    onSuccess: () => {
-      toast.success('Events settings updated successfully');
+    onSuccess: (_, variables) => {
+      if (variables.enabled !== undefined) {
+        toast.success(variables.enabled ? 'Events enabled' : 'Events disabled');
+      } else {
+        toast.success('Events settings updated successfully');
+      }
       utils.systemSettings.getPublicSettings.invalidate();
     },
     onError: () => {

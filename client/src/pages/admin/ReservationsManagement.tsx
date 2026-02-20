@@ -53,8 +53,12 @@ export default function ReservationsManagement() {
   }, [settings]);
 
   const updateSettingsMutation = trpc.systemSettings.updateReservationSettings.useMutation({
-    onSuccess: () => {
-      toast.success('Reservation settings updated successfully');
+    onSuccess: (_, variables) => {
+      if (variables.enabled !== undefined) {
+        toast.success(variables.enabled ? 'Reservations enabled' : 'Reservations disabled');
+      } else {
+        toast.success('Reservation settings updated successfully');
+      }
       utils.systemSettings.getPublicSettings.invalidate();
     },
     onError: () => {

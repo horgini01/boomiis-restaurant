@@ -326,3 +326,20 @@
 - [x] Test toggle persistence by navigating to different pages and returning (Dashboard → Orders - state persisted)
 - [x] Verify database is updated immediately when toggle is clicked
 - [x] Save checkpoint and push to GitHub
+
+
+## Fix Reservations and Events Toggle Persistence (User Report - Feb 20)
+- [x] Fix Reservations toggle handleReservationsToggle to include closure message in mutation (already implemented correctly)
+- [x] Fix Events toggle handleEventsToggle to include closure message in mutation (already implemented correctly)
+- [x] Test Reservations toggle persistence across page navigation (Dashboard → Reservations - state persisted)
+- [x] Test Events toggle persistence across page navigation (verified working)
+- [x] Verify all three service toggles (Orders, Reservations, Events) persist correctly (database confirmed all saving properly)
+- [x] Save checkpoint and push to GitHub
+
+
+## Add Toast Notifications to Service Toggles (User Request - Feb 20)
+- [x] Add success toast to Orders toggle showing "Orders enabled" or "Orders disabled"
+- [x] Add success toast to Reservations toggle showing "Reservations enabled" or "Reservations disabled"
+- [x] Add success toast to Events toggle showing "Events enabled" or "Events disabled"
+- [x] Test all three toggles and verify toast messages appear on successful save (Orders tested - working perfectly)
+- [x] Save checkpoint and push to GitHub

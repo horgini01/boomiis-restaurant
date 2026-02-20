@@ -63,8 +63,12 @@ export default function OrdersManagement() {
   const [showClosureInput, setShowClosureInput] = useState(false);
   
   const updateOrderSettingsMutation = trpc.systemSettings.updateOrderSettings.useMutation({
-    onSuccess: () => {
-      toast.success('Order settings updated');
+    onSuccess: (_, variables) => {
+      if (variables.enabled !== undefined) {
+        toast.success(variables.enabled ? 'Orders enabled' : 'Orders disabled');
+      } else {
+        toast.success('Order settings updated');
+      }
       utils.systemSettings.getPublicSettings.invalidate();
     },
     onError: (error: any) => {
