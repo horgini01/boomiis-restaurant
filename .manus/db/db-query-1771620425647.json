@@ -1,0 +1,73 @@
+{
+  "query": "SELECT * FROM opening_hours ORDER BY day_of_week;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM opening_hours ORDER BY day_of_week;",
+  "rows": [
+    {
+      "id": "1",
+      "day_of_week": "0",
+      "open_time": "10:00",
+      "close_time": "21:00",
+      "is_closed": "1",
+      "created_at": "2026-02-03 00:40:56",
+      "updated_at": "2026-02-03 01:07:13"
+    },
+    {
+      "id": "2",
+      "day_of_week": "1",
+      "open_time": "01:00",
+      "close_time": "22:00",
+      "is_closed": "0",
+      "created_at": "2026-02-03 00:40:56",
+      "updated_at": "2026-02-03 01:07:13"
+    },
+    {
+      "id": "3",
+      "day_of_week": "2",
+      "open_time": "00:30",
+      "close_time": "22:00",
+      "is_closed": "0",
+      "created_at": "2026-02-03 00:40:56",
+      "updated_at": "2026-02-03 17:52:59"
+    },
+    {
+      "id": "4",
+      "day_of_week": "3",
+      "open_time": "10:00",
+      "close_time": "22:00",
+      "is_closed": "0",
+      "created_at": "2026-02-03 00:40:56",
+      "updated_at": "2026-02-04 11:13:19"
+    },
+    {
+      "id": "5",
+      "day_of_week": "4",
+      "open_time": "10:00",
+      "close_time": "22:00",
+      "is_closed": "0",
+      "created_at": "2026-02-03 00:40:56",
+      "updated_at": "2026-02-03 01:07:13"
+    },
+    {
+      "id": "6",
+      "day_of_week": "5",
+      "open_time": "10:00",
+      "close_time": "23:00",
+      "is_closed": "0",
+      "created_at": "2026-02-03 00:40:56",
+      "updated_at": "2026-02-03 01:07:13"
+    },
+    {
+      "id": "7",
+      "day_of_week": "6",
+      "open_time": "10:00",
+      "close_time": "23:00",
+      "is_closed": "0",
+      "created_at": "2026-02-03 00:40:56",
+      "updated_at": "2026-02-03 01:07:13"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tday_of_week\topen_time\tclose_time\tis_closed\tcreated_at\tupdated_at\n1\t0\t10:00\t21:00\t1\t2026-02-03 00:40:56\t2026-02-03 01:07:13\n2\t1\t01:00\t22:00\t0\t2026-02-03 00:40:56\t2026-02-03 01:07:13\n3\t2\t00:30\t22:00\t0\t2026-02-03 00:40:56\t2026-02-03 17:52:59\n4\t3\t10:00\t22:00\t0\t2026-02-03 00:40:56\t2026-02-04 11:13:19\n5\t4\t10:00\t22:00\t0\t2026-02-03 00:40:56\t2026-02-03 01:07:13\n6\t5\t10:00\t23:00\t0\t2026-02-03 00:40:56\t2026-02-03 01:07:13\n7\t6\t10:00\t23:00\t0\t2026-02-03 00:40:56\t2026-02-03 01:07:13\n",
+  "stderr": "",
+  "execution_time_ms": 107
+}
