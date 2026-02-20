@@ -485,5 +485,24 @@
 - [x] Test form with empty database - displays default 9AM-5PM
 - [x] Test footer display with empty database - displays default hours
 - [x] Write and run vitest tests for opening hours
-- [ ] Deploy to production
-- [ ] Verify form displays on boomiis.com
+- [x] Deploy to production (checkpoint 83b9379c)
+- [ ] User to verify form displays on boomiis.com after Railway deployment
+
+
+## Railway Migration Error - Missing 0035 File (User Report - Feb 20)
+- [x] Check if migration file 0035 exists locally in drizzle/migrations/
+- [x] Check if migration file is tracked in Git
+- [x] Check if migration file was included in checkpoint 83b9379c
+- [x] Discovered root cause: Migration 0034 is missing (not 0035)
+- [x] Document findings in investigation report
+- [ ] Report findings to user without fixing
+
+
+## Fix Railway Migration with Existing opening_hours Table (User Report - Feb 20)
+- [x] Analyze migration state - opening_hours table already exists in production
+- [x] Determine safest approach - use IF NOT EXISTS for idempotency
+- [x] Move migration 0034 to migrations folder with IF NOT EXISTS
+- [x] Delete migration 0036 (full schema dump, redundant)
+- [x] Remove migration 0036 from journal
+- [x] Remove INSERT from migration 0035 (conflicts with shared constants)
+- [ ] Deploy and verify Railway deployment succeeds

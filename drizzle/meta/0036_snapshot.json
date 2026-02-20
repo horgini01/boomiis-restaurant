@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "86b51dd5-fe11-416f-bd0c-439fcb4e151f",
+  "id": "7ff21b3f-48b2-4cd5-bea5-abc47377b286",
   "prevId": "0035_create_opening_hours_table",
   "tables": {
     "about_content": {

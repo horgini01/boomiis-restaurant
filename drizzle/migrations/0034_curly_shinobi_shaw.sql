@@ -1,4 +1,4 @@
-CREATE TABLE `system_settings` (
+CREATE TABLE IF NOT EXISTS `system_settings` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`setting_key` varchar(100) NOT NULL,
 	`setting_value` text,
