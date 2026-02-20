@@ -512,4 +512,11 @@
 ## Migration Script Looking in Wrong Folder (User Report - Feb 20)
 - [x] Check migrate-and-seed.mjs configuration - was pointing to ./drizzle
 - [x] Fix migrationsFolder path to point to drizzle/migrations
+- [x] Deploy fix to GitHub (checkpoint a0d34c13)
+- [ ] User to verify Railway deployment succeeds
+
+
+## Reorganize Migrations to Drizzle Default Structure (User Request - Feb 20)
+- [x] Move migration SQL files from drizzle/migrations/ to drizzle/
+- [x] Revert migration script path to ./drizzle
 - [ ] Deploy fix
