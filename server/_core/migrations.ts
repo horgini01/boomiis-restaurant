@@ -1,5 +1,5 @@
 import { getDb } from '../db';
-import { migrationsRun, emailTemplates } from '../../drizzle/schema';
+import { migrationsRun, emailTemplates, smsTemplates } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
 const DEFAULT_EMAIL_TEMPLATES = {
@@ -378,6 +378,69 @@ const DEFAULT_EMAIL_TEMPLATES = {
   },
 };
 
+const DEFAULT_SMS_TEMPLATES = {
+  order_confirmed: {
+    templateName: 'Order Confirmed',
+    message: 'Hi {{customerName}}! Your order #{{orderNumber}} has been confirmed. We\'ll notify you when it\'s ready!',
+  },
+  order_preparing: {
+    templateName: 'Order Preparing',
+    message: 'Good news {{customerName}}! Your order #{{orderNumber}} is now being prepared by our kitchen team.',
+  },
+  order_ready: {
+    templateName: 'Order Ready for Pickup',
+    message: 'Hi {{customerName}}! Your order #{{orderNumber}} is ready for pickup at Boomiis Restaurant. See you soon!',
+  },
+  out_for_delivery: {
+    templateName: 'Out for Delivery',
+    message: 'Hi {{customerName}}! Your order #{{orderNumber}} is out for delivery and will arrive in approximately {{estimatedMinutes}} minutes.',
+  },
+  order_delivered: {
+    templateName: 'Order Delivered',
+    message: 'Your order #{{orderNumber}} has been delivered. Enjoy your meal from Boomiis Restaurant! Please rate your experience.',
+  },
+  order_delayed: {
+    templateName: 'Order Delayed',
+    message: 'Hi {{customerName}}, we apologize but your order #{{orderNumber}} is running {{estimatedMinutes}} minutes late. Thank you for your patience!',
+  },
+  order_cancelled: {
+    templateName: 'Order Cancelled',
+    message: 'Your order #{{orderNumber}} has been cancelled. If you have questions, please contact Boomiis Restaurant.',
+  },
+  admin_new_order: {
+    templateName: 'Admin: New Order',
+    message: 'New {{orderType}} order #{{orderNumber}} received! Total: £{{total}}. Check admin panel for details.',
+  },
+  admin_new_reservation: {
+    templateName: 'Admin: New Reservation',
+    message: 'New reservation: {{customerName}}, {{partySize}} guests on {{date}} at {{time}}. Check admin panel.',
+  },
+  admin_catering_quote: {
+    templateName: 'Admin: Catering Quote Request',
+    message: 'Boomiis Catering Quote Request! {{customerName}} wants {{eventType}} for {{guestCount}} guests on {{eventDate}}. Check admin panel.',
+  },
+  reservation_confirmed: {
+    templateName: 'Reservation Confirmed',
+    message: 'Hi {{customerName}}! Your table for {{partySize}} on {{date}} at {{time}} is confirmed at Boomiis Restaurant. See you then!',
+  },
+  reservation_reminder: {
+    templateName: 'Reservation Reminder',
+    message: 'Reminder: Your reservation at Boomiis Restaurant is tomorrow at {{time}} for {{partySize}} guests. Looking forward to seeing you!',
+  },
+  reservation_cancelled: {
+    templateName: 'Reservation Cancelled',
+    message: 'Your reservation at Boomiis Restaurant for {{date}} at {{time}} has been cancelled. Hope to see you again soon!',
+  },
+  catering_confirmed: {
+    templateName: 'Catering Confirmed',
+    message: 'Hi {{customerName}}! Your {{eventType}} is confirmed for {{eventDate}} ({{guestCount}} guests). Check your email for full details!',
+  },
+  catering_quote_response: {
+    templateName: 'Catering Quote Response',
+    message: 'Hi {{customerName}}! Regarding your {{eventType}} inquiry at Boomiis: {{responseMessage}}. Check your email for full details.',
+  },
+};
+
 /**
  * Seed email templates on first startup
  */
@@ -424,6 +487,53 @@ async function seedEmailTemplates() {
   }
 
   console.log(`[Migration] Email templates seeding complete: ${inserted} inserted, ${skipped} skipped`);
+}
+
+/**
+ * Seed SMS templates on first startup
+ */
+async function seedSmsTemplates() {
+  const db = await getDb();
+  if (!db) {
+    console.log('[Migration] Database not available, skipping SMS template seeding');
+    return;
+  }
+
+  console.log('[Migration] Seeding SMS templates...');
+  
+  let inserted = 0;
+  let skipped = 0;
+
+  for (const [templateType, template] of Object.entries(DEFAULT_SMS_TEMPLATES)) {
+    try {
+      // Check if template exists
+      const existing = await db.select()
+        .from(smsTemplates)
+        .where(eq(smsTemplates.templateType, templateType))
+        .limit(1);
+
+      if (existing.length > 0) {
+        skipped++;
+        continue;
+      }
+
+      // Insert new template
+      await db.insert(smsTemplates).values({
+        templateType,
+        templateName: template.templateName,
+        message: template.message,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      inserted++;
+    } catch (error) {
+      console.error(`[Migration] Error inserting SMS template "${templateType}":`, error);
+    }
+  }
+
+  console.log(`[Migration] SMS templates seeding complete: ${inserted} inserted, ${skipped} skipped`);
 }
 
 /**
@@ -478,6 +588,16 @@ export async function runDataMigrations() {
     await markMigrationComplete(emailTemplatesMigration);
   } else {
     console.log(`[Migration] Skipping ${emailTemplatesMigration} (already run)`);
+  }
+
+  // Migration: Seed SMS templates
+  const smsTemplatesMigration = 'seed_sms_templates_v1';
+  if (!(await hasMigrationRun(smsTemplatesMigration))) {
+    console.log(`[Migration] Running: ${smsTemplatesMigration}`);
+    await seedSmsTemplates();
+    await markMigrationComplete(smsTemplatesMigration);
+  } else {
+    console.log(`[Migration] Skipping ${smsTemplatesMigration} (already run)`);
   }
 
   console.log('[Migration] All data migrations complete');

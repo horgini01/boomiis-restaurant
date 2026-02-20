@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COUNT(*) as total FROM sms_templates; SELECT * FROM sms_templates LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT COUNT(*) as total FROM sms_templates; SELECT * FROM sms_templates LIMIT 3;",
+  "rows": [
+    {
+      "total": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n0\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

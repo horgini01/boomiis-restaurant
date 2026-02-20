@@ -526,4 +526,16 @@
 ## Fix Migration 0036 IF NOT EXISTS (User Request - Feb 20)
 - [x] Read migration 0036 - contains 33 CREATE TABLE statements
 - [x] Update all 33 CREATE TABLE to use IF NOT EXISTS
-- [ ] Deploy fix to GitHub
+- [x] Deploy fix to GitHub (checkpoint 46b5388e)
+- [ ] User to verify Railway deployment succeeds
+
+
+## Implement SMS Templates Startup Seeding (User Request - Feb 20)
+- [x] Design default SMS template messages for all template types (15 templates)
+- [x] Create shared constants file for default SMS templates
+- [x] Create startup script to seed SMS templates if database is empty
+- [x] Integrate script into migrate-and-seed.mjs (seedSmsTemplates function)
+- [x] Test locally that templates appear on first load (15 templates seeded successfully)
+- [x] Add SMS template seeding to runtime migration system (server/_core/migrations.ts)
+- [ ] Deploy to production
+- [ ] Verify templates display on boomiis.com

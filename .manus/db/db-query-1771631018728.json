@@ -1,0 +1,30 @@
+{
+  "query": "SELECT template_type, template_name FROM sms_templates ORDER BY id LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT template_type, template_name FROM sms_templates ORDER BY id LIMIT 5;",
+  "rows": [
+    {
+      "template_type": "order_confirmed",
+      "template_name": "Order Confirmed"
+    },
+    {
+      "template_type": "order_preparing",
+      "template_name": "Order Preparing"
+    },
+    {
+      "template_type": "order_ready",
+      "template_name": "Order Ready for Pickup"
+    },
+    {
+      "template_type": "out_for_delivery",
+      "template_name": "Out for Delivery"
+    },
+    {
+      "template_type": "order_delivered",
+      "template_name": "Order Delivered"
+    }
+  ],
+  "messages": [],
+  "stdout": "template_type\ttemplate_name\norder_confirmed\tOrder Confirmed\norder_preparing\tOrder Preparing\norder_ready\tOrder Ready for Pickup\nout_for_delivery\tOut for Delivery\norder_delivered\tOrder Delivered\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}
