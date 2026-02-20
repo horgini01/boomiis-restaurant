@@ -88,8 +88,12 @@ export default function OrdersManagement() {
   const handleOrdersToggle = (checked: boolean) => {
     setOrdersEnabled(checked);
     setShowClosureInput(!checked);
+    // Don't auto-save - user must click Save Settings button
+  };
+  
+  const handleSaveSettings = () => {
     updateOrderSettingsMutation.mutate({ 
-      enabled: checked,
+      enabled: ordersEnabled,
       closureMessage: closureMessage || undefined
     });
   };
@@ -352,15 +356,28 @@ export default function OrdersManagement() {
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-4xl font-bold">Orders Management</h1>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="orders-toggle"
-                  checked={ordersEnabled}
-                  onCheckedChange={handleOrdersToggle}
-                />
-                <Label htmlFor="orders-toggle" className="cursor-pointer">
-                  {ordersEnabled ? 'Accepting Orders' : 'Orders Closed'}
-                </Label>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="orders-toggle"
+                    checked={ordersEnabled}
+                    onCheckedChange={handleOrdersToggle}
+                  />
+                  <Label htmlFor="orders-toggle" className="cursor-pointer">
+                    {ordersEnabled ? 'Accepting Orders' : 'Orders Closed'}
+                  </Label>
+                </div>
+                <Button
+                  onClick={handleSaveSettings}
+                  disabled={updateOrderSettingsMutation.isPending}
+                  size="sm"
+                >
+                  {updateOrderSettingsMutation.isPending ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
+                  ) : (
+                    'Save Settings'
+                  )}
+                </Button>
               </div>
               <Button
                 variant={soundEnabled ? "default" : "outline"}

@@ -68,7 +68,14 @@ export default function ReservationsManagement() {
 
   const handleToggleChange = (enabled: boolean) => {
     setReservationsEnabled(enabled);
-    updateSettingsMutation.mutate({ enabled, closureMessage });
+    // Don't auto-save - user must click Save Settings button
+  };
+  
+  const handleSaveSettings = () => {
+    updateSettingsMutation.mutate({ 
+      enabled: reservationsEnabled, 
+      closureMessage 
+    });
   };
 
   const handleMessageChange = (message: string) => {
@@ -220,6 +227,17 @@ export default function ReservationsManagement() {
                   onCheckedChange={handleToggleChange}
                 />
               </div>
+              <Button
+                onClick={handleSaveSettings}
+                disabled={updateSettingsMutation.isPending}
+                size="sm"
+              >
+                {updateSettingsMutation.isPending ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
+                ) : (
+                  'Save Settings'
+                )}
+              </Button>
             </div>
           </div>
 

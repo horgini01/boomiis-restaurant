@@ -355,3 +355,29 @@
 - [x] Verify all three toggles (Orders, Reservations, Events) save correctly (all confirmed working)
 - [x] Added detailed console logging to mutation for debugging
 - [x] Save checkpoint and push to GitHub
+
+
+## Complete End-to-End Toggle Testing (User Report - Feb 20)
+- [ ] Test orders toggle OFF in admin panel
+- [ ] Check database immediately after toggling OFF
+- [ ] Navigate to Dashboard
+- [ ] Return to Orders page
+- [ ] Verify toggle state matches database
+- [ ] Test orders toggle ON
+- [ ] Check database immediately after toggling ON
+- [ ] Navigate away and return
+- [ ] Verify persistence
+- [ ] Identify and fix root cause if issue persists
+- [ ] Save checkpoint and push to GitHub
+
+
+## Add Manual Save Settings Button (User Request - Feb 20)
+- [x] Add "Save Settings" button next to Orders toggle
+- [x] Remove auto-save on toggle click for Orders
+- [x] Add "Save Settings" button next to Reservations toggle  
+- [x] Remove auto-save on toggle click for Reservations
+- [x] Add "Save Settings" button next to Events toggle
+- [x] Remove auto-save on toggle click for Events
+- [x] Test all three pages - toggle should update UI only, save button commits to database
+- [x] Verify settings persist after clicking Save Settings button (Orders ✅, Reservations ✅, Events ✅)
+- [ ] Save checkpoint and push to GitHub

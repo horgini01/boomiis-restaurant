@@ -76,7 +76,14 @@ export default function EventsManagement() {
 
   const handleToggleChange = (enabled: boolean) => {
     setEventsEnabled(enabled);
-    updateSettingsMutation.mutate({ enabled, closureMessage });
+    // Don't auto-save - user must click Save Settings button
+  };
+  
+  const handleSaveSettings = () => {
+    updateSettingsMutation.mutate({ 
+      enabled: eventsEnabled, 
+      closureMessage 
+    });
   };
 
   const handleMessageChange = (message: string) => {
@@ -247,6 +254,17 @@ export default function EventsManagement() {
                   onCheckedChange={handleToggleChange}
                 />
               </div>
+              <Button
+                onClick={handleSaveSettings}
+                disabled={updateSettingsMutation.isPending}
+                size="sm"
+              >
+                {updateSettingsMutation.isPending ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
+                ) : (
+                  'Save Settings'
+                )}
+              </Button>
             </div>
           </div>
 
