@@ -380,4 +380,4 @@
 - [x] Remove auto-save on toggle click for Events
 - [x] Test all three pages - toggle should update UI only, save button commits to database
 - [x] Verify settings persist after clicking Save Settings button (Orders ✅, Reservations ✅, Events ✅)
-- [ ] Save checkpoint and push to GitHub
+- [x] Save checkpoint and push to GitHub
