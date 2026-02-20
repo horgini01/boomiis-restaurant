@@ -381,3 +381,14 @@
 - [x] Test all three pages - toggle should update UI only, save button commits to database
 - [x] Verify settings persist after clicking Save Settings button (Orders ✅, Reservations ✅, Events ✅)
 - [x] Save checkpoint and push to GitHub
+
+
+## CRITICAL: Toggle Still Resetting Despite Manual Save Button (User Report - Feb 20) - RESOLVED ✅
+- [x] Investigate why toggle still resets after clicking Save Settings and getting success toast
+- [x] Check if there's a cache invalidation issue causing stale data to reload
+- [x] Check if useEffect dependency is causing re-fetch with old data (ROOT CAUSE FOUND)
+- [x] Verify mutation is actually updating database (not just returning success)
+- [x] Fix: Changed state management to use query data as source of truth, local state only for unsaved changes
+- [x] Applied fix to all three pages (Orders, Reservations, Events)
+- [x] Tested toggle OFF → Save → Navigate away → Return → State persisted correctly ✅
+- [ ] Save checkpoint and push to GitHub

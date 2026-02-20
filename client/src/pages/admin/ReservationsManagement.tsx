@@ -32,8 +32,8 @@ import { useMemo, useEffect } from 'react';
 
 export default function ReservationsManagement() {
   const [statusFilter, setStatusFilter] = useState<'pending' | 'confirmed' | 'cancelled' | 'completed' | undefined>(undefined);
-  const [reservationsEnabled, setReservationsEnabled] = useState(true);
-  const [closureMessage, setClosureMessage] = useState('');
+  const [reservationsEnabled, setReservationsEnabled] = useState<boolean | null>(null);
+  const [closureMessage, setClosureMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'partySize'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -41,16 +41,12 @@ export default function ReservationsManagement() {
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const utils = trpc.useUtils();
 
-  // Fetch current settings
+  // Fetch current settings - use query data directly, no local state syncing
   const { data: settings } = trpc.systemSettings.getPublicSettings.useQuery();
   
-  // Update local state when settings are loaded
-  useEffect(() => {
-    if (settings) {
-      setReservationsEnabled(settings.reservationsEnabled);
-      setClosureMessage(settings.reservationsClosureMessage);
-    }
-  }, [settings]);
+  // Use query data as source of truth, only use local state for unsaved changes
+  const currentReservationsEnabled = reservationsEnabled !== null ? reservationsEnabled : (settings?.reservationsEnabled ?? true);
+  const currentClosureMessage = closureMessage !== null ? closureMessage : (settings?.reservationsClosureMessage ?? '');
 
   const updateSettingsMutation = trpc.systemSettings.updateReservationSettings.useMutation({
     onSuccess: (_, variables) => {
@@ -59,6 +55,9 @@ export default function ReservationsManagement() {
       } else {
         toast.success('Reservation settings updated successfully');
       }
+      // Reset local state after successful save
+      setReservationsEnabled(null);
+      setClosureMessage(null);
       utils.systemSettings.getPublicSettings.invalidate();
     },
     onError: () => {
@@ -73,8 +72,8 @@ export default function ReservationsManagement() {
   
   const handleSaveSettings = () => {
     updateSettingsMutation.mutate({ 
-      enabled: reservationsEnabled, 
-      closureMessage 
+      enabled: currentReservationsEnabled, 
+      closureMessage: currentClosureMessage
     });
   };
 
@@ -83,7 +82,7 @@ export default function ReservationsManagement() {
   };
 
   const handleSaveMessage = () => {
-    updateSettingsMutation.mutate({ enabled: reservationsEnabled, closureMessage });
+    updateSettingsMutation.mutate({ enabled: currentReservationsEnabled, closureMessage: currentClosureMessage });
   };
   
   const { data: reservations, isLoading } = trpc.reservations.list.useQuery({
@@ -217,13 +216,13 @@ export default function ReservationsManagement() {
             <h1 className="text-4xl font-bold">Reservations Management</h1>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Power className={cn("h-5 w-5", reservationsEnabled ? "text-green-500" : "text-red-500")} />
+                <Power className={cn("h-5 w-5", currentReservationsEnabled ? "text-green-500" : "text-red-500")} />
                 <Label htmlFor="reservations-toggle" className="text-sm font-medium">
-                  {reservationsEnabled ? "Accepting Reservations" : "Reservations Closed"}
+                  {currentReservationsEnabled ? "Accepting Reservations" : "Reservations Closed"}
                 </Label>
                 <Switch
                   id="reservations-toggle"
-                  checked={reservationsEnabled}
+                  checked={currentReservationsEnabled}
                   onCheckedChange={handleToggleChange}
                 />
               </div>
@@ -242,7 +241,7 @@ export default function ReservationsManagement() {
           </div>
 
           {/* Closure Message Input */}
-          {!reservationsEnabled && (
+          {!currentReservationsEnabled && (
             <Card className="border-amber-500/50 bg-amber-500/10">
               <CardContent className="pt-6">
                 <Label htmlFor="closure-message" className="text-sm font-medium mb-2 block">
@@ -251,7 +250,7 @@ export default function ReservationsManagement() {
                 <Textarea
                   id="closure-message"
                   placeholder="e.g., Closed for renovations until March 1st"
-                  value={closureMessage}
+                  value={currentClosureMessage}
                   onChange={(e) => handleMessageChange(e.target.value)}
                   className="mb-2"
                   rows={3}
