@@ -627,7 +627,11 @@
 - [x] Initialize default values in database (enabled=true, max=£30)
 
 ### Phase 3: Checkout Flow Changes
-- [ ] Add "Pay on Pickup" checkbox to checkout page
+- [x] Add sendOrderVerificationOTPSMS function to otp-sms.service.ts
+- [x] Add sendOrderVerificationCode procedure to payment router
+- [x] Add createPayOnPickupOrder procedure to payment router
+- [ ] Add "Pay on Pickup" checkbox to checkout page (frontend)
+- [ ] Implement SMS verification UI in checkout flow
 - [ ] Implement order total validation against max limit
 - [ ] Add SMS verification code generation
 - [ ] Add SMS verification input field

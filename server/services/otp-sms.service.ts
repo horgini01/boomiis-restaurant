@@ -55,3 +55,31 @@ export async function sendPasswordResetOTPSMS(
   
   return result;
 }
+
+/**
+ * Send OTP code via SMS for order verification (pay-on-pickup)
+ * @param phone - Phone number in E.164 format (e.g., +447911123456)
+ * @param otpCode - 6-digit OTP code
+ * @param recipientName - Name of the recipient
+ * @returns Promise with SMS send result
+ */
+export async function sendOrderVerificationOTPSMS(
+  phone: string,
+  otpCode: string,
+  recipientName: string
+): Promise<{ success: boolean; error?: string }> {
+  const message = `Hi ${recipientName}, your Boomiis order verification code is: ${otpCode}. This code expires in 10 minutes.`;
+  
+  const result = await sendSMS({
+    to: phone,
+    message,
+  });
+  
+  if (result.success) {
+    console.log(`[OTP SMS] Order verification OTP sent to ${phone} via ${result.provider}`);
+  } else {
+    console.error(`[OTP SMS] Failed to send order verification OTP: ${result.error}`);
+  }
+  
+  return result;
+}

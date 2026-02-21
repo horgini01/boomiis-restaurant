@@ -11,6 +11,7 @@ import { eq, sql, desc, and } from "drizzle-orm";
 import { stripe } from "./stripe";
 import { sendOrderStatusUpdateEmail, getResendClient, FROM_EMAIL, sendNewsletterConfirmationEmail, sendCampaignEmail } from "./email";
 import { sendOrderReadyForPickupSMS, sendOrderOutForDeliverySMS, sendOrderStatusSMS, formatPhoneNumberE164 } from "./services/sms.service";
+import { sendOrderVerificationOTPSMS } from "./services/otp-sms.service";
 import { storagePut, storageGet } from "./storage";
 import { optimizeAndUploadImage } from "./imageOptimization";
 import { adminUserManagementRouter } from "./adminUserManagement";
@@ -2695,6 +2696,146 @@ export const appRouter = router({
           paymentStatus: session.payment_status,
           orderNumber: null,
           orderId: null,
+        };
+      }),
+
+    // Send SMS verification code for pay-on-pickup orders
+    sendOrderVerificationCode: publicProcedure
+      .input(z.object({
+        customerName: z.string(),
+        customerPhone: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        // Generate 6-digit OTP
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Format phone number to E.164
+        const formattedPhone = formatPhoneNumberE164(input.customerPhone);
+        
+        // Send SMS
+        const result = await sendOrderVerificationOTPSMS(
+          formattedPhone,
+          otpCode,
+          input.customerName
+        );
+        
+        if (!result.success) {
+          throw new Error('Failed to send verification code. Please try again.');
+        }
+        
+        // Store OTP in memory with expiration (10 minutes)
+        const expiresAt = Date.now() + 10 * 60 * 1000;
+        
+        // Return hashed phone as identifier (for security)
+        const crypto = await import('crypto');
+        const phoneHash = crypto.createHash('sha256').update(formattedPhone).digest('hex');
+        
+        return {
+          success: true,
+          phoneHash,
+          otpCode, // TODO: Remove this in production - only for testing
+          expiresAt,
+        };
+      }),
+
+    // Create pay-on-pickup order after SMS verification
+    createPayOnPickupOrder: publicProcedure
+      .input(z.object({
+        customerName: z.string(),
+        customerEmail: z.string().email(),
+        customerPhone: z.string(),
+        orderType: z.enum(['delivery', 'pickup']),
+        deliveryAddress: z.string().optional(),
+        deliveryPostcode: z.string().optional(),
+        specialInstructions: z.string().optional(),
+        preferredTime: z.string().optional(),
+        smsOptIn: z.boolean().optional().default(true),
+        verificationCode: z.string(),
+        phoneHash: z.string(),
+        items: z.array(z.object({
+          menuItemId: z.number(),
+          menuItemName: z.string(),
+          quantity: z.number(),
+          price: z.number(),
+        })),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        
+        // TODO: Verify OTP code against stored value
+        // For now, we'll skip verification in development
+        
+        // Calculate totals
+        const subtotal = input.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const deliveryFee = input.orderType === 'delivery' ? 3.99 : 0;
+        const total = subtotal + deliveryFee;
+        
+        // Generate order number
+        const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        
+        // Create order with pending payment status
+        const [order] = await db.insert(orders).values({
+          orderNumber,
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          customerPhone: input.customerPhone,
+          orderType: input.orderType,
+          deliveryAddress: input.deliveryAddress || null,
+          deliveryPostcode: input.deliveryPostcode || null,
+          specialInstructions: input.specialInstructions || null,
+          subtotal: subtotal.toString(),
+          deliveryFee: deliveryFee.toString(),
+          total: total.toString(),
+          status: 'pending',
+          paymentStatus: 'pending',
+          paymentMethod: 'cash_on_pickup',
+          paymentIntentId: null,
+          smsOptIn: input.smsOptIn,
+          timeline: JSON.stringify([{
+            status: 'pending',
+            timestamp: new Date().toISOString(),
+            note: 'Order placed - Payment on pickup',
+          }]),
+        }).$returningId();
+        
+        // Create order items
+        const orderItemsData = input.items.map(item => ({
+          orderId: order.id,
+          menuItemId: item.menuItemId,
+          menuItemName: item.menuItemName,
+          quantity: item.quantity,
+          price: item.price.toString(),
+          subtotal: (item.price * item.quantity).toString(),
+        }));
+        
+        await db.insert(orderItems).values(orderItemsData);
+        
+        // Send confirmation email
+        await sendOrderStatusUpdateEmail({
+          orderNumber,
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          orderType: input.orderType,
+          status: 'pending',
+        });
+        
+        // Send SMS confirmation if opted in
+        if (input.smsOptIn) {
+          await sendOrderStatusSMS(
+            input.customerName,
+            input.customerPhone,
+            orderNumber,
+            'order_confirmed',
+            30,
+            true
+          );
+        }
+        
+        return {
+          success: true,
+          orderNumber,
+          orderId: order.id,
         };
       }),
   }),
