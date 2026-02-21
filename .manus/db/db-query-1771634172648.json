@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO site_settings (setting_key, setting_value, setting_type, description, updated_at) VALUES \n('reservation_notice_enabled', 'true', 'boolean', 'Enable notice banner on reservations page', NOW()),\n('reservation_notice_text', 'Please note: We are fully booked on Valentine''s Day. Consider booking for Feb 15th instead!', 'text', 'Notice message displayed on reservations page', NOW())\nON DUPLICATE KEY UPDATE updated_at = NOW();",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute INSERT INTO site_settings (setting_key, setting_value, setting_type, description, updated_at) VALUES \n('reservation_notice_enabled', 'true', 'boolean', 'Enable notice banner on reservations page', NOW()),\n('reservation_notice_text', 'Please note: We are fully booked on Valentine''s Day. Consider booking for Feb 15th instead!', 'text', 'Notice message displayed on reservations page', NOW())\nON DUPLICATE KEY UPDATE updated_at = NOW();",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 91
+}

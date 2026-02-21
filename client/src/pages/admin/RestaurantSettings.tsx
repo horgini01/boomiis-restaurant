@@ -574,7 +574,46 @@ export default function RestaurantSettings() {
             </TabsContent>
 
             <TabsContent value="operations">
-              <DeliverySettings />
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Reservation Notice Banner</CardTitle>
+                    <CardDescription>
+                      Display an important notice at the top of the reservations page
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="reservation_notice_enabled"
+                        checked={formData.reservation_notice_enabled === 'true'}
+                        onChange={(e) =>
+                          setFormData({ ...formData, reservation_notice_enabled: e.target.checked ? 'true' : 'false' })
+                        }
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="reservation_notice_enabled" className="cursor-pointer">
+                        Enable reservation notice banner
+                      </Label>
+                    </div>
+                    <div>
+                      <Label htmlFor="reservation_notice_text">Notice Message</Label>
+                      <Textarea
+                        id="reservation_notice_text"
+                        placeholder="e.g., Please note: We are fully booked on Valentine's Day. Consider booking for Feb 15th instead!"
+                        value={formData.reservation_notice_text || ''}
+                        onChange={(e) => setFormData({ ...formData, reservation_notice_text: e.target.value })}
+                        rows={3}
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        This message will appear at the top of the reservation form when enabled
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <DeliverySettings />
+              </div>
             </TabsContent>
 
             <TabsContent value="delivery-areas">

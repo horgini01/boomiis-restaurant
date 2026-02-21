@@ -565,3 +565,24 @@
 - [x] Add seed_whatsapp_setting_v1 migration to runDataMigrations
 - [ ] Deploy fix to production
 - [ ] Verify WhatsApp button appears on boomiis.com after deployment
+
+## Reservation Notice Banner (Conservative Approach)
+- [ ] Add reservation_notice_enabled setting to database (boolean)
+- [ ] Add reservation_notice_text setting to database (text)
+- [ ] Create simple ReservationNoticeBanner component
+- [ ] Add banner to Reservations page (top of form)
+- [ ] Add admin controls in Restaurant Settings → Operations tab
+- [ ] Test enable/disable functionality
+- [ ] Test text updates appear immediately
+- [ ] Verify styling matches site design
+
+## Reservation Notice Banner (Conservative Approach - Feb 21)
+- [x] Add reservation_notice_enabled setting to database (boolean)
+- [x] Add reservation_notice_text setting to database (text)
+- [x] Add backend procedure getReservationNotice to settings router
+- [x] Create simple ReservationNoticeBanner component
+- [x] Add banner to Reservations page (top of form)
+- [x] Add admin controls in Restaurant Settings → Operations tab (checkbox + textarea)
+- [x] Test enable/disable functionality (5/5 tests passing)
+- [x] Test text updates appear immediately (verified in tests)
+- [x] Verify styling matches site design (amber info box with icon)

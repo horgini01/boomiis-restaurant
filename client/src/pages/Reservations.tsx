@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ReservationNoticeBanner from '@/components/ReservationNoticeBanner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -111,6 +112,8 @@ export default function Reservations() {
             <Card className="border-border/50">
               <CardContent className="p-8">
                 <h2 className="text-2xl font-bold mb-6">Make a Reservation</h2>
+                
+                <ReservationNoticeBanner />
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
