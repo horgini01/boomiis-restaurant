@@ -586,3 +586,13 @@
 - [x] Test enable/disable functionality (5/5 tests passing)
 - [x] Test text updates appear immediately (verified in tests)
 - [x] Verify styling matches site design (amber info box with icon)
+
+## Events & Catering Notice Banner (Feb 21)
+- [x] Add events_notice_enabled setting to database (boolean)
+- [x] Add events_notice_text setting to database (text)
+- [x] Add backend procedure getEventsNotice to settings router
+- [x] Create EventsNoticeBanner component (copy from ReservationNoticeBanner)
+- [x] Add banner to Events & Catering page (top of form)
+- [x] Add admin controls in Restaurant Settings → Operations tab
+- [x] Test functionality (banner visible on events page)
+- [x] Write and run tests (5/5 tests passing)

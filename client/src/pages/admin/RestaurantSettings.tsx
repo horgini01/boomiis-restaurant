@@ -612,6 +612,43 @@ export default function RestaurantSettings() {
                     </div>
                   </CardContent>
                 </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Events & Catering Notice Banner</CardTitle>
+                    <CardDescription>
+                      Display an important notice at the top of the events & catering inquiry form
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="events_notice_enabled"
+                        checked={formData.events_notice_enabled === 'true'}
+                        onChange={(e) =>
+                          setFormData({ ...formData, events_notice_enabled: e.target.checked ? 'true' : 'false' })
+                        }
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="events_notice_enabled" className="cursor-pointer">
+                        Enable events & catering notice banner
+                      </Label>
+                    </div>
+                    <div>
+                      <Label htmlFor="events_notice_text">Notice Message</Label>
+                      <Textarea
+                        id="events_notice_text"
+                        placeholder="e.g., We're currently booking events 3 months in advance. Contact us early to secure your date!"
+                        value={formData.events_notice_text || ''}
+                        onChange={(e) => setFormData({ ...formData, events_notice_text: e.target.value })}
+                        rows={3}
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        This message will appear at the top of the events & catering inquiry form when enabled
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
                 <DeliverySettings />
               </div>
             </TabsContent>

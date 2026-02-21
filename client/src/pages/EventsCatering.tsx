@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import EventsNoticeBanner from '@/components/EventsNoticeBanner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -161,6 +162,8 @@ export default function EventsCatering() {
                 <p className="text-muted-foreground text-center mb-8">
                   Fill out the form below and we'll get back to you within 24 hours with a custom quote
                 </p>
+
+                <EventsNoticeBanner />
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Personal Information */}

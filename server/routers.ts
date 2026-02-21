@@ -143,6 +143,26 @@ export const appRouter = router({
         text: textSetting[0]?.settingValue || '',
       };
     }),
+    getEventsNotice: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { enabled: false, text: '' };
+
+      const [enabledSetting, textSetting] = await Promise.all([
+        db.select()
+          .from(siteSettings)
+          .where(eq(siteSettings.settingKey, 'events_notice_enabled'))
+          .limit(1),
+        db.select()
+          .from(siteSettings)
+          .where(eq(siteSettings.settingKey, 'events_notice_text'))
+          .limit(1),
+      ]);
+
+      return {
+        enabled: enabledSetting[0]?.settingValue === 'true',
+        text: textSetting[0]?.settingValue || '',
+      };
+    }),
   }),
 
   menu: router({
