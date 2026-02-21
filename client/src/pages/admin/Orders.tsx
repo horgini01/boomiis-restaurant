@@ -55,6 +55,10 @@ export default function OrdersManagement() {
   const [bulkStatus, setBulkStatus] = useState<string>('');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [previousOrderIds, setPreviousOrderIds] = useState<Set<number>>(new Set());
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
+  const [paymentNotes, setPaymentNotes] = useState('');
   
   // Toggle functionality removed - orders are always enabled
 
@@ -77,6 +81,31 @@ export default function OrdersManagement() {
     oscillator.stop(audioContext.currentTime + 0.5);
   };
 
+  const handleMarkAsPaid = () => {
+    if (!selectedOrder) return;
+    
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid payment amount');
+      return;
+    }
+    
+    markOrderAsPaidMutation.mutate({
+      orderId: selectedOrder.id,
+      actualAmountPaid: amount,
+      paymentMethod,
+      paymentNotes: paymentNotes || undefined,
+    });
+  };
+
+  const handleOpenPaymentModal = (order: any) => {
+    setSelectedOrder(order);
+    setPaymentAmount(order.total);
+    setPaymentMethod('cash');
+    setPaymentNotes('');
+    setIsPaymentModalOpen(true);
+  };
+
   // Detect new orders and play sound
   useEffect(() => {
     if (!orders || orders.length === 0) return;
@@ -94,6 +123,20 @@ export default function OrdersManagement() {
     
     setPreviousOrderIds(currentOrderIds);
   }, [orders]);
+
+  const markOrderAsPaidMutation = trpc.admin.markOrderAsPaid.useMutation({
+    onSuccess: () => {
+      toast.success('Payment marked as received');
+      utils.admin.getOrders.invalidate();
+      setIsPaymentModalOpen(false);
+      setPaymentAmount('');
+      setPaymentMethod('cash');
+      setPaymentNotes('');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to mark payment as received');
+    },
+  });
 
   const updateStatusMutation = trpc.admin.updateOrderStatus.useMutation({
     onSuccess: () => {
@@ -603,7 +646,11 @@ export default function OrdersManagement() {
                                   ? 'bg-red-500/10 text-red-500'
                                   : 'bg-yellow-500/10 text-yellow-500'
                               }`}>
-                                {order.paymentStatus}
+                                {order.paymentStatus === 'pending' && order.paymentMethod && order.paymentMethod.includes('pickup')
+                                  ? `Pending - ${order.paymentMethod === 'cash_on_pickup' ? 'Cash' : 'Card'} on Pickup`
+                                  : order.paymentStatus === 'paid' && order.paymentMethod && order.paymentMethod.includes('pickup')
+                                  ? `Paid - ${order.paymentMethod === 'cash_on_pickup' ? 'Cash' : 'Card'}`
+                                  : order.paymentStatus}
                               </span>
                             </TableCell>
                             <TableCell>
@@ -1019,15 +1066,28 @@ export default function OrdersManagement() {
                     </div>
                     <div>
                       <p className="text-muted-foreground">Payment Status</p>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedOrder.paymentStatus === 'paid'
-                          ? 'bg-green-500/10 text-green-500'
-                          : selectedOrder.paymentStatus === 'failed'
-                          ? 'bg-red-500/10 text-red-500'
-                          : 'bg-yellow-500/10 text-yellow-500'
-                      }`}>
-                        {selectedOrder.paymentStatus}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedOrder.paymentStatus === 'paid'
+                            ? 'bg-green-500/10 text-green-500'
+                            : selectedOrder.paymentStatus === 'failed'
+                            ? 'bg-red-500/10 text-red-500'
+                            : 'bg-yellow-500/10 text-yellow-500'
+                        }`}>
+                          {selectedOrder.paymentStatus === 'pending' && selectedOrder.paymentMethod && selectedOrder.paymentMethod.includes('pickup') 
+                            ? `Pending - ${selectedOrder.paymentMethod === 'cash_on_pickup' ? 'Cash' : 'Card'} on Pickup` 
+                            : selectedOrder.paymentStatus}
+                        </span>
+                        {selectedOrder.paymentStatus === 'pending' && selectedOrder.orderType === 'pickup' && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleOpenPaymentModal(selectedOrder)}
+                            className="ml-2"
+                          >
+                            Mark as Paid
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Order Date</p>
@@ -1052,6 +1112,91 @@ export default function OrdersManagement() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Confirmation Modal */}
+        <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Mark Order as Paid</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="paymentAmount">Amount Paid (£)</Label>
+                <Input
+                  id="paymentAmount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  placeholder="Enter amount received"
+                />
+              </div>
+              
+              <div>
+                <Label>Payment Method</Label>
+                <div className="flex gap-4 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cash"
+                      checked={paymentMethod === 'cash'}
+                      onChange={(e) => setPaymentMethod(e.target.value as 'cash' | 'card')}
+                      className="w-4 h-4"
+                    />
+                    <span>Cash</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="card"
+                      checked={paymentMethod === 'card'}
+                      onChange={(e) => setPaymentMethod(e.target.value as 'cash' | 'card')}
+                      className="w-4 h-4"
+                    />
+                    <span>Card at Counter</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="paymentNotes">Notes (Optional)</Label>
+                <Textarea
+                  id="paymentNotes"
+                  value={paymentNotes}
+                  onChange={(e) => setPaymentNotes(e.target.value)}
+                  placeholder="Add any notes about this payment..."
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsPaymentModalOpen(false)}
+                  disabled={markOrderAsPaidMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleMarkAsPaid}
+                  disabled={markOrderAsPaidMutation.isPending}
+                >
+                  {markOrderAsPaidMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Confirm Payment'
+                  )}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </AdminLayout>

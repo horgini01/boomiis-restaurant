@@ -1893,6 +1893,51 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    markOrderAsPaid: protectedProcedure
+      .input(z.object({
+        orderId: z.number(),
+        actualAmountPaid: z.number(),
+        paymentMethod: z.enum(['cash', 'card']),
+        paymentNotes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        
+        // Get existing order to update timeline
+        const [existingOrder] = await db.select().from(orders).where(eq(orders.id, input.orderId));
+        if (!existingOrder) {
+          throw new Error('Order not found');
+        }
+        
+        // Parse existing timeline
+        const timeline = JSON.parse(existingOrder.timeline || '[]');
+        
+        // Add payment received event to timeline
+        timeline.push({
+          status: 'payment_received',
+          timestamp: new Date().toISOString(),
+          note: `Payment received: £${input.actualAmountPaid.toFixed(2)} via ${input.paymentMethod}${input.paymentNotes ? ` - ${input.paymentNotes}` : ''}`,
+          updatedBy: ctx.user.email,
+        });
+        
+        // Update order with payment information
+        await db.update(orders)
+          .set({
+            paymentStatus: 'paid',
+            paymentMethod: input.paymentMethod === 'cash' ? 'cash_on_pickup' : 'card_on_pickup',
+            paymentReceivedAt: new Date(),
+            paymentReceivedBy: ctx.user.id,
+            actualAmountPaid: input.actualAmountPaid.toString(),
+            paymentNotes: input.paymentNotes || null,
+            timeline: JSON.stringify(timeline),
+            lastUpdatedBy: ctx.user.id,
+          })
+          .where(eq(orders.id, input.orderId));
+        
+        return { success: true };
+      }),
+
     getReservations: protectedProcedure.query(async ({ ctx }) => {      const db = await getDb();
       if (!db) throw new Error('Database not available');
 

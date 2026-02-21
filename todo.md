@@ -630,24 +630,26 @@
 - [x] Add sendOrderVerificationOTPSMS function to otp-sms.service.ts
 - [x] Add sendOrderVerificationCode procedure to payment router
 - [x] Add createPayOnPickupOrder procedure to payment router
-- [ ] Add "Pay on Pickup" checkbox to checkout page (frontend)
-- [ ] Implement SMS verification UI in checkout flow
-- [ ] Implement order total validation against max limit
-- [ ] Add SMS verification code generation
-- [ ] Add SMS verification input field
-- [ ] Update order creation logic to skip Stripe when pay-on-pickup selected
-- [ ] Add order confirmation page for unpaid orders
-- [ ] Test complete checkout flow for both payment methods
+- [x] Add "Pay on Pickup" checkbox to checkout page (frontend)
+- [x] Implement SMS verification UI in checkout flow
+- [x] Implement order total validation against max limit
+- [x] Add SMS verification code generation (backend)
+- [x] Add SMS verification input field (frontend)
+- [x] Update order creation logic to skip Stripe when pay-on-pickup selected
+- [x] Update submit button text based on payment method
+- [x] Add conditional flow: Stripe vs pay-on-pickup
+- [ ] Test complete checkout flow for both payment methods (manual testing required)
 
 ### Phase 4: Admin Order Management - Mark as Paid
-- [ ] Add "Mark as Paid" button to order cards (conditional display)
-- [ ] Create payment confirmation modal with editable amount field
-- [ ] Add payment method selection (cash/card at counter)
-- [ ] Add payment notes field
-- [ ] Implement backend procedure to update payment status
-- [ ] Update order timeline when payment received
-- [ ] Add visual indicators for payment status in order list
-- [ ] Test payment capture workflow
+- [x] Add "Mark as Paid" button to order cards (conditional display)
+- [x] Create payment confirmation modal with editable amount field
+- [x] Add payment method selection (cash/card at counter)
+- [x] Add payment notes field
+- [x] Implement backend procedure to update payment status
+- [x] Update order timeline when payment received
+- [x] Add visual indicators for payment status in order list
+- [x] Update payment status badges to show payment method (Cash/Card on Pickup)
+- [ ] Test payment capture workflow (manual testing required)
 
 ### Phase 5: Phone Tracking & No-Show Prevention
 - [ ] Implement phone number hashing for privacy

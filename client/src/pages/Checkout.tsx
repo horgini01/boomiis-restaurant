@@ -36,6 +36,14 @@ export default function Checkout() {
   });
   const [subscribeToNewsletter, setSubscribeToNewsletter] = useState(false);
   const [smsOptIn, setSmsOptIn] = useState(true); // Default to opted-in for SMS notifications
+  const [payOnPickup, setPayOnPickup] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [phoneHash, setPhoneHash] = useState('');
+  const [showVerificationInput, setShowVerificationInput] = useState(false);
+  const [actualOtpCode, setActualOtpCode] = useState(''); // For testing
+  
+  // Get pay-on-pickup settings
+  const { data: payOnPickupSettings } = trpc.settings.getPayOnPickupSettings.useQuery();
 
   // Get delivery settings
   const prepBufferMinutes = Number(settings?.find(s => s.settingKey === 'prep_buffer_minutes')?.settingValue || 10);
@@ -118,6 +126,42 @@ export default function Checkout() {
 
   const subscribeNewsletterMutation = trpc.newsletter.subscribe.useMutation();
 
+  const sendVerificationCodeMutation = trpc.payment.sendOrderVerificationCode.useMutation({
+    onSuccess: (data: any) => {
+      setPhoneHash(data.phoneHash);
+      setActualOtpCode(data.otpCode); // For testing - remove in production
+      setShowVerificationInput(true);
+      toast.success('Verification code sent to your phone!');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to send verification code');
+    },
+  });
+
+  const createPayOnPickupOrderMutation = trpc.payment.createPayOnPickupOrder.useMutation({
+    onSuccess: async (data: any) => {
+      // Subscribe to newsletter if checkbox was checked
+      if (subscribeToNewsletter) {
+        try {
+          await subscribeNewsletterMutation.mutateAsync({
+            email: formData.customerEmail,
+            name: formData.customerName,
+            source: 'checkout',
+          });
+        } catch (error) {
+          console.error('Newsletter subscription failed:', error);
+        }
+      }
+
+      clearCart();
+      toast.success(`Order placed successfully! Order number: ${data.orderNumber}`);
+      setLocation(`/order-success?orderNumber=${data.orderNumber}&payOnPickup=true`);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to create order');
+    },
+  });
+
   const createCheckoutMutation = trpc.payment.createCheckoutSession.useMutation({
     onSuccess: async (data: any) => {
       // Subscribe to newsletter if checkbox was checked
@@ -172,12 +216,49 @@ export default function Checkout() {
       price: item.price,
     }));
 
-    // Create Stripe checkout session directly (order will be created after payment)
+    // Handle pay-on-pickup flow
+    if (payOnPickup && orderType === 'pickup') {
+      // Check order value limit
+      const maxAmount = parseFloat(String(payOnPickupSettings?.maxAmount || '30'));
+      if (orderTotal > maxAmount) {
+        toast.error(`Pay on pickup is only available for orders under £${maxAmount}`);
+        return;
+      }
+
+      // If verification code not sent yet, send it
+      if (!showVerificationInput) {
+        sendVerificationCodeMutation.mutate({
+          customerName: formData.customerName,
+          customerPhone: formData.customerPhone,
+        });
+        return;
+      }
+
+      // If verification code sent, validate and create order
+      if (!verificationCode) {
+        toast.error('Please enter the verification code sent to your phone');
+        return;
+      }
+
+      // Create pay-on-pickup order
+      createPayOnPickupOrderMutation.mutate({
+        ...formData,
+        preferredTime: finalPreferredTime,
+        orderType,
+        smsOptIn,
+        verificationCode,
+        phoneHash,
+        items: itemsWithNames,
+      });
+      return;
+    }
+
+    // Default: Create Stripe checkout session
     createCheckoutMutation.mutate({
       ...formData,
       preferredTime: finalPreferredTime,
       orderType,
-      smsOptIn, // Customer's SMS notification preference
+      smsOptIn,
       items: itemsWithNames,
     });
   };
@@ -417,6 +498,64 @@ export default function Checkout() {
                         Send me SMS updates about my order status (recommended)
                       </Label>
                     </div>
+                    
+                    {/* Pay on Pickup Option */}
+                    {orderType === 'pickup' && payOnPickupSettings?.enabled && (
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="pay-on-pickup"
+                            checked={payOnPickup}
+                            onCheckedChange={(checked) => {
+                              setPayOnPickup(checked as boolean);
+                              if (!checked) {
+                                setShowVerificationInput(false);
+                                setVerificationCode('');
+                                setPhoneHash('');
+                              }
+                            }}
+                            disabled={orderTotal > parseFloat(String(payOnPickupSettings?.maxAmount || '30'))}
+                          />
+                          <Label
+                            htmlFor="pay-on-pickup"
+                            className="text-sm font-normal cursor-pointer"
+                          >
+                            I'll pay when I collect my order (cash or card at counter)
+                          </Label>
+                        </div>
+                        {orderTotal > parseFloat(String(payOnPickupSettings?.maxAmount || '30')) && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Pay on pickup is only available for orders under £{payOnPickupSettings?.maxAmount || '30'}
+                          </p>
+                        )}
+                        
+                        {/* SMS Verification Input */}
+                        {payOnPickup && showVerificationInput && (
+                          <div className="mt-4 space-y-2">
+                            <Label htmlFor="verification-code" className="text-sm">
+                              Verification Code
+                            </Label>
+                            <Input
+                              id="verification-code"
+                              type="text"
+                              placeholder="Enter 6-digit code"
+                              value={verificationCode}
+                              onChange={(e) => setVerificationCode(e.target.value)}
+                              maxLength={6}
+                              className="max-w-[200px]"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              We sent a verification code to {formData.customerPhone}
+                            </p>
+                            {actualOtpCode && (
+                              <p className="text-xs text-amber-600">
+                                [Testing] Code: {actualOtpCode}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -476,11 +615,15 @@ export default function Checkout() {
                       className="w-full"
                        disabled={createCheckoutMutation.isPending}
                     >
-                       {createCheckoutMutation.isPending ? (
+                       {(createCheckoutMutation.isPending || sendVerificationCodeMutation.isPending || createPayOnPickupOrderMutation.isPending) ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Processing...
+                          {sendVerificationCodeMutation.isPending ? 'Sending code...' : 'Processing...'}
                         </>
+                      ) : payOnPickup && !showVerificationInput ? (
+                        'Send Verification Code'
+                      ) : payOnPickup && showVerificationInput ? (
+                        'Place Order (Pay on Pickup)'
                       ) : (
                         'Proceed to Payment'
                       )}
