@@ -596,3 +596,13 @@
 - [x] Add admin controls in Restaurant Settings → Operations tab
 - [x] Test functionality (banner visible on events page)
 - [x] Write and run tests (5/5 tests passing)
+
+## Menu Notice Banner (Feb 21)
+- [x] Add menu_notice_enabled setting to database (boolean)
+- [x] Add menu_notice_text setting to database (text)
+- [x] Add backend procedure getMenuNotice to settings router
+- [x] Create MenuNoticeBanner component
+- [x] Add banner to Menu page (top of menu display)
+- [x] Add admin controls in Restaurant Settings → Operations tab
+- [x] Test functionality (banner visible on menu page)
+- [x] Write and run tests (5/5 tests passing)

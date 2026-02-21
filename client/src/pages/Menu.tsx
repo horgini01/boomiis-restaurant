@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import MenuNoticeBanner from '@/components/MenuNoticeBanner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -84,6 +85,7 @@ export default function Menu() {
         {/* Search and Filters */}
         <section className="py-8 border-b border-border">
           <div className="container">
+            <MenuNoticeBanner />
             {/* Search Bar */}
             <div className="mb-8">
               <div className="relative max-w-2xl mx-auto">

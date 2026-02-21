@@ -649,6 +649,43 @@ export default function RestaurantSettings() {
                     </div>
                   </CardContent>
                 </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Menu Notice Banner</CardTitle>
+                    <CardDescription>
+                      Display an important notice at the top of the menu page
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="menu_notice_enabled"
+                        checked={formData.menu_notice_enabled === 'true'}
+                        onChange={(e) =>
+                          setFormData({ ...formData, menu_notice_enabled: e.target.checked ? 'true' : 'false' })
+                        }
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="menu_notice_enabled" className="cursor-pointer">
+                        Enable menu notice banner
+                      </Label>
+                    </div>
+                    <div>
+                      <Label htmlFor="menu_notice_text">Notice Message</Label>
+                      <Textarea
+                        id="menu_notice_text"
+                        placeholder="e.g., New seasonal menu items available! Try our special Jollof Rice with grilled fish."
+                        value={formData.menu_notice_text || ''}
+                        onChange={(e) => setFormData({ ...formData, menu_notice_text: e.target.value })}
+                        rows={3}
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        This message will appear at the top of the menu page when enabled
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
                 <DeliverySettings />
               </div>
             </TabsContent>
