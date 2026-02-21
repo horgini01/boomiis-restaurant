@@ -668,3 +668,8 @@
 - [ ] Test edge cases (no-shows, partial payments, blocked phones)
 - [ ] Review audit log entries
 - [ ] Save checkpoint and deploy
+
+### Bug Fixes - Pay on Pickup Feature
+- [x] Remove testing code display from checkout page (actualOtpCode)
+- [x] Add Mark as Paid button to orders table Actions column
+- [x] Ensure payment amount input is visible in Mark as Paid modal

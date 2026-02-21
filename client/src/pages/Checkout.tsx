@@ -547,11 +547,6 @@ export default function Checkout() {
                             <p className="text-xs text-muted-foreground">
                               We sent a verification code to {formData.customerPhone}
                             </p>
-                            {actualOtpCode && (
-                              <p className="text-xs text-amber-600">
-                                [Testing] Code: {actualOtpCode}
-                              </p>
-                            )}
                           </div>
                         )}
                       </div>

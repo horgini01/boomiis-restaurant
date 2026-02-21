@@ -1,0 +1,26 @@
+{
+  "query": "SELECT * FROM site_settings WHERE setting_key IN ('pay_on_pickup_enabled', 'max_pay_on_pickup_amount');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT * FROM site_settings WHERE setting_key IN ('pay_on_pickup_enabled', 'max_pay_on_pickup_amount');",
+  "rows": [
+    {
+      "id": "180001",
+      "setting_key": "pay_on_pickup_enabled",
+      "setting_value": "true",
+      "setting_type": "text",
+      "description": "NULL",
+      "updated_at": "2026-02-21 01:31:53"
+    },
+    {
+      "id": "180002",
+      "setting_key": "max_pay_on_pickup_amount",
+      "setting_value": "30",
+      "setting_type": "text",
+      "description": "NULL",
+      "updated_at": "2026-02-21 01:31:53"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsetting_key\tsetting_value\tsetting_type\tdescription\tupdated_at\n180001\tpay_on_pickup_enabled\ttrue\ttext\tNULL\t2026-02-21 01:31:53\n180002\tmax_pay_on_pickup_amount\t30\ttext\tNULL\t2026-02-21 01:31:53\n",
+  "stderr": "",
+  "execution_time_ms": 74
+}

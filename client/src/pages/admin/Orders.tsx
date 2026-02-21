@@ -692,6 +692,15 @@ export default function OrdersManagement() {
                                   <Download className="h-4 w-4 mr-1" />
                                   Receipt
                                 </Button>
+                                {order.paymentStatus === 'pending' && order.orderType === 'pickup' && (
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() => handleOpenPaymentModal(order)}
+                                  >
+                                    Mark as Paid
+                                  </Button>
+                                )}
                                 <Select
                                   value={order.status}
                                   onValueChange={(value) => handleStatusChange(order.id, value)}
