@@ -606,3 +606,59 @@
 - [x] Add admin controls in Restaurant Settings → Operations tab
 - [x] Test functionality (banner visible on menu page)
 - [x] Write and run tests (5/5 tests passing)
+
+## Pay on Pickup Feature Implementation (Feb 21)
+
+### Phase 1: Database Schema Changes
+- [x] Add paymentMethod enum field to orders table (stripe, cash_on_pickup, card_on_pickup)
+- [x] Add paymentReceivedAt timestamp field to orders table
+- [x] Add paymentReceivedBy int field to orders table (admin user ID)
+- [x] Add paymentNotes text field to orders table
+- [x] Add actualAmountPaid decimal field to orders table (for tracking if amount differs)
+- [x] Create phone_order_history table for tracking customer behavior
+- [x] Run database migration (pnpm db:push)
+- [x] Test migration on development database (migration 0037 applied successfully)
+
+### Phase 2: Admin Settings for Order Limits
+- [x] Add max_pay_on_pickup_amount setting to site_settings table
+- [x] Add pay_on_pickup_enabled toggle to site_settings table
+- [x] Add admin UI in Restaurant Settings → Operations tab
+- [x] Add backend procedure getPayOnPickupSettings to settings router
+- [x] Initialize default values in database (enabled=true, max=£30)
+
+### Phase 3: Checkout Flow Changes
+- [ ] Add "Pay on Pickup" checkbox to checkout page
+- [ ] Implement order total validation against max limit
+- [ ] Add SMS verification code generation
+- [ ] Add SMS verification input field
+- [ ] Update order creation logic to skip Stripe when pay-on-pickup selected
+- [ ] Add order confirmation page for unpaid orders
+- [ ] Test complete checkout flow for both payment methods
+
+### Phase 4: Admin Order Management - Mark as Paid
+- [ ] Add "Mark as Paid" button to order cards (conditional display)
+- [ ] Create payment confirmation modal with editable amount field
+- [ ] Add payment method selection (cash/card at counter)
+- [ ] Add payment notes field
+- [ ] Implement backend procedure to update payment status
+- [ ] Update order timeline when payment received
+- [ ] Add visual indicators for payment status in order list
+- [ ] Test payment capture workflow
+
+### Phase 5: Phone Tracking & No-Show Prevention
+- [ ] Implement phone number hashing for privacy
+- [ ] Create tracking logic for order completion/no-shows
+- [ ] Add trust score calculation
+- [ ] Implement progressive limits based on history
+- [ ] Add auto-block logic for repeat no-shows
+- [ ] Add admin view for blocked phone numbers
+- [ ] Add manual unblock functionality
+- [ ] Test tracking and blocking logic
+
+### Phase 6: Testing & Deployment
+- [ ] Write vitest tests for all new procedures
+- [ ] Test complete user journey (guest checkout → SMS verify → order → pickup → payment)
+- [ ] Test admin workflow (view order → mark as paid → complete)
+- [ ] Test edge cases (no-shows, partial payments, blocked phones)
+- [ ] Review audit log entries
+- [ ] Save checkpoint and deploy

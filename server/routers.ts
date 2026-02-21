@@ -183,6 +183,26 @@ export const appRouter = router({
         text: textSetting[0]?.settingValue || '',
       };
     }),
+    getPayOnPickupSettings: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return { enabled: false, maxAmount: 30 };
+
+      const [enabledSetting, maxAmountSetting] = await Promise.all([
+        db.select()
+          .from(siteSettings)
+          .where(eq(siteSettings.settingKey, 'pay_on_pickup_enabled'))
+          .limit(1),
+        db.select()
+          .from(siteSettings)
+          .where(eq(siteSettings.settingKey, 'max_pay_on_pickup_amount'))
+          .limit(1),
+      ]);
+
+      return {
+        enabled: enabledSetting[0]?.settingValue === 'true',
+        maxAmount: parseFloat(maxAmountSetting[0]?.settingValue || '30'),
+      };
+    }),
   }),
 
   menu: router({

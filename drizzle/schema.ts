@@ -95,7 +95,12 @@ export const orders = mysqlTable("orders", {
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   status: mysqlEnum("status", ["pending", "confirmed", "preparing", "ready", "out_for_delivery", "completed", "cancelled", "delayed"]).default("pending").notNull(),
   paymentStatus: mysqlEnum("payment_status", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
+  paymentMethod: mysqlEnum("payment_method", ["stripe", "cash_on_pickup", "card_on_pickup"]).default("stripe").notNull(),
   paymentIntentId: varchar("payment_intent_id", { length: 255 }).unique(),
+  paymentReceivedAt: timestamp("payment_received_at"),
+  paymentReceivedBy: int("payment_received_by"),
+  actualAmountPaid: decimal("actual_amount_paid", { precision: 10, scale: 2 }),
+  paymentNotes: text("payment_notes"),
   specialInstructions: text("special_instructions"),
   smsOptIn: boolean("sms_opt_in").default(true).notNull(), // Customer consent to receive SMS notifications (GDPR)
   reviewRequestSent: boolean("review_request_sent").default(false).notNull(), // Track if review request email was sent
@@ -126,6 +131,28 @@ export const orderItems = mysqlTable("order_items", {
 
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = typeof orderItems.$inferInsert;
+
+/**
+ * Phone order history for tracking customer behavior and preventing fraud
+ * Tracks order completion rates and no-shows per phone number
+ */
+export const phoneOrderHistory = mysqlTable("phone_order_history", {
+  id: int("id").autoincrement().primaryKey(),
+  phoneNumberHash: varchar("phone_number_hash", { length: 64 }).notNull().unique(), // SHA-256 hash of phone number for privacy
+  totalOrders: int("total_orders").default(0).notNull(),
+  completedOrders: int("completed_orders").default(0).notNull(),
+  noShowCount: int("no_show_count").default(0).notNull(),
+  lastOrderDate: timestamp("last_order_date"),
+  trustScore: int("trust_score"), // Calculated: (completedOrders / totalOrders) * 100
+  isBlocked: boolean("is_blocked").default(false).notNull(),
+  blockedReason: text("blocked_reason"),
+  blockedAt: timestamp("blocked_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PhoneOrderHistory = typeof phoneOrderHistory.$inferSelect;
+export type InsertPhoneOrderHistory = typeof phoneOrderHistory.$inferInsert;
 
 /**
  * Table reservations

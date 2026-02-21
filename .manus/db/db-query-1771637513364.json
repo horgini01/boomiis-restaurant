@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO site_settings (setting_key, setting_value) VALUES \n('pay_on_pickup_enabled', 'true'),\n('max_pay_on_pickup_amount', '30')\nON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute INSERT INTO site_settings (setting_key, setting_value) VALUES \n('pay_on_pickup_enabled', 'true'),\n('max_pay_on_pickup_amount', '30')\nON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 120
+}

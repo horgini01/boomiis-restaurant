@@ -686,6 +686,45 @@ export default function RestaurantSettings() {
                     </div>
                   </CardContent>
                 </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pay on Pickup Settings</CardTitle>
+                    <CardDescription>
+                      Configure payment-on-collection options for pickup orders
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="pay_on_pickup_enabled"
+                        checked={formData.pay_on_pickup_enabled === 'true'}
+                        onChange={(e) =>
+                          setFormData({ ...formData, pay_on_pickup_enabled: e.target.checked ? 'true' : 'false' })
+                        }
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="pay_on_pickup_enabled" className="cursor-pointer">
+                        Enable "Pay on Pickup" option
+                      </Label>
+                    </div>
+                    <div>
+                      <Label htmlFor="max_pay_on_pickup_amount">Maximum Order Value (£)</Label>
+                      <Input
+                        id="max_pay_on_pickup_amount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="30.00"
+                        value={formData.max_pay_on_pickup_amount || '30'}
+                        onChange={(e) => setFormData({ ...formData, max_pay_on_pickup_amount: e.target.value })}
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Orders above this amount will require prepayment. Recommended: £30-50
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
                 <DeliverySettings />
               </div>
             </TabsContent>

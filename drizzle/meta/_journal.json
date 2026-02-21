@@ -260,6 +260,13 @@
       "when": 1771626531213,
       "tag": "0036_brave_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1771637400157,
+      "tag": "0037_slippery_phalanx",
+      "breakpoints": true
     }
   ]
 }
