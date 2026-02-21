@@ -555,3 +555,13 @@
 - [x] Test WhatsApp link opens correctly on mobile and desktop
 - [x] Write and run vitest tests (4/4 tests passing)
 - [x] Fix z-index to ensure button appears above all elements
+
+## WhatsApp Button Production Issue (Feb 21)
+- [x] Investigate why WhatsApp button not visible on boomiis.com after deployment
+- [x] Check if whatsapp_enabled setting exists in production database (missing)
+- [x] Identified root cause: WhatsApp setting was only added to local DB via SQL, not in migrations
+- [x] Add seedWhatsAppSetting function to server/_core/migrations.ts
+- [x] Add siteSettings to imports in migrations.ts
+- [x] Add seed_whatsapp_setting_v1 migration to runDataMigrations
+- [ ] Deploy fix to production
+- [ ] Verify WhatsApp button appears on boomiis.com after deployment

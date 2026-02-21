@@ -1,5 +1,5 @@
 import { getDb } from '../db';
-import { migrationsRun, emailTemplates, smsTemplates } from '../../drizzle/schema';
+import { migrationsRun, emailTemplates, smsTemplates, siteSettings } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
 const DEFAULT_EMAIL_TEMPLATES = {
@@ -537,6 +537,45 @@ async function seedSmsTemplates() {
 }
 
 /**
+ * Seed WhatsApp setting if it doesn't exist
+ */
+async function seedWhatsAppSetting() {
+  const db = await getDb();
+  if (!db) {
+    console.error('[Migration] Database not available for WhatsApp setting seeding');
+    return;
+  }
+
+  console.log('[Migration] Seeding WhatsApp setting...');
+
+  try {
+    // Check if whatsapp_enabled setting exists
+    const existing = await db.select()
+      .from(siteSettings)
+      .where(eq(siteSettings.settingKey, 'whatsapp_enabled'))
+      .limit(1);
+
+    if (existing.length > 0) {
+      console.log('[Migration] WhatsApp setting already exists, skipping');
+      return;
+    }
+
+    // Insert whatsapp_enabled setting
+    await db.insert(siteSettings).values({
+      settingKey: 'whatsapp_enabled',
+      settingValue: 'true',
+      settingType: 'boolean',
+      description: 'Enable floating WhatsApp chat button on customer pages',
+      updatedAt: new Date(),
+    });
+
+    console.log('[Migration] WhatsApp setting seeded successfully');
+  } catch (error) {
+    console.error('[Migration] Error seeding WhatsApp setting:', error);
+  }
+}
+
+/**
  * Check if a migration has already been run
  */
 async function hasMigrationRun(migrationName: string): Promise<boolean> {
@@ -598,6 +637,16 @@ export async function runDataMigrations() {
     await markMigrationComplete(smsTemplatesMigration);
   } else {
     console.log(`[Migration] Skipping ${smsTemplatesMigration} (already run)`);
+  }
+
+  // Migration: Seed WhatsApp setting
+  const whatsappSettingMigration = 'seed_whatsapp_setting_v1';
+  if (!(await hasMigrationRun(whatsappSettingMigration))) {
+    console.log(`[Migration] Running: ${whatsappSettingMigration}`);
+    await seedWhatsAppSetting();
+    await markMigrationComplete(whatsappSettingMigration);
+  } else {
+    console.log(`[Migration] Skipping ${whatsappSettingMigration} (already run)`);
   }
 
   console.log('[Migration] All data migrations complete');
