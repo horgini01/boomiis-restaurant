@@ -1,0 +1,45 @@
+{
+  "query": "SELECT order_number, order_type, scheduled_for, payment_status, created_at FROM orders WHERE order_type = 'pickup' ORDER BY created_at DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT order_number, order_type, scheduled_for, payment_status, created_at FROM orders WHERE order_type = 'pickup' ORDER BY created_at DESC LIMIT 5;",
+  "rows": [
+    {
+      "order_number": "BO-MLKUZ9NU-AF1G",
+      "order_type": "pickup",
+      "scheduled_for": "2026-02-13 13:00:00",
+      "payment_status": "paid",
+      "created_at": "2026-02-13 12:23:16"
+    },
+    {
+      "order_number": "BO-MLF9V6V6-WH2D",
+      "order_type": "pickup",
+      "scheduled_for": "2026-02-09 15:15:00",
+      "payment_status": "paid",
+      "created_at": "2026-02-09 14:33:23"
+    },
+    {
+      "order_number": "BO-MLF8YLHU-FD9Q",
+      "order_type": "pickup",
+      "scheduled_for": "2026-02-09 14:45:00",
+      "payment_status": "paid",
+      "created_at": "2026-02-09 14:08:02"
+    },
+    {
+      "order_number": "BO-MLF4OOG1-111Q",
+      "order_type": "pickup",
+      "scheduled_for": "2026-02-09 12:45:00",
+      "payment_status": "paid",
+      "created_at": "2026-02-09 12:08:21"
+    },
+    {
+      "order_number": "BO-ML416M4M-N9HU",
+      "order_type": "pickup",
+      "scheduled_for": "2026-02-01 19:30:00",
+      "payment_status": "paid",
+      "created_at": "2026-02-01 17:44:52"
+    }
+  ],
+  "messages": [],
+  "stdout": "order_number\torder_type\tscheduled_for\tpayment_status\tcreated_at\nBO-MLKUZ9NU-AF1G\tpickup\t2026-02-13 13:00:00\tpaid\t2026-02-13 12:23:16\nBO-MLF9V6V6-WH2D\tpickup\t2026-02-09 15:15:00\tpaid\t2026-02-09 14:33:23\nBO-MLF8YLHU-FD9Q\tpickup\t2026-02-09 14:45:00\tpaid\t2026-02-09 14:08:02\nBO-MLF4OOG1-111Q\tpickup\t2026-02-09 12:45:00\tpaid\t2026-02-09 12:08:21\nBO-ML416M4M-N9HU\tpickup\t2026-02-01 19:30:00\tpaid\t2026-02-01 17:44:52\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

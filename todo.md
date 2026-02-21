@@ -673,3 +673,7 @@
 - [x] Remove testing code display from checkout page (actualOtpCode)
 - [x] Add Mark as Paid button to orders table Actions column
 - [x] Ensure payment amount input is visible in Mark as Paid modal
+
+### Bug Fix - Scheduled Pickup Time Not Saving
+- [x] Add scheduledFor field to createPayOnPickupOrder procedure
+- [ ] Verify scheduled time displays in orders table (requires new test order)

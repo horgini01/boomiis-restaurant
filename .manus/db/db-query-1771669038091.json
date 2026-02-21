@@ -1,0 +1,9 @@
+{
+  "query": "SELECT order_number, order_type, scheduled_for, created_at FROM orders WHERE order_number = 'ORD-1771668260347-396';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT order_number, order_type, scheduled_for, created_at FROM orders WHERE order_number = 'ORD-1771668260347-396';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 78
+}

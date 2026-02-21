@@ -2828,6 +2828,7 @@ export const appRouter = router({
           orderType: input.orderType,
           deliveryAddress: input.deliveryAddress || null,
           deliveryPostcode: input.deliveryPostcode || null,
+          scheduledFor: input.preferredTime ? new Date(input.preferredTime) : null,
           specialInstructions: input.specialInstructions || null,
           subtotal: subtotal.toString(),
           deliveryFee: deliveryFee.toString(),
