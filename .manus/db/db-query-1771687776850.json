@@ -1,0 +1,22 @@
+{
+  "query": "SELECT status, payment_status, COUNT(*) as count, GROUP_CONCAT(order_number) as order_numbers FROM orders GROUP BY status, payment_status;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT status, payment_status, COUNT(*) as count, GROUP_CONCAT(order_number) as order_numbers FROM orders GROUP BY status, payment_status;",
+  "rows": [
+    {
+      "status": "completed",
+      "payment_status": "paid",
+      "count": "8",
+      "order_numbers": "BO-MKSAD7KT-MV36,BO-MKSBJP4I-5AR2,BO-ML2ESJZU-ESUH,BO-ML2H26HN-HZHH,BO-ML2N0RIE-UGQH,BO-MLF8YLHU-FD9Q,BO-MLF9V6V6-WH2D,BO-MLKUZ9NU-AF1G"
+    },
+    {
+      "status": "confirmed",
+      "payment_status": "paid",
+      "count": "16",
+      "order_numbers": "BO-ML2FI1SX-O4Z8,BO-ML3ZPW73-X95F,BO-ML416M4M-N9HU,BO-ML4F54GM-480U,BO-ML5WGCYU-5LYM,BO-ML6ICOE6-M8A1,BO-ML6ISU57-5ECK,BO-ML6J9VV9-7Z1D,BO-ML6JF3AY-82IO,BO-ML6JLI6L-GK1N,BO-ML6JP2U0-MILX,BO-ML6L9AEB-5PNI,BO-ML6N7LCQ-AIFB,BO-ML6O9332-SIIW,BO-ML6OS00D-LB2C,BO-MLF4OOG1-111Q"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tpayment_status\tcount\torder_numbers\ncompleted\tpaid\t8\tBO-MKSAD7KT-MV36,BO-MKSBJP4I-5AR2,BO-ML2ESJZU-ESUH,BO-ML2H26HN-HZHH,BO-ML2N0RIE-UGQH,BO-MLF8YLHU-FD9Q,BO-MLF9V6V6-WH2D,BO-MLKUZ9NU-AF1G\nconfirmed\tpaid\t16\tBO-ML2FI1SX-O4Z8,BO-ML3ZPW73-X95F,BO-ML416M4M-N9HU,BO-ML4F54GM-480U,BO-ML5WGCYU-5LYM,BO-ML6ICOE6-M8A1,BO-ML6ISU57-5ECK,BO-ML6J9VV9-7Z1D,BO-ML6JF3AY-82IO,BO-ML6JLI6L-GK1N,BO-ML6JP2U0-MILX,BO-ML6L9AEB-5PNI,BO-ML6N7LCQ-AIFB,BO-ML6O9332-SIIW,BO-ML6OS00D-LB2C,BO-MLF4OOG1-111Q\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

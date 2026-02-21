@@ -709,3 +709,8 @@
 - [ ] Validate structured data with Google Rich Results Test (manual testing)
 - [ ] Run Lighthouse SEO audit (manual testing)
 - [ ] Create checkpoint and deploy
+
+## Developer Credit
+- [x] Add "Developed by Bravehat Consulting Limited" to Footer component
+- [x] Link to https://bravehatconsulting.com/
+- [ ] Test footer display on all pages (manual testing)

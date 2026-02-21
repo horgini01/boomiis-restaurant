@@ -155,9 +155,22 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-8 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} {restaurantName}. All rights reserved.
-            </p>
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <p className="text-sm text-muted-foreground">
+                © {new Date().getFullYear()} {restaurantName}. All rights reserved.
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                Developed by{' '}
+                <a 
+                  href="https://bravehatconsulting.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary/80 hover:text-primary transition-colors underline"
+                >
+                  Bravehat Consulting Limited
+                </a>
+              </p>
+            </div>
             <div className="flex gap-6">
               <Link href="/privacy-policy">
                 <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">

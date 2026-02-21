@@ -1,0 +1,20 @@
+{
+  "query": "SELECT status, payment_status, COUNT(*) as count FROM orders GROUP BY status, payment_status;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2acBjedGBUZUvzs.4f77da611348 --database 6g8xxhsNMKiXF83cS8YGfP --execute SELECT status, payment_status, COUNT(*) as count FROM orders GROUP BY status, payment_status;",
+  "rows": [
+    {
+      "status": "completed",
+      "payment_status": "paid",
+      "count": "8"
+    },
+    {
+      "status": "confirmed",
+      "payment_status": "paid",
+      "count": "16"
+    }
+  ],
+  "messages": [],
+  "stdout": "status\tpayment_status\tcount\ncompleted\tpaid\t8\nconfirmed\tpaid\t16\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}
