@@ -2,6 +2,7 @@ import { Link } from 'wouter';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { generateRestaurantSchema, generateLocalBusinessSchema } from '@/lib/structured-data';
 import { Input } from '@/components/ui/input';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -43,8 +44,50 @@ export default function Home() {
       <SEO 
         title="Home"
         description="Experience authentic West African cuisine at Boomiis Restaurant in London. Enjoy traditional dishes like Jollof Rice, Egusi Soup, and Suya in a warm, welcoming atmosphere. Book your table today!"
+        keywords="african restaurant london, west african food, nigerian restaurant, ghanaian food, jollof rice, suya, plantain, egusi soup, african cuisine uk"
         image="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200&h=630&fit=crop"
         url="/"
+        structuredData={[
+          generateRestaurantSchema({
+            name: 'Boomiis Restaurant',
+            description: 'Authentic West African cuisine bringing the flavors of Nigeria and Ghana to London',
+            address: {
+              street: '123 High Street',
+              city: 'London',
+              postalCode: 'SW1A 1AA',
+              country: 'GB',
+            },
+            phone: '+44 20 7946 0958',
+            email: 'info@boomiis.com',
+            openingHours: [
+              'Monday-Friday: 11:00-22:00',
+              'Saturday-Sunday: 12:00-23:00',
+            ],
+            priceRange: '££',
+            cuisine: ['West African', 'Nigerian', 'Ghanaian'],
+            image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200',
+            logo: 'https://boomiis.com/logo.png',
+            url: window.location.origin,
+          }),
+          generateLocalBusinessSchema({
+            name: 'Boomiis Restaurant',
+            description: 'Authentic West African cuisine bringing the flavors of Nigeria and Ghana to London',
+            address: {
+              street: '123 High Street',
+              city: 'London',
+              postalCode: 'SW1A 1AA',
+              country: 'GB',
+            },
+            phone: '+44 20 7946 0958',
+            email: 'info@boomiis.com',
+            openingHours: [],
+            priceRange: '££',
+            cuisine: ['West African', 'Nigerian', 'Ghanaian'],
+            image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200',
+            logo: 'https://boomiis.com/logo.png',
+            url: window.location.origin,
+          }),
+        ]}
       />
       <Header />
       

@@ -6,6 +6,8 @@ interface SEOProps {
   image?: string;
   url?: string;
   type?: 'website' | 'article';
+  keywords?: string;
+  structuredData?: object | object[];
   article?: {
     publishedTime?: string;
     modifiedTime?: string;
@@ -21,6 +23,8 @@ export function SEO({
   image,
   url,
   type = 'website',
+  keywords,
+  structuredData,
   article,
 }: SEOProps) {
   const siteTitle = 'Boomiis Restaurant - Authentic West African Cuisine in London';
@@ -40,6 +44,7 @@ export function SEO({
       <title>{fullTitle}</title>
       <meta name="title" content={fullTitle} />
       <meta name="description" content={metaDescription} />
+      {keywords && <meta name="keywords" content={keywords} />}
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
@@ -82,6 +87,13 @@ export function SEO({
 
       {/* Canonical URL */}
       <link rel="canonical" href={metaUrl} />
+
+      {/* Structured Data (JSON-LD) */}
+      {structuredData && (
+        <script type="application/ld+json">
+          {JSON.stringify(Array.isArray(structuredData) ? structuredData : [structuredData])}
+        </script>
+      )}
     </Helmet>
   );
 }

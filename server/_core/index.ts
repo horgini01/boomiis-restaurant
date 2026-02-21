@@ -123,6 +123,11 @@ async function startServer() {
     return handleTestimonialAction(req, res);
   });
   
+  // SEO: Sitemap and robots.txt
+  const { generateSitemap, generateRobotsTxt } = await import('../sitemap');
+  app.get('/sitemap.xml', generateSitemap);
+  app.get('/robots.txt', generateRobotsTxt);
+  
   // Health check endpoints for Railway/Docker monitoring
   const healthRouter = await import('./health');
   app.use('/api', healthRouter.default);
