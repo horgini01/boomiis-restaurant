@@ -2,6 +2,7 @@ import { Heart, Leaf, Users, Award } from 'lucide-react';
 import { SEO } from '@/components/SEO';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import { trpc } from '@/lib/trpc';
 import { Loader2 } from 'lucide-react';
 
@@ -42,6 +43,7 @@ export function About() {
             <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
           </div>
           <Footer />
+      <WhatsAppButton />
         </div>
       </>
     );
@@ -194,6 +196,7 @@ export function About() {
         </div>
       )}
         <Footer />
+      <WhatsAppButton />
       </div>
     </>
   );

@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import { UtensilsCrossed, Calendar, Truck, Star } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
@@ -275,6 +276,7 @@ export default function Home() {
       </main>
 
       <Footer />
+      <WhatsAppButton />
       <CookieConsent />
     </div>
   );

@@ -537,5 +537,21 @@
 - [x] Integrate script into migrate-and-seed.mjs (seedSmsTemplates function)
 - [x] Test locally that templates appear on first load (15 templates seeded successfully)
 - [x] Add SMS template seeding to runtime migration system (server/_core/migrations.ts)
-- [ ] Deploy to production
-- [ ] Verify templates display on boomiis.com
+- [x] Deploy to production (checkpoint 525fbb85 ready for Railway deployment)
+- [ ] Verify templates display on boomiis.com after deployment
+
+## Floating WhatsApp Chat Button (User Request - Feb 20)
+- [x] Review existing layout structure to identify integration points
+- [x] Create isolated WhatsApp floating button component
+- [x] Add database field for WhatsApp toggle (uses existing site_settings table with key 'whatsapp_enabled')
+- [x] Add backend procedure getWhatsAppEnabled to settings router
+- [x] Add admin toggle control in Restaurant Settings → Contact tab
+- [x] Pull phone number from contact_phone setting (already in useSettings hook)
+- [x] Add WhatsApp button to customer-facing pages only (not admin)
+- [x] Implement pre-filled message: "Hi Boomiis! I'd like to inquire about..."
+- [x] Add subtle bounce animation for visibility
+- [x] Test on all customer pages (Home, Menu, Reservations, Events, Contact)
+- [x] Verify toggle on/off functionality
+- [x] Test WhatsApp link opens correctly on mobile and desktop
+- [x] Write and run vitest tests (4/4 tests passing)
+- [x] Fix z-index to ensure button appears above all elements

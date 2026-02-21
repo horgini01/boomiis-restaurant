@@ -112,6 +112,17 @@ export const appRouter = router({
     getPublicOpeningHours: publicProcedure.query(async () => {
       return await getAllOpeningHours();
     }),
+    getWhatsAppEnabled: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return false;
+
+      const setting = await db.select()
+        .from(siteSettings)
+        .where(eq(siteSettings.settingKey, 'whatsapp_enabled'))
+        .limit(1);
+
+      return setting[0]?.settingValue === 'true';
+    }),
   }),
 
   menu: router({

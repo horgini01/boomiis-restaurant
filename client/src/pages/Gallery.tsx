@@ -3,6 +3,7 @@ import { SEO } from '@/components/SEO';
 import { trpc } from '@/lib/trpc';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { Button } from '@/components/ui/button';
@@ -118,6 +119,7 @@ export function Gallery() {
         index={lightboxIndex}
       />
         <Footer />
+      <WhatsAppButton />
       </div>
     </>
   );
